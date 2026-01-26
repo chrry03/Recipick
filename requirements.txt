@@ -3,7 +3,7 @@ Django==5.2.10
 djangorestframework==3.15.2
 
 # 2. Database (PostgreSQL) binary version
-psycopg2-binary==2.9.9
+psycopg[binary]==3.1.18
 
 # 3. Environment Variables(.env)
 python-dotenv==1.0.1
