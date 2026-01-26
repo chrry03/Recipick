@@ -1,17 +1,23 @@
-asgiref==3.11.0
+# 1. Web Framework & API
 Django==5.2.10
-sqlparse==0.5.5
-
-# 환경변수 관리용
-python-dotenv==1.0.1
-# 이미지 업로드 / 처리용
-Pillow==10.3.0
-# 외부 API 호출용
-requests==2.32.3
-
-# Django REST Framework (API 분리하는 경우)
 djangorestframework==3.15.2
-# 소셜 로그인 사용하는 경우
-django-allauth==0.63.6
-# PostgreSQL 사용하는 경우
+
+# 2. Database (PostgreSQL) binary version
 # psycopg2-binary==2.9.9
+
+# 3. Environment Variables(.env)
+python-dotenv==1.0.1
+
+# 4. External API & Utilities
+requests==2.32.3
+Pillow==10.3.0
+
+# 5. Deployment (Docker/AWS)
+# WSGI server used for real service instead of django embedded server
+gunicorn==21.2.0
+
+# 6. Security & Auth (option)
+# It is recommended to add CORS error prevention when communicating with the front end (JS).
+django-cors-headers==4.3.1
+# Social Login
+django-allauth==0.63.6
