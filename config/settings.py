@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# .env 파일 내용을 불러옵니다.
+load_dotenv() 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -72,10 +77,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# 기존 sqlite3 설정은 지우고 아래 내용으로 교체!
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',  # postgresql 엔진 사용
+        'NAME': 'recipick_db',                      # pgAdmin에서 만든 DB 이름
+        'USER': 'postgres',                         # 설치 시 기본 ID
+        'PASSWORD': os.getenv('DB_PASSWORD'),       # .env 파일에서 비밀번호 가져오기
+        'HOST': 'localhost',                        # 내 컴퓨터
+        'PORT': '5432',                             # 기본 포트
     }
 }
 
