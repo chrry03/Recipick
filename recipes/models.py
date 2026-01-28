@@ -6,7 +6,6 @@ Recipes App Models
 - Recipe: 레시피 정보
 - RecipeIngredient: 레시피에 필요한 식재료
 - FavoriteRecipe: 사용자가 찜한 레시피
-- RecipeLog: 요리 일지 (캘린더에 표시)
 """
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
