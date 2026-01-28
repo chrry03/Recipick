@@ -134,3 +134,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 기본 django 모델 말고 직접 만든 유저 모델 사용
+AUTH_USER_MODEL = 'users.User'
+
+# logs/models.py의 이미지 관련
+# 1. 브라우저에서 접근할 때 쓸 URL 주소 (예: http://localhost:8000/media/...)
+MEDIA_URL = '/media/'
+# 2. 실제로 파일이 저장될 컴퓨터 내의 경로 (프로젝트 폴더 내 'media' 폴더)
+import os
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
