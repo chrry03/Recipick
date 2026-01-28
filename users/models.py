@@ -12,6 +12,11 @@ class User(AbstractUser):
     nickname = models.CharField(max_length=50, null=False)
     # email field is already in AbstractUser, but we can enforce it to be unique
     email = models.EmailField(unique=True, null=False)
+
+    # 이메일을 아이디로 사용 (로그인 시 사용자설정 아이디가 아니라, "이메일"과 패스워드를 입력)
+    USERNAME_FIELD = 'email'
+    # 슈퍼유저 생성 시 추가로 입력받을 필드
+    REQUIRED_FIELDS = ['username', 'nickname']
     
     # password, last_login, date_joined는 AbstractUser에 이미 포함되어 있음
 
@@ -20,6 +25,18 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.nickname # 객체를 보여줄때 객체 자신의 닉네임(문자열)으로 보여줌
+    
+    # [★ 핵심 기능 추가] 저장할 때 자동으로 username 채워주기(username이 비어있으면)
+    def save(self, *args, **kwargs):
+        # 만약 username이 비어있다면?
+        if not self.username:
+            # 이메일을 username에 그대로 복사!
+            self.username = self.email
+        # 원래의 저장 기능 실행 (이거 안 쓰면 저장 안 됨)
+        super().save(*args, **kwargs)
+    # AbstractUser받아서 쓰면 무조건 생기는 필드인데 비어있으면 에러날수 있음. 근데 우리는 안받기 때문에 채워줘야함.
+    # email값으로 채움. DB 저장 시: user.username = user.email (이렇게 똑같이 넣어버리기)
+    # 이유: username 필드는 unique=True라서 비워두면 안 되기 때문.
 
 class UserProfile(models.Model):
     """
@@ -42,8 +59,10 @@ class UserProfile(models.Model):
         default=CookingLevel.BEGINNER
     )
     # JSONField는 리스트나 딕셔너리를 그대로 저장 가능
-    allergies = models.JSONField(null=True, blank=True)
-    banned_ingredients = models.JSONField(null=True, blank=True)
+    # [수정] null=True 제거, default=list 추가 -> 개발 편의성 향상
+    allergies = models.JSONField(default=list, blank=True, verbose_name='알러지 목록')
+    banned_ingredients = models.JSONField(default=list, blank=True, verbose_name='기피 재료 목록')
+    # verbose_name은 관리자페이지에서 영어 막 banned_ingredients이렇게 말고 저렇게 보이도록 함.
     updated_at = models.DateTimeField(auto_now=True) # 수정될 때마다 자동 갱신
 
     class Meta:
