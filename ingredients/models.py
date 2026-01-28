@@ -236,14 +236,12 @@ class UserIngredient(models.Model):
     사용자 보유 식재료
     
     사용자 냉장고에 있는 식재료 관리
-    유통기한, 수량, 소비 여부 등을 추적
+    유통기한, 소비 여부 등을 추적
     
     Fields:
         user_ingredient_id: 사용자 식재료 고유 ID (PK)
         user: 소유자
         ingredient: 어떤 식재료인지 (IngredientMaster 참조)
-        quantity: 수량 (선택)
-        unit: 단위 (선택, 예: g, ml, 개)
         expire_at: 유통기한 (선택, 입력 시 추천 가중치에 반영)
         is_consumed: 사용 완료 여부
     """
@@ -271,27 +269,6 @@ class UserIngredient(models.Model):
         related_name='user_ingredients',  # 역참조용
         db_column='ingredient_id',
         verbose_name='식재료'
-    )
-    
-    # 수량 (선택 사항)
-    # DecimalField: 정확한 소수 계산 (FloatField는 부정확할 수 있음)
-    quantity = models.DecimalField(
-        max_digits=10,  # 총 10자리
-        decimal_places=2,  # 소수점 2자리
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(0)],  # 음수 방지
-        verbose_name='수량',
-        help_text='선택 사항'
-    )
-    
-    # 단위 (예: g, ml, 개)
-    unit = models.CharField(
-        max_length=20,
-        null=True,
-        blank=True,
-        verbose_name='단위',
-        help_text='g, ml, 개 등'
     )
     
     # 유통기한 (선택 사항)
