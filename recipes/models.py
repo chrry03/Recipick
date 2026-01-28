@@ -716,8 +716,6 @@ class Recipe(models.Model):
                         recipe=recipe,
                         ingredient=ingredient_master,
                         ingredient_name=api_ingredient.get('original', ingredient_name),
-                        amount=api_ingredient.get('amount'),
-                        unit=api_ingredient.get('unit'),
                         is_optional=False
                     )
         
@@ -928,8 +926,6 @@ class RecipeIngredient(models.Model):
         recipe: 어떤 레시피인지
         ingredient: 어떤 식재료인지 (IngredientMaster 참조)
         ingredient_name: API 원본 이름 (보존용)
-        amount: 필요한 양
-        unit: 단위 (g, ml, 개 등)
         is_optional: 선택 재료 여부
     """
     # Primary Key
@@ -964,23 +960,6 @@ class RecipeIngredient(models.Model):
         help_text='원본 API에서 사용하는 이름'
     )
     
-    # 필요한 양
-    amount = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name='필요량'
-    )
-    
-    # 단위 (g, ml, 개, 큰술 등)
-    unit = models.CharField(
-        max_length=50,
-        null=True,
-        blank=True,
-        verbose_name='단위'
-    )
-    
     # 선택 재료 여부 (있으면 좋지만 없어도 되는 재료)
     is_optional = models.BooleanField(
         default=False,
@@ -1006,12 +985,11 @@ class RecipeIngredient(models.Model):
     def __str__(self):
         """
         Admin에서 보기 좋게 표시
-        예: "김치볶음밥 - 김치 100g"
+        예: "김치볶음밥 - 김치"
             "김치볶음밥 - 설탕 (선택)"
         """
         optional = "(선택)" if self.is_optional else ""
-        amount_str = f"{self.amount}{self.unit}" if self.amount else ""
-        return f"{self.recipe.title} - {self.ingredient.name_ko} {amount_str} {optional}"
+        return f"{self.recipe.title} - {self.ingredient.name_ko} {optional}"
 
 
 class FavoriteRecipe(models.Model):
@@ -1075,276 +1053,3 @@ class FavoriteRecipe(models.Model):
     def __str__(self):
         """Admin에서 '홍길동 ♥ 김치볶음밥' 형태로 표시"""
         return f"{self.user.nickname} ♥ {self.recipe.title}"
-
-
-class RecipeLog(models.Model):
-    """
-    요리 일지
-    
-    사용자가 실제로 만든 레시피 기록
-    캘린더에 표시되며, 개인화 점수 계산에 활용
-    
-    Fields:
-        recipe_log_id: 요리 일지 고유 ID (PK)
-        user: 작성자
-        recipe: 만든 레시피
-        cooked_at: 요리한 날짜 (캘린더에 표시)
-        rating: 별점 (1~5)
-        perceived_difficulty: 체감 난이도
-        actual_time_minutes: 실제 소요 시간
-        memo: 메모/후기
-        image_url: 요리 완성 사진
-        shared_image_url: 인스타 공유용 이미지
-    """
-    # Primary Key
-    recipe_log_id = models.BigAutoField(
-        primary_key=True,
-        verbose_name='요리 일지 ID'
-    )
-    
-    # CASCADE: 사용자 또는 레시피 삭제 시 일지도 함께 삭제
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='recipe_logs',  # user.recipe_logs.all()
-        db_column='user_id',
-        verbose_name='사용자'
-    )
-    
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='logs',  # recipe.logs.all()
-        db_column='recipe_id',
-        verbose_name='레시피'
-    )
-    
-    # 요리한 날짜 (캘린더에 표시)
-    cooked_at = models.DateField(
-        verbose_name='요리한 날짜',
-        help_text='캘린더에 표시됨'
-    )
-    
-    # 별점 (1~5)
-    rating = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)],
-        verbose_name='별점'
-    )
-    
-    # 체감 난이도 (실제로 만들어본 느낌)
-    perceived_difficulty = models.CharField(
-        max_length=20,
-        choices=DifficultyLevel.choices,
-        verbose_name='체감 난이도'
-    )
-    
-    # 실제 소요 시간 (예상 시간과 비교용)
-    actual_time_minutes = models.IntegerField(
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(0)],
-        verbose_name='실제 소요시간(분)'
-    )
-    
-    # 메모/후기 (선택)
-    memo = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name='메모/후기'
-    )
-    
-    # 요리 완성 사진 (선택)
-    image_url = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        verbose_name='요리 완성 사진'
-    )
-    
-    # 인스타 공유용 이미지 (선택)
-    # 비율 맞춰서 자동 생성
-    shared_image_url = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        verbose_name='인스타 공유용 이미지'
-    )
-    
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='작성일시'
-    )
-    
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name='수정일시'
-    )
-
-    class Meta:
-        db_table = 'RecipeLog'
-        verbose_name = '요리 일지'
-        verbose_name_plural = '요리 일지'
-        indexes = [
-            models.Index(fields=['user'], name='idx_log_user'),
-            models.Index(fields=['recipe'], name='idx_log_recipe'),
-            # 사용자의 특정 월 일지 조회 시 사용
-            models.Index(fields=['user', 'cooked_at'], name='idx_log_user_date'),
-            # 캘린더에서 날짜별 일지 조회 시 사용
-            models.Index(fields=['cooked_at'], name='idx_log_date'),
-        ]
-        constraints = [
-            # 별점은 1~5 사이
-            models.CheckConstraint(
-                check=models.Q(rating__gte=1, rating__lte=5),
-                name='chk_rating_range'
-            ),
-        ]
-        # 기본 정렬: 최신 날짜 → 최신 작성 순
-        ordering = ['-cooked_at', '-created_at']
-
-    def __str__(self):
-        """Admin에서 '홍길동 - 김치볶음밥 (2025-01-27)' 형태로 표시"""
-        return f"{self.user.nickname} - {self.recipe.title} ({self.cooked_at})"
-
-    @property
-    def time_difference(self):
-        """
-        예상 시간과 실제 시간 차이
-        
-        Returns:
-            int or None: 차이 (분 단위)
-                양수: 예상보다 더 오래 걸림
-                음수: 예상보다 빨리 완료
-        
-        Example:
-            예상 30분, 실제 45분 → +15분
-            예상 30분, 실제 20분 → -10분
-        """
-        if not self.actual_time_minutes or not self.recipe.ready_minutes:
-            return None
-        return self.actual_time_minutes - self.recipe.ready_minutes
-
-    @property
-    def difficulty_matched(self):
-        """
-        난이도가 예상과 일치하는지
-        
-        레시피 난이도와 체감 난이도가 같으면 True
-        난이도 자동 계산의 정확도 검증에 활용 가능
-        
-        Returns:
-            bool: 일치하면 True
-        """
-        return self.perceived_difficulty == self.recipe.difficulty
-
-    @property
-    def is_positive_review(self):
-        """
-        긍정적인 리뷰인지 (별점 4점 이상)
-        
-        Returns:
-            bool: 4점 이상이면 True
-        """
-        return self.rating >= 4
-
-    # ========== 개인화 점수 계산 메서드 ==========
-    @classmethod
-    def get_recipe_satisfaction_score(cls, user, recipe):
-        """
-        특정 레시피에 대한 사용자 만족도 점수
-        
-        과거에 이 레시피를 만들어본 경험의 평균 별점
-        
-        Args:
-            user: User 객체
-            recipe: Recipe 객체
-        
-        Returns:
-            int: 만족도 점수 (50~100)
-        
-        점수 기준:
-            - 평균 4.5~5.0: 100점
-            - 평균 3.5~4.4: 80점
-            - 평균 2.5~3.4: 60점
-            - 평균 2.5미만, 기록 없음: 50점
-        """
-        from django.db.models import Avg
-        
-        logs = cls.objects.filter(user=user, recipe=recipe)
-        
-        if not logs.exists():
-            return 50  # 기록 없음
-        
-        avg_rating = logs.aggregate(Avg('rating'))['rating__avg']
-        
-        if avg_rating >= 4.5:
-            return 100
-        elif avg_rating >= 3.5:
-            return 80
-        elif avg_rating >= 2.5:
-            return 60
-        else:
-            return 50
-
-    @classmethod
-    def get_recipe_frequency_score(cls, user, recipe):
-        """
-        레시피 조리 빈도 점수
-        
-        너무 자주 먹으면 식상하고, 적당한 반복이 좋음
-        
-        Args:
-            user: User 객체
-            recipe: Recipe 객체
-        
-        Returns:
-            int: 빈도 점수 (30~100)
-        
-        점수 기준:
-            - 1주일 이내: 30점 (너무 최근 → 식상함)
-            - 1~4주 이내: 100점 (적당한 반복)
-            - 1개월 이상: 70점 (재발견)
-            - 기록 없음: 60점 (신규)
-        """
-        from datetime import date, timedelta
-        
-        # 가장 최근 기록 찾기
-        last_log = cls.objects.filter(
-            user=user, 
-            recipe=recipe
-        ).order_by('-cooked_at').first()
-        
-        if not last_log:
-            return 60  # 신규 레시피
-        
-        # 마지막으로 만든 후 며칠 지났는지
-        days_since = (date.today() - last_log.cooked_at).days
-        
-        if days_since <= 7:
-            return 30  # 너무 최근
-        elif days_since <= 28:  # 4주
-            return 100  # 적당
-        else:
-            return 70  # 재발견
-
-    @classmethod
-    def get_personalization_score(cls, user, recipe):
-        """
-        개인화 점수 계산 (만족도 + 빈도)
-        
-        추천 점수의 5%를 차지
-        
-        Args:
-            user: User 객체
-            recipe: Recipe 객체
-        
-        Returns:
-            float: 개인화 점수 (0~100)
-        
-        공식:
-            점수 = (과거 만족도 + 조리 빈도) / 2
-        """
-        satisfaction = cls.get_recipe_satisfaction_score(user, recipe)
-        frequency = cls.get_recipe_frequency_score(user, recipe)
-        
-        return (satisfaction + frequency) / 2
