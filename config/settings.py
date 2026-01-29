@@ -15,7 +15,7 @@ import os
 from dotenv import load_dotenv
 
 # .env 파일 내용을 불러옵니다.
-load_dotenv() 
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -67,6 +67,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -144,3 +145,6 @@ MEDIA_URL = '/media/'
 # 2. 실제로 파일이 저장될 컴퓨터 내의 경로 (프로젝트 폴더 내 'media' 폴더)
 import os
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Spoonacular API (환경변수로 관리)
+SPOONACULAR_API_KEY = os.getenv('SPOONACULAR_API_KEY', '')
