@@ -63,7 +63,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -129,7 +129,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+# 정적 파일 (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -148,3 +149,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Spoonacular API (환경변수로 관리)
 SPOONACULAR_API_KEY = os.getenv('SPOONACULAR_API_KEY', '')
+
+# ▼ 개발 단계에서 static 폴더 위치 지정 (이게 있어야 static 폴더 인식함)
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
