@@ -47,6 +47,12 @@ urlpatterns = [
     # API Endpoints
     path('api/', include('ingredients.urls')),
     path('api/', include('recipes.urls')),
+
+    # Users App
+    path('', include('users.urls')),
+    
+    # Logs App
+    path('logs/', include('logs.urls')),
 ]
 
 
