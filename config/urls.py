@@ -50,6 +50,9 @@ urlpatterns = [
 
     # Users App
     path('', include('users.urls')),
+    
+    # Logs App
+    path('logs/', include('logs.urls')),
 ]
 
 # 미디어 파일 서빙 설정 (개발 모드용): 개발 모드일 때만 미디어 파일 서빙 가능하도록 설정

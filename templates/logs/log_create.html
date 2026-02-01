@@ -1,1 +1,90 @@
-<!-- 일지 작성 (요리 완료 후 진입) -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}일지 작성 - Recipick{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/logs.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="log-create-container">
+    <!-- Header -->
+    {% include 'header.html' %}
+
+    <!-- Title Section with Back Button -->
+    <div class="title-section">
+        <button class="back-btn" onclick="window.history.back();" aria-label="뒤로가기">
+            <svg width="23" height="21" viewBox="0 0 23 21" fill="none">
+                <path d="M22 10.5H1M1 10.5L11 1M1 10.5L11 20" stroke="#555555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <h1 class="page-title">오늘 요리는 어떠셨나요?</h1>
+    </div>
+
+    <form id="log-create-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Image Upload Area -->
+        <div class="image-upload-wrapper">
+            <div class="image-upload" id="imageUpload">
+                <svg class="camera-icon" width="60" height="60" viewBox="0 0 60 60" fill="none">
+                    <rect width="60" height="60" rx="8" fill="#A6A6A2" opacity="0.3"/>
+                    <path d="M20 40H40C41.1046 40 42 39.1046 42 38V24C42 22.8954 41.1046 22 40 22H35L33 18H27L25 22H20C18.8954 22 18 22.8954 18 24V38C18 39.1046 18.8954 40 20 40Z" stroke="#A6A6A2" stroke-width="2"/>
+                    <circle cx="30" cy="30" r="5" stroke="#A6A6A2" stroke-width="2"/>
+                </svg>
+            </div>
+            <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
+            <img class="image-preview" id="imagePreview" alt="업로드된 사진" style="display: none;">
+        </div>
+
+        <!-- Recipe Info -->
+        <div class="recipe-info">
+            <h2 class="recipe-name" id="recipeName">{{ recipe_name|default:"로제 파스타" }}</h2>
+            
+            <!-- Difficulty Rating -->
+            <div class="rating-row">
+                <span class="rating-label">난이도:</span>
+                <div class="stars difficulty-stars" id="difficultyStars">
+                    <button type="button" class="star-btn" data-rating="1" aria-label="난이도 1점">★</button>
+                    <button type="button" class="star-btn" data-rating="2" aria-label="난이도 2점">★</button>
+                    <button type="button" class="star-btn" data-rating="3" aria-label="난이도 3점">★</button>
+                    <button type="button" class="star-btn" data-rating="4" aria-label="난이도 4점">★</button>
+                    <button type="button" class="star-btn" data-rating="5" aria-label="난이도 5점">★</button>
+                </div>
+            </div>
+            <input type="hidden" id="difficultyRating" name="difficulty_rating" value="0" required>
+            
+            <!-- Satisfaction Rating -->
+            <div class="rating-row">
+                <span class="rating-label">만족도:</span>
+                <div class="stars satisfaction-stars" id="satisfactionStars">
+                    <button type="button" class="star-btn" data-rating="1" aria-label="만족도 1점">★</button>
+                    <button type="button" class="star-btn" data-rating="2" aria-label="만족도 2점">★</button>
+                    <button type="button" class="star-btn" data-rating="3" aria-label="만족도 3점">★</button>
+                    <button type="button" class="star-btn" data-rating="4" aria-label="만족도 4점">★</button>
+                    <button type="button" class="star-btn" data-rating="5" aria-label="만족도 5점">★</button>
+                </div>
+            </div>
+            <input type="hidden" id="satisfactionRating" name="satisfaction_rating" value="0" required>
+        </div>
+
+        <!-- Memo Section -->
+        <div class="memo-header">&lt;메모&gt;</div>
+        <div class="memo-container">
+            <textarea class="memo-input" id="memoInput" name="memo" placeholder="후기를 남겨주세요."></textarea>
+        </div>
+
+        <!-- Hidden Date Input -->
+        <input type="date" id="cookedAt" name="cooked_at" class="date-input-hidden" required>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn" id="submitBtn">작성하기</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="{% static 'js/logs.js' %}"></script>
+{% endblock %}

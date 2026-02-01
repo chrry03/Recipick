@@ -1,0 +1,262 @@
+/* 일지 작성 페이지 스타일 */
+
+.log-create-container {
+    position: relative;
+    width: 100%;
+    max-width: 375px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #f5ede0, #f6f3ee);
+    padding: 12px;
+}
+
+/* Header - logs.css에서 오버라이드 가능 */
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Title Section with Back Button */
+.title-section {
+    display: flex;
+    align-items: center;
+    margin: 20px 0 30px;
+    position: relative;
+    min-height: 40px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    transition: opacity 0.2s;
+    position: absolute;
+    left: 0;
+    z-index: 1;
+}
+
+.back-btn:hover {
+    opacity: 0.7;
+}
+
+/* Title */
+.page-title {
+    font-size: 20px;
+    color: #555;
+    text-align: center;
+    margin: 0;
+    font-weight: normal;
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    padding: 0 2rem;
+    top: 10px;
+}
+
+/* Image Upload */
+.image-upload-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+    position: relative;
+}
+
+.image-upload {
+    width: 111px;
+    height: 148px;
+    background: #d9d9d9;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.image-upload:hover {
+    background: #c9c9c9;
+}
+
+.image-upload.has-image {
+    padding: 0;
+}
+
+.image-upload img,
+.image-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.image-preview {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 111px;
+    height: 148px;
+}
+
+.camera-icon {
+    opacity: 0.5;
+}
+
+/* Recipe Info */
+.recipe-info {
+    text-align: center;
+    margin: 30px 0 20px;
+}
+
+.recipe-name {
+    font-size: 20px;
+    color: #000;
+    margin-bottom: 15px;
+    font-weight: normal;
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+}
+
+.rating-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 8px 0;
+    font-size: 15px;
+    gap: 5px;
+}
+
+.rating-label {
+    color: #000;
+    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+}
+
+.stars {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.star-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    color: #ccc;
+    font-size: 20px;
+    line-height: 1;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.star-btn:hover {
+    transform: scale(1.2);
+}
+
+.star-btn.active {
+    color: #000;
+}
+
+/* Memo Header */
+.memo-header {
+    font-size: 13px;
+    color: #000;
+    margin-bottom: 10px;
+    text-align: center;
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+}
+
+/* Memo Container */
+.memo-container {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 0 9px 20px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    min-height: 232px;
+}
+
+.memo-input {
+    width: 100%;
+    min-height: 180px;
+    border: none;
+    outline: none;
+    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    color: #555;
+    resize: vertical;
+    background: transparent;
+}
+
+.memo-input::placeholder {
+    color: #999;
+}
+
+.memo-input:focus {
+    outline: none;
+}
+
+/* Date Input (Hidden) */
+.date-input-hidden {
+    display: none;
+}
+
+/* Submit Button */
+.submit-btn {
+    width: calc(100% - 30px);
+    max-width: 344px;
+    height: 47px;
+    background: #ff7043;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    color: #ffeedb;
+    font-size: 20px;
+    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    margin: 30px auto 20px;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background: #ff5722;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 112, 67, 0.3);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+.submit-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .log-create-container {
+        max-width: 100%;
+        border-radius: 0;
+        min-height: 100vh;
+    }
+    
+    .memo-container {
+        margin: 20px 0;
+    }
+    
+    .submit-btn {
+        width: calc(100% - 24px);
+    }
+}
