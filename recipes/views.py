@@ -322,3 +322,4 @@ class RecipeViewSet(viewsets.ReadOnlyModelViewSet):
         
         serializer = FavoriteRecipeSerializer(favorites, many=True)
         return Response(serializer.data)
+    

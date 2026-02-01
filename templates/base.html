@@ -1,1 +1,18 @@
 <!-- 모든 페이지의 뼈대 (CSS/JS 로드) 완전 쌩기초 뼈대(로드하는거만) -->
+ {% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Recipick</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="wrapper">
+        {% block content %}
+        {% endblock content %}
+    </div>
+
+    </body>
+</html>

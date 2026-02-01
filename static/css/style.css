@@ -1,1 +1,126 @@
 /* 공통 스타일 */
+/* static/css/style.css */
+
+:root {
+    /* 피그마 컬러셋 추출 */
+    --color-white: #FFFFFF;
+    --color-bg: #F9F5EB;       /* 앱 배경색 (크림색) */
+    --color-beige: #F0EAD6;    /* 연한 베이지 */
+    --color-primary: #E07248;  /* 메인 주황색 (버튼 등) */
+    --color-text-main: #333333; /* 진한 회색 (텍스트) */
+    --color-gray-light: #E5E5E5; /* 연한 회색 */
+    --color-gray-medium: #A0A0A0; /* 중간 회색 */
+    
+    /* 폰트 설정 (임의 설정, 필요시 웹폰트 import) */
+    --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--color-bg);
+    color: var(--color-text-main);
+    /* 모바일 뷰 처럼 보이게 중앙 정렬 (선택사항) */
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 80px; /* 네브바 공간 확보 */
+}
+
+/* 공통 헤더 스타일 */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: var(--color-bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: #555; /* 로고색 */
+}
+
+.header-icons .icon-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+/* 검색창 스타일 (공통) */
+.search-bar-container {
+    padding: 0 20px 10px;
+}
+
+.search-input-box {
+    position: relative;
+    width: 100%;
+}
+
+.search-input-box input {
+    width: 100%;
+    padding: 12px 15px 12px 40px; /* 돋보기 아이콘 공간 확보 */
+    border: 2px solid #555;
+    border-radius: 25px;
+    background-color: transparent;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-icon-inside {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #555;
+}
+
+/* 버튼 스타일 */
+.btn-primary-large {
+    width: 100%;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    padding: 15px;
+    border-radius: 25px;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.fab-add {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border-radius: 50%;
+    border: none;
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    cursor: pointer;
+    z-index: 90;
+}

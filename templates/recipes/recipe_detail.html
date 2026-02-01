@@ -1,1 +1,65 @@
 <!-- 레시피 상세 (단계별) -->
+ {% extends 'base_with_navbar.html' %}
+{% load static %}
+
+{% block header %}
+<header class="page-header detail-header">
+    <button class="back-btn" onclick="history.back()">←</button>
+    <h1 class="header-title">레시피 상세</h1>
+    <button class="header-action-btn like-toggle-btn" data-recipe-id="{{ recipe.id }}">
+        {% if is_liked %}❤️{% else %}🤍{% endif %}
+    </button>
+</header>
+{% endblock header %}
+
+{% block main_content %}
+<section class="recipe-detail-container">
+    <div class="detail-main-image">
+        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+    </div>
+
+    <div class="detail-header-info">
+        <h2 class="detail-title">{{ recipe.title }}</h2>
+        <p class="detail-desc">{{ recipe.description }}</p>
+        <div class="detail-meta-badges">
+            <span class="badge">{{ recipe.time }}분</span>
+            <span class="badge">{{ recipe.difficulty }}</span>
+            <span class="badge">{{ recipe.calories }}kcal</span>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="detail-ingredients">
+        <h3 class="section-title">준비 재료</h3>
+        <ul class="ingredient-check-list">
+            {% for ingredient in recipe.ingredients.all %}
+            <li class="ingredient-item">
+                <span class="name">{{ ingredient.name }}</span>
+                <span class="amount">{{ ingredient.quantity }}</span>
+                {% if ingredient.is_owned %}
+                <span class="owned-badge">보유중</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="detail-steps-preview">
+        <h3 class="section-title">조리 순서</h3>
+        <ol class="step-list-summary">
+            {% for step in recipe.steps.all %}
+            <li>{{ step.description }}</li>
+            {% endfor %}
+        </ol>
+    </div>
+</section>
+
+<div class="floating-action-container">
+    <a href="{% url 'cooking_mode' recipe.id %}" class="btn-primary-full">
+        요리 시작하기 🍳
+    </a>
+</div>
+{% endblock main_content %}
