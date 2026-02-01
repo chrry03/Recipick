@@ -28,9 +28,6 @@ urlpatterns = [
     # 1. 식재료 앱 (우리가 만든 fridge 페이지는 여기 안에 있음)
     path('ingredients/', include('ingredients.urls')),
     
-    # 2. 레시피 앱 (API)
-    path('api/', include('recipes.urls')),
-
     # ================= [중요] 에러 해결 파트 =================
     # base_with_navbar.html에 있는 이름들을 임시로 다 등록해줘야 함
     
@@ -51,6 +48,11 @@ urlpatterns = [
 
     # Swagger
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    # Users App
+    path('', include('users.urls')),
+    
+    # Logs App
+    path('logs/', include('logs.urls')),
 ]
 
 if settings.DEBUG:
