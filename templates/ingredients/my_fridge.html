@@ -1,183 +1,170 @@
-<!-- 내 식재료 목록 (로그인 필) -->
 {% extends 'base_with_navbar.html' %}
 {% load static %}
 
 {% block header %}
-<header class="page-header">
-    <div class="logo-area">
-        <span class="logo-text">🥄 Recipick</span>
-    </div>
-    <div class="header-icons">
-        <button class="icon-btn">🔍</button>
-        <button class="icon-btn">🔔</button>
-    </div>
-</header>
-<div class="search-bar-container">
-    <div class="search-input-box">
-        <span class="search-icon-inside">🔍</span>
-        <input type="text" placeholder="식재료 검색">
-    </div>
+<div class="header-container">
+    <img src="{% static 'images/logo.png' %}" alt="Recipick" class="logo-img">
+    <img src="{% static 'images/bell.png' %}" alt="알림" class="bell-icon">
 </div>
 {% endblock header %}
 
 {% block main_content %}
 <style>
-    /* 이 페이지 전용 스타일 */
-    .fridge-container { padding: 20px; min-height: 60vh; position: relative; }
+    /* --- 이 페이지 전용 스타일 --- */
     
-    /* 1. 비로그인 상태 (블러 & 자물쇠) */
-    .blur-overlay {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(255, 255, 255, 0.6);
-        backdrop-filter: blur(5px);
-        z-index: 10;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
+    /* 1. 검색창 */
+    .search-wrapper {
+        position: relative;
+        margin-top: 10px;
+        margin-bottom: 24px;
+        width: 100%;
     }
-    .lock-icon-img { width: 80px; margin-bottom: 20px; }
-    .login-prompt-text { font-size: 16px; color: #555; margin-bottom: 10px; }
-    .login-link-text { 
-        font-size: 20px; font-weight: bold; color: #fff; 
-        text-shadow: 0 0 5px rgba(0,0,0,0.5); /* 텍스트 잘 보이게 */
+    
+    .search-input {
+        width: 100%;
+        height: 40px;
+        background: transparent;
+        border: 1px solid #555555;
+        border-radius: 20px;
+        padding: 0 40px 0 16px; /* 오른쪽 아이콘 여백 */
+        box-sizing: border-box;
+        
+        font-family: 'Gowun Dodum', sans-serif; /* 고운 돋음 적용 */
+        font-size: 14px;
+        color: #555555;
+    }
+    
+    .search-input::placeholder {
+        color: #555555;
+        opacity: 0.7;
+    }
+    
+    .search-icon-img {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        pointer-events: none;
     }
 
-    /* 2. 빈 냉장고 (거미줄) */
-    .empty-state {
+    /* 2. 식재료 등록 프로모션 카드 */
+    .promo-card {
+        background: #FFFFFF;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        box-sizing: border-box;
+        margin-bottom: 40px;
+    }
+
+    .card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        
+        font-family: 'Nanum Gothic', sans-serif;
+        font-weight: 700; /* Bold */
+        font-size: 18px;
+        color: #1A1A1A;
+    }
+
+    .card-desc {
+        font-family: 'Nanum Gothic', sans-serif;
+        font-size: 13px;
+        line-height: 1.5;
+        color: #6B6B6B;
+        margin-bottom: 20px;
+    }
+
+    /* 주황색 버튼 */
+    .btn-orange {
+        width: 100%;
+        height: 48px;
+        background: #FF7043; /* 컬러셋 주황색 */
+        border-radius: 24px;
+        border: none;
+        
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        
+        /* 그림자 효과 (선택사항) */
+        box-shadow: 0 2px 4px rgba(255, 112, 67, 0.3);
+    }
+
+    .btn-orange span {
+        font-family: 'Nanum Gothic', sans-serif;
+        font-size: 16px;
+        color: #FFEEDB; /* 버튼 텍스트 연한 살구색 */
+        font-weight: 400;
+    }
+
+    /* 3. Empty State (거미줄) */
+    .empty-area {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         margin-top: 40px;
-        text-align: center;
+        opacity: 0.8;
     }
-    .info-card {
-        background: white;
-        padding: 30px 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        margin-bottom: 40px;
-        width: 100%;
-    }
-    .info-card h3 { font-size: 18px; margin-bottom: 10px; }
-    .info-card p { font-size: 14px; color: #888; margin-bottom: 20px; line-height: 1.4; }
-    
-    .spider-web-img { width: 120px; opacity: 0.5; margin-bottom: 20px; }
-    .empty-msg { color: #888; font-size: 14px; line-height: 1.5; }
 
-    /* 3. 리스트 상태 */
-    .ingredient-grid-row {
-        display: flex;
-        justify-content: flex-start; /* 왼쪽 정렬 */
-        gap: 20px;
-        flex-wrap: wrap;
-        margin-top: 20px;
+    .empty-img {
+        width: 120px;
+        height: auto;
+        margin-bottom: 16px;
     }
-    .ingredient-item {
-        width: calc(33.33% - 14px); /* 3열 배치 */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: 20px;
-        position: relative;
-    }
-    .d-day-badge {
-        position: absolute;
-        top: -5px; left: 50%;
-        transform: translateX(-50%);
+
+    .empty-text {
+        font-family: 'Gowun Dodum', sans-serif; /* 고운 돋음 적용 */
         font-size: 12px;
-        font-weight: bold;
-        background-color: #fff;
-        padding: 2px 6px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        z-index: 2;
-    }
-    .d-day-badge.urgent { color: red; } /* 임박 시 빨간색 */
-    
-    .ing-img-circle {
-        width: 70px; height: 70px;
-        background-color: #EFEFEF;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 8px;
-        overflow: hidden;
-    }
-    .ing-img-circle img { width: 60%; object-fit: contain; }
-    .ing-name { font-size: 14px; font-weight: 500; color: #333; }
-    
-    .divider-line {
-        height: 2px;
-        background-color: #EFEFEF;
-        margin: 10px 0;
-        width: 100%;
+        line-height: 1.5;
+        text-align: center;
+        color: #555555;
     }
 </style>
 
-<section class="fridge-container">
-    {% if not user.is_authenticated %}
-        <div class="ingredient-grid-row" style="filter: blur(5px);">
-            <div class="ingredient-item">
-                <div class="ing-img-circle"><img src="{% static 'images/carrot.png' %}" alt=""></div>
-                <span class="ing-name">당근</span>
-            </div>
-            <div class="ingredient-item">
-                <div class="ing-img-circle"><img src="{% static 'images/meat.png' %}" alt=""></div>
-                <span class="ing-name">소고기</span>
-            </div>
-        </div>
+<div class="search-wrapper">
+    <input type="text" class="search-input" placeholder="식재료 검색">
+    <img src="{% static 'images/search.png' %}" alt="검색" class="search-icon-img">
+</div>
 
-        <div class="blur-overlay">
-            <div class="lock-icon" style="font-size: 60px; margin-bottom: 20px;">🔒</div>
-            <p class="login-prompt-text">내 냉장고 속 재료를 관리하려면?</p>
-            <a href="{% url 'login' %}" class="login-link-text">3초 만에 로그인하고<br>시작하기</a>
-        </div>
+<div class="promo-card">
+    <div class="card-title">
+        <span>🔪</span> 
+        <span>식재료 등록</span>
+    </div>
+    <div class="card-desc">
+        냉장고에 있는 재료를 등록하고<br>
+        맞춤 레시피를 추천받아보세요
+    </div>
+    
+    <a href="{% url 'add_ingredient' %}" class="btn-orange">
+        <span>+ 재료 추가하기</span>
+    </a>
+</div>
 
-    {% elif not user_ingredients %}
-        <div class="info-card">
-            <div style="text-align: center; margin-bottom:15px;">
-                <img src="{% static 'images/icon-knife.png' %}" style="width:20px;">
-                <h3>식재료 등록</h3>
-            </div>
-            <p>냉장고에 있는 재료를 등록하고<br>맞춤 레시피를 추천받아보세요</p>
-            <a href="{% url 'add_ingredient' %}" class="btn-primary-large">
-                + 재료 추가하기
-            </a>
+{% if not ingredients %}
+    <div class="empty-area">
+        <img src="{% static 'images/empty_fridge.png' %}" alt="텅 빈 냉장고" class="empty-img">
+        <div class="empty-text">
+            냉장고가 텅 비어있어요...<br>
+            '재료 추가 버튼'을 눌러 추가해 주세요!
         </div>
-
-        <div class="empty-state">
-            <div class="spider-web-img" style="font-size: 60px;">🕸️</div>
-            <p class="empty-msg">
-                냉장고가 텅 비어있어요...<br>
-                '재료 추가 버튼'을 눌러 추가해 주세요!
-            </p>
+    </div>
+{% else %}
+    <div class="ingredient-list">
         </div>
+{% endif %}
 
-    {% else %}
-        <div class="ingredient-grid-row">
-            {% for item in user_ingredients %}
-            <div class="ingredient-item">
-                <span class="d-day-badge {% if item.d_day <= 3 %}urgent{% endif %}">
-                    {% if item.d_day == 0 %}D-Day{% else %}D-{{ item.d_day }}{% endif %}
-                </span>
-                <div class="ing-img-circle">
-                    <img src="{{ item.image.url|default:'/static/images/default_food.png' }}" alt="{{ item.name }}">
-                </div>
-                <span class="ing-name">{{ item.name }}</span>
-            </div>
-            
-            {% if forloop.counter|divisibleby:3 and not forloop.last %}
-                <div class="divider-line"></div>
-            {% endif %}
-            {% endfor %}
-        </div>
-
-        <a href="{% url 'add_ingredient' %}" class="fab-add">+</a>
-    {% endif %}
-</section>
 {% endblock main_content %}

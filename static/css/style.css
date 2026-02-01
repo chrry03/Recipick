@@ -1,126 +1,117 @@
-/* 공통 스타일 */
 /* static/css/style.css */
 
-:root {
-    /* 피그마 컬러셋 추출 */
-    --color-white: #FFFFFF;
-    --color-bg: #F9F5EB;       /* 앱 배경색 (크림색) */
-    --color-beige: #F0EAD6;    /* 연한 베이지 */
-    --color-primary: #E07248;  /* 메인 주황색 (버튼 등) */
-    --color-text-main: #333333; /* 진한 회색 (텍스트) */
-    --color-gray-light: #E5E5E5; /* 연한 회색 */
-    --color-gray-medium: #A0A0A0; /* 중간 회색 */
-    
-    /* 폰트 설정 (임의 설정, 필요시 웹폰트 import) */
-    --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+/* 1. 폰트 설정 */
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Gothic:wght@400;700;800&display=swap');
+
+/* 메모먼트 꾹꾹체는 다운로드 받아 static/fonts 폴더에 넣었다고 가정합니다 */
+@font-face {
+    font-family: 'Memoment';
+    src: url('../fonts/MemomentKkukkkuk.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
+/* 2. 전체 레이아웃 (마지막에서 2번째 이미지 기준) */
 body {
-    font-family: var(--font-main);
-    background-color: var(--color-bg);
-    color: var(--color-text-main);
-    /* 모바일 뷰 처럼 보이게 중앙 정렬 (선택사항) */
-    max-width: 480px;
-    margin: 0 auto;
-    min-height: 100vh;
+    width: 377px !important;
+    height: 928px !important;
+    margin: 40px auto;
+    
+    /* 배경 그라데이션 */
+    background: linear-gradient(180deg, #F5EDE0 0%, #F6F3EE 100%) !important;
+    
+    border-radius: 20px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+    overflow-y: auto;
     position: relative;
-    padding-bottom: 80px; /* 네브바 공간 확보 */
+    
+    /* 기본 폰트 설정 (나눔고딕) */
+    font-family: 'Nanum Gothic', sans-serif;
+    color: #555555;
+    line-height: 1.2;
 }
 
-/* 공통 헤더 스타일 */
-.page-header {
+/* 스크롤바 숨김 */
+body::-webkit-scrollbar {
+    display: none;
+}
+
+/* 상단 헤더 (로고 영역) */
+.header-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    background-color: var(--color-bg);
-    position: sticky;
-    top: 0;
+    padding: 24px 20px 10px 20px;
+}
+
+.logo-img {
+    height: 24px;
+    width: auto;
+}
+
+.bell-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+/* 컨텐츠 래퍼 */
+.app-container {
+    padding-bottom: 85px; /* 네비게이션바 높이만큼 여백 */
+    min-height: 100%;
+}
+
+.main-content {
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 3. 하단 네비게이션 바 (공통) */
+.bottom-navbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: #FFFFFF; /* 투명도 없이 흰색 */
+    border-top: 1px solid rgba(229, 229, 229, 0.94);
+    border-radius: 0 0 20px 20px;
     z-index: 100;
 }
 
-.logo-text {
-    font-size: 24px;
-    font-weight: bold;
-    color: #555; /* 로고색 */
-}
-
-.header-icons .icon-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    margin-left: 10px;
-    cursor: pointer;
-}
-
-/* 검색창 스타일 (공통) */
-.search-bar-container {
-    padding: 0 20px 10px;
-}
-
-.search-input-box {
-    position: relative;
-    width: 100%;
-}
-
-.search-input-box input {
-    width: 100%;
-    padding: 12px 15px 12px 40px; /* 돋보기 아이콘 공간 확보 */
-    border: 2px solid #555;
-    border-radius: 25px;
-    background-color: transparent;
-    font-size: 14px;
-    outline: none;
-}
-
-.search-icon-inside {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: #555;
-}
-
-/* 버튼 스타일 */
-.btn-primary-large {
-    width: 100%;
-    background-color: var(--color-primary);
-    color: var(--color-white);
-    padding: 15px;
-    border-radius: 25px;
-    border: none;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+.navbar-list {
     display: flex;
+    justify-content: space-around;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    height: 100%;
+    padding: 0 10px;
+    margin: 0;
 }
 
-.fab-add {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 56px;
-    height: 56px;
-    background-color: var(--color-primary);
-    color: var(--color-white);
-    border-radius: 50%;
-    border: none;
-    font-size: 32px;
+.nav-item {
+    list-style: none;
+}
+
+.nav-link {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    cursor: pointer;
-    z-index: 90;
+    text-decoration: none;
+    gap: 6px;
+    color: rgba(85, 85, 85, 0.76);
+}
+
+.nav-link span:last-child {
+    font-family: 'Inter', 'Nanum Gothic', sans-serif;
+    font-size: 11px;
+}
+
+/* 활성화 된 탭 스타일 (이미지 컬러셋의 주황색) */
+.nav-link.active {
+    color: #FF7043;
+}
+.nav-link.active .nav-icon {
+    /* SVG 등을 쓸 경우 fill 변경 로직 필요, 텍스트/이모지라면 색상만 변경 */
+    color: #FF7043; 
 }
