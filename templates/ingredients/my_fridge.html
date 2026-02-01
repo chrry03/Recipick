@@ -10,127 +10,135 @@
 
 {% block main_content %}
 <style>
-    /* --- 이 페이지 전용 스타일 --- */
-    
-    /* 1. 검색창 */
+    /* --- 검색창 --- */
     .search-wrapper {
         position: relative;
-        margin-top: 10px;
-        margin-bottom: 24px;
         width: 100%;
+        height: 45px;
+        margin-top: 10px; 
+        margin-bottom: 25px; 
+        flex-shrink: 0;
     }
     
     .search-input {
         width: 100%;
-        height: 40px;
+        height: 100%;
         background: transparent;
-        border: 1px solid #555555;
-        border-radius: 20px;
-        padding: 0 40px 0 16px; /* 오른쪽 아이콘 여백 */
+        border: 1.5px solid #555555;
+        border-radius: 25px;
+        padding: 0 45px 0 20px;
         box-sizing: border-box;
         
-        font-family: 'Gowun Dodum', sans-serif; /* 고운 돋음 적용 */
+        font-family: 'Gowun Dodum', sans-serif;
         font-size: 14px;
-        color: #555555;
+        color: #333333;
     }
     
-    .search-input::placeholder {
-        color: #555555;
-        opacity: 0.7;
-    }
+    .search-input::placeholder { color: #888888; }
     
     .search-icon-img {
         position: absolute;
-        right: 14px;
+        right: 18px;
         top: 50%;
         transform: translateY(-50%);
-        width: 18px;
-        height: 18px;
+        width: 19px;
+        height: 19px;
         pointer-events: none;
+        opacity: 0.7;
     }
 
-    /* 2. 식재료 등록 프로모션 카드 */
+    /* --- 식재료 등록 카드 --- */
     .promo-card {
         background: #FFFFFF;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-        border-radius: 16px;
-        padding: 24px;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.05);
+        border-radius: 18px;
+        padding: 25px 25px 30px 25px; 
+        
         display: flex;
         flex-direction: column;
         align-items: flex-start;
         box-sizing: border-box;
-        margin-bottom: 40px;
+        flex-shrink: 0;
+        margin-bottom: 30px; 
     }
 
     .card-title {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
-        
+        gap: 8px; /* 아이콘과 텍스트 사이 간격 약간 좁힘 */
+        margin-bottom: 12px;
+    }
+
+    /* [수정] 식재료 등록 아이콘 확대 */
+    .register-icon { 
+        width: 20px; /* 13px -> 20px로 확대 */
+        height: auto; 
+        margin-top: 0; /* 수직 정렬을 위해 마진 제거 */
+    }
+
+    .card-title-text {
         font-family: 'Nanum Gothic', sans-serif;
-        font-weight: 700; /* Bold */
+        font-weight: 800;
         font-size: 18px;
         color: #1A1A1A;
     }
 
     .card-desc {
         font-family: 'Nanum Gothic', sans-serif;
-        font-size: 13px;
+        font-size: 14px;
         line-height: 1.5;
-        color: #6B6B6B;
-        margin-bottom: 20px;
+        color: #666666;
+        margin-bottom: 25px;
     }
 
-    /* 주황색 버튼 */
     .btn-orange {
         width: 100%;
-        height: 48px;
-        background: #FF7043; /* 컬러셋 주황색 */
-        border-radius: 24px;
+        height: 50px;
+        background: #E76F51; 
+        border-radius: 25px;
         border: none;
         
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         cursor: pointer;
         text-decoration: none;
-        
-        /* 그림자 효과 (선택사항) */
-        box-shadow: 0 2px 4px rgba(255, 112, 67, 0.3);
+        box-shadow: 0 3px 8px rgba(231, 111, 81, 0.2);
     }
 
     .btn-orange span {
         font-family: 'Nanum Gothic', sans-serif;
         font-size: 16px;
-        color: #FFEEDB; /* 버튼 텍스트 연한 살구색 */
-        font-weight: 400;
+        color: #FFFFFF;
+        font-weight: 600;
     }
 
-    /* 3. Empty State (거미줄) */
+    /* --- Empty State --- */
     .empty-area {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        margin-top: 40px;
-        opacity: 0.8;
+        justify-content: flex-start; 
+        flex-grow: 1;
+        
+        padding-top: 8vh;
+        padding-bottom: 20px;
     }
 
     .empty-img {
-        width: 120px;
+        width: 130px;
         height: auto;
-        margin-bottom: 16px;
+        margin-bottom: 18px;
+        opacity: 0.95;
     }
 
     .empty-text {
-        font-family: 'Gowun Dodum', sans-serif; /* 고운 돋음 적용 */
-        font-size: 12px;
-        line-height: 1.5;
+        font-family: 'Gowun Dodum', sans-serif;
+        font-size: 13px;
+        line-height: 1.6;
         text-align: center;
-        color: #555555;
+        color: #999999;
     }
 </style>
 
@@ -141,9 +149,10 @@
 
 <div class="promo-card">
     <div class="card-title">
-        <span>🔪</span> 
-        <span>식재료 등록</span>
+        <img src="{% static 'images/icon_register.png' %}" alt="아이콘" class="register-icon">
+        <span class="card-title-text">식재료 등록</span>
     </div>
+    
     <div class="card-desc">
         냉장고에 있는 재료를 등록하고<br>
         맞춤 레시피를 추천받아보세요
