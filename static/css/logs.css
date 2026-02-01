@@ -3,11 +3,12 @@
 .log-create-container {
     position: relative;
     width: 100%;
-    max-width: 375px;
+    max-width: 448px;
     margin: 0 auto;
     min-height: 100vh;
     background: linear-gradient(to bottom, #f5ede0, #f6f3ee);
     padding: 12px;
+    padding-bottom: 6rem;
 }
 
 /* Header - logs.css에서 오버라이드 가능 */
@@ -259,4 +260,263 @@
     .submit-btn {
         width: calc(100% - 24px);
     }
+}
+
+
+/* 일지 목록 페이지 스타일 */
+.log-list-container {
+    position: relative;
+    width: 100%;
+    max-width: 448px;
+    margin: 0 auto;
+    padding-bottom: 6rem;
+}
+
+/* 월 선택 */
+.month-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin: 20px 0 15px;
+    font-size: 30px;
+}
+
+.current-month {
+    color: #555;
+    font-weight: normal;
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+}
+
+.month-nav {
+    background: none;
+    border: none;
+    color: #a5a5a4;
+    font-size: 30px;
+    cursor: pointer;
+    padding: 0 10px;
+    transition: color 0.3s;
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+.month-nav:hover {
+    color: #555;
+}
+
+/* 구분선 */
+.divider {
+    width: 100%;
+    max-width: 400px;
+    height: 2.5px;
+    background: #555555;
+    margin: 0 auto;
+}
+
+.divider-dashed {
+    width: 100%;
+    max-width: 400px;
+    height: 1px;
+    background: repeating-linear-gradient(
+        to right,
+        #555555 0,
+        #555555 5px,
+        transparent 5px,
+        transparent 10px
+    );
+    margin: 0 auto;
+}
+
+/* 요리 일지 리스트 */
+.recipe-list {
+    padding: 0 20px 20px;
+    padding-top: 0;
+    overflow-y: auto;
+    max-height: calc(100vh - 250px);
+}
+
+/* 요리 항목 */
+.recipe-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0;
+    padding-left: 27px;
+    padding-right: 27px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-radius: 10px;
+    margin: 0 -13px;
+    height: 108px;
+    box-sizing: border-box;
+}
+
+/* 날짜/시간 */
+.date-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+}
+
+.date {
+    font-size: 30px;
+    color: #000;
+    font-weight: normal;
+    line-height: 1;
+    margin: 0;
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+}
+
+.time {
+    font-size: 20px;
+    color: #a5a5a4;
+    margin-top: 0;
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-weight: 300;
+}
+
+/* 요리 이미지 */
+.recipe-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.recipe-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recipe-image.placeholder {
+    background: #d9d9d9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recipe-image.placeholder svg {
+    font-size: 24px;
+}
+
+/* 요리 정보 */
+.recipe-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.recipe-title {
+    font-size: 20px;
+    color: #000;
+    font-weight: normal;
+    margin-bottom: 4px;
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    display: flex;
+}
+
+.rating {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.6;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rating-label {
+    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+}
+
+.rating .stars {
+    color: #000;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+/* 빈 상태 */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-message {
+    font-size: 15px;
+    color: #a5a5a4;
+    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+}
+
+/* 인스타그램 공유 버튼 */
+.floating-btn {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 5rem;
+    width: 4rem;
+    height: 4rem;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    transition: all 0.2s;
+    z-index: 100;
+    padding: 0;
+    margin: -55px 32px;
+}
+
+.floating-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.floating-btn:hover {
+    transform: scale(1.1);
+}
+
+.floating-btn:active {
+    transform: scale(0.95);
+}
+
+/* 반응형 */
+@media (min-width: 448px) {
+    .floating-btn {
+        right: calc(50% - 224px + 1.5rem);
+    }
+}
+
+@media (max-width: 448px) {
+    .log-list-container {
+        max-width: 100%;
+    }
+    
+    .floating-btn {
+        right: 1rem;
+        bottom: 4rem;
+    }
+}
+
+/* 스크롤바 스타일 */
+.recipe-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.recipe-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.recipe-list::-webkit-scrollbar-thumb {
+    background: #d9d9d9;
+    border-radius: 3px;
+}
+
+.recipe-list::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
 }

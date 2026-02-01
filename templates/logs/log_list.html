@@ -1,1 +1,78 @@
-<!-- 일지 목록 (월별 조회) -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recipick|일지 목록{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/logs.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="log-list-container">
+    <!-- Header -->
+    {% include 'header.html' %}
+
+    <!-- Month Selector -->
+    <div class="month-selector">
+        <button class="month-nav prev" id="prevMonth" aria-label="이전 달">&lt;</button>
+        <h2 class="current-month" id="currentMonth">{{ current_month|default:"1" }}월</h2>
+        <button class="month-nav next" id="nextMonth" aria-label="다음 달">&gt;</button>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider"></div>
+
+    <!-- Recipe Log List -->
+    <div class="recipe-list" id="recipeList">
+        {% for log in logs %}
+        <div class="recipe-item" data-log-id="{{ log.id }}">
+            <div class="date-time">
+                <div class="date">{{ log.day }}일</div>
+                <div class="time">{{ log.time }}</div>
+            </div>
+            <div class="recipe-image {% if not log.image %}placeholder{% endif %}">
+                {% if log.image %}
+                    <img src="{{ log.image }}" alt="{{ log.recipe_name }}" onerror="this.parentElement.classList.add('placeholder'); this.remove();">
+                {% else %}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                {% endif %}
+            </div>
+            <div class="recipe-info">
+                <h3 class="recipe-title">{{ log.recipe_name }}</h3>
+                <div class="rating">
+                    <span class="rating-label">난이도:</span>
+                    <span class="stars">{{ log.difficulty_stars|safe }}</span>
+                </div>
+                <div class="rating">
+                    <span class="rating-label">만족도:</span>
+                    <span class="stars">{{ log.satisfaction_stars|safe }}</span>
+                </div>
+            </div>
+        </div>
+        {% if not forloop.last %}
+        <div class="divider-dashed"></div>
+        {% endif %}
+        {% empty %}
+        <div class="empty-state">
+            <p class="empty-message">등록된 일지가 없습니다.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Instagram Share Button -->
+    <button class="floating-btn" id="instagramShareBtn" aria-label="인스타그램 공유">
+        <img src="{% static 'images/insta_share_btn.png' %}" alt="인스타그램 공유" width="56" height="56">
+    </button>
+
+    <!-- Bottom Navigation -->
+    {% include 'base_with_navbar.html' %}
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="{% static 'js/logs.js' %}"></script>
+{% endblock %}
