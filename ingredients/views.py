@@ -188,3 +188,49 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
         response_serializer = UserIngredientSerializer(ingredient)
         return Response(response_serializer.data)
     
+from django.shortcuts import render
+
+def my_fridge_view(request):
+    # 빈 리스트를 보내서 'Empty State' 화면 유지
+    ingredients = [] 
+    return render(request, 'ingredients/my_fridge.html', {'ingredients': ingredients})
+
+from django.shortcuts import render
+
+def my_fridge_view(request):
+    ingredients = [] 
+    return render(request, 'ingredients/my_fridge.html', {'ingredients': ingredients})
+
+def add_ingredient_view(request):
+    # 1. 요청하신 카테고리 전체 목록
+    categories = [
+        "전체", "채소", "양념", "해산물", "조미료", 
+        "곡물/면류", "제빵", "과일", "육류", "가공식품", 
+        "음료", "건조", "유제품/계란", "절임", "기타"
+    ]
+
+    # 2. 식재료 마스터 데이터 (아이콘 매칭)
+    # 아이콘이 있는 것은 파일명을 적고, 없는 것은 None으로 두어 기본 접시가 뜨게 함
+    master_ingredients = [
+        # --- 아이콘 보유 ---
+        {'name': '당근', 'category': '채소', 'is_added': False, 'icon_name': 'carrot.png'},
+        {'name': '소고기', 'category': '육류', 'is_added': False, 'icon_name': 'beef.png'},
+        {'name': '돼지고기', 'category': '육류', 'is_added': False, 'icon_name': 'pork.png'},
+        {'name': '우유', 'category': '유제품/계란', 'is_added': False, 'icon_name': 'milk.png'},
+        {'name': '계란', 'category': '유제품/계란', 'is_added': True, 'icon_name': 'egg.png'}, # 이미 추가됨 예시
+        
+        # --- 아이콘 미보유 (기본 이미지) ---
+        {'name': '브로콜리', 'category': '채소', 'is_added': False, 'icon_name': None},
+        {'name': '양파', 'category': '채소', 'is_added': False, 'icon_name': None},
+        {'name': '사과', 'category': '과일', 'is_added': False, 'icon_name': None},
+        {'name': '대파', 'category': '채소', 'is_added': False, 'icon_name': None},
+        {'name': '고등어', 'category': '해산물', 'is_added': False, 'icon_name': None},
+        {'name': '식빵', 'category': '제빵', 'is_added': False, 'icon_name': None},
+        {'name': '간장', 'category': '조미료', 'is_added': False, 'icon_name': None},
+    ]
+
+    context = {
+        'categories': categories,
+        'ingredients': master_ingredients,
+    }
+    return render(request, 'ingredients/add_ingredient.html', context)
