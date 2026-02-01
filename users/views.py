@@ -131,8 +131,6 @@ def check_nickname_view(request):
 def nickname_view(request): return render(request, 'users/nickname.html')
 def mypage_view(request): return render(request, 'users/mypage.html')
 
-# Create your views here.
-
 def notification(request):
     """알림 페이지 뷰"""
     # 테스트용 알림 데이터
