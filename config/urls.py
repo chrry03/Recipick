@@ -46,18 +46,12 @@ urlpatterns = [
     path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     
     # API Endpoints
-    path('api/', include('ingredients.urls')),
+    path('ingredients/', include('ingredients.urls')),
     path('api/', include('recipes.urls')),
-<<<<<<< HEAD
     path('api/users/', include('users.urls')),
-=======
 
-    # Users App
-    path('', include('users.urls')),
-    
     # Logs App
     path('logs/', include('logs.urls')),
->>>>>>> b6536717c1069e5c01f2aba1d52b7dfb53660fdd
 ]
 
 
