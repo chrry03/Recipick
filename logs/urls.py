@@ -7,4 +7,5 @@ app_name = 'logs'
 urlpatterns = [
     path('', views.log_list, name='list'),
     path('create/', views.log_create, name='create'),
+    path('<int:log_id>/', views.log_detail, name='detail'),
 ]

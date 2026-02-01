@@ -312,6 +312,21 @@
     margin: 0 auto;
 }
 
+/* 일지 디테일 페이지의 구분선 */
+.log-detail-container .divider {
+    height: 1px;
+}
+
+.log-detail-container .divider:first-of-type {
+    margin-top: 37px;
+    margin-bottom: 18px;
+}
+
+.log-detail-container .divider:last-of-type {
+    margin-top: 13px;
+    margin-bottom: 13px;
+}
+
 .divider-dashed {
     width: 100%;
     max-width: 400px;
@@ -335,6 +350,12 @@
 }
 
 /* 요리 항목 */
+.recipe-item-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
 .recipe-item {
     display: flex;
     align-items: center;
@@ -520,3 +541,233 @@
 .recipe-list::-webkit-scrollbar-thumb:hover {
     background: #bbb;
 }
+
+/* 일지 디테일 페이지 스타일 */
+.log-detail-container {
+    position: relative;
+    width: 100%;
+    max-width: 448px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #f5ede0, #f6f3ee);
+    padding: 12px;
+    padding-bottom: 6rem;
+}
+
+/* 디테일 헤더 */
+.detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    position: relative;
+}
+
+.detail-header .back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+}
+
+.detail-header .back-btn:hover {
+    opacity: 0.7;
+}
+
+.detail-header .date-section {
+    text-align: center;
+    flex: 1;
+}
+
+.detail-header .date {
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-size: 30px;
+    font-weight: normal;
+    margin-bottom: 5px;
+}
+
+.detail-header .time {
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-size: 20px;
+    color: #a5a5a4;
+}
+
+.detail-header .more-btn {
+    background: none;
+    border: none;
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-size: 30px;
+    color: #555;
+    cursor: pointer;
+    padding: 8px;
+    line-height: 1;
+    transition: opacity 0.2s;
+}
+
+.detail-header .more-btn:hover {
+    opacity: 0.7;
+}
+
+.detail-content {
+    padding: 0 26px;
+    position: relative;
+}
+
+/* 요리 정보 섹션 */
+.recipe-info-section {
+    display: flex;
+    gap: 35px;
+    margin-bottom: 30px;
+    padding-left: 31px;
+    padding-right: 31px;
+}
+
+.recipe-image-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.recipe-image-wrapper .recipe-image {
+    width: 111px;
+    height: 148px;
+    object-fit: cover;
+    box-shadow: 3px 3px 4px 0px rgba(0, 0, 0, 0.25);
+    border-radius: 0;
+}
+
+.recipe-image-wrapper .bookmark {
+    position: absolute;
+    top: -10px;
+    left: 53px;
+    width: 14px;
+    height: 24px;
+    background: rgba(255, 112, 67, 0.8);
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    z-index: 1;
+}
+
+.recipe-image-wrapper .recipe-image.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+}
+
+.recipe-details {
+    flex: 1;
+}
+
+.recipe-details .recipe-name {
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-size: 20px;
+    font-weight: normal;
+    margin-bottom: 5px;
+}
+
+.recipe-details .difficulty,
+.recipe-details .satisfaction {
+    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    color: #555;
+    margin: 5px 0;
+}
+
+.ingredients-section {
+    margin-top: 20px;
+}
+
+.ingredients-section h3 {
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+    margin-bottom: 8px;
+}
+
+.ingredients-text {
+    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* 레시피 스텝 섹션 */
+.recipe-steps-section {
+    margin-bottom: 30px;
+}
+
+.recipe-steps-section h3 {
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 15px;
+    color: #000;
+}
+
+.recipe-steps {
+    padding-left: 20px;
+}
+
+.recipe-steps li {
+    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.75;
+    margin-bottom: 8px;
+}
+
+/* 메모 섹션 */
+.log-detail-container .memo-section {
+    margin-bottom: 30px;
+}
+
+.log-detail-container .memo-section h3 {
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 15px;
+}
+
+.log-detail-container .memo-box {
+    background: #f5f5f5;
+    border: 1.108px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    min-height: 199px;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.log-detail-container .memo-box p {
+    font-family: 'NanumGothic', 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.5;
+    padding-left: 31px;
+    padding-right: 31px;
+    text-align: center;
+}
+
+
+/* 반응형 디자인 */
+@media (max-width: 448px) {
+    .log-detail-container {
+        max-width: 100%;
+        padding: 8px;
+    }
+    
+    .detail-content {
+        padding: 0 20px;
+    }
+}
+
+/* 커스텀 폰트 로드 (필요시 추가) */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
