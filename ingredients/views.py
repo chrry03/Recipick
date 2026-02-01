@@ -187,3 +187,4 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
         # 응답은 상세 정보로
         response_serializer = UserIngredientSerializer(ingredient)
         return Response(response_serializer.data)
+    
