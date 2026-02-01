@@ -1,0 +1,92 @@
+[
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 1,
+    "fields": {
+      "name": "채소",
+      "parent": null,
+      "icon_url": "🥬"
+    }
+  },
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 2,
+    "fields": {
+      "name": "육류",
+      "parent": null,
+      "icon_url": "🥩"
+    }
+  },
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 3,
+    "fields": {
+      "name": "해산물",
+      "parent": null,
+      "icon_url": "🐟"
+    }
+  },
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 4,
+    "fields": {
+      "name": "유제품",
+      "parent": null,
+      "icon_url": "🥛"
+    }
+  },
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 5,
+    "fields": {
+      "name": "곡물·면류",
+      "parent": null,
+      "icon_url": "🌾"
+    }
+  },
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 6,
+    "fields": {
+      "name": "양념·소스",
+      "parent": null,
+      "icon_url": "🧂"
+    }
+  },
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 7,
+    "fields": {
+      "name": "과일",
+      "parent": null,
+      "icon_url": "🍎"
+    }
+  },
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 8,
+    "fields": {
+      "name": "가공식품",
+      "parent": null,
+      "icon_url": "🥫"
+    }
+  },
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 9,
+    "fields": {
+      "name": "견과·콩류",
+      "parent": null,
+      "icon_url": "🥜"
+    }
+  },
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 10,
+    "fields": {
+      "name": "기타",
+      "parent": null,
+      "icon_url": "📦"
+    }
+  }
+]
