@@ -1,1 +1,110 @@
-<!-- 일지 상세 내용 -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}일지 상세 - Recipick{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/logs.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="log-detail-container">
+    <!-- Header -->
+    {% include 'header.html' %}
+    
+    <!-- Header with Back Button, Date/Time, and More Button -->
+    <header class="detail-header">
+        <button class="back-btn" onclick="window.history.back()" aria-label="뒤로가기">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="#555555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <div class="date-section">
+            <h1 class="date">{{ log.date|default:"1월 11일" }}</h1>
+            <p class="time">{{ log.time|default:"10:20" }}</p>
+        </div>
+        <button class="more-btn" id="moreBtn" aria-label="더보기">⁝</button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="detail-content">
+
+        <!-- Recipe Info Section -->
+        <div class="recipe-info-section">
+            <div class="recipe-image-wrapper">
+                {% if log.recipe_image %}
+                    <img src="{{ log.recipe_image }}" alt="{{ log.recipe_name }}" class="recipe-image">
+                    <div class="bookmark"></div>
+                {% else %}
+                    <div class="recipe-image placeholder">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 17L12 22L22 17" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="recipe-details">
+                <h2 class="recipe-name">{{ log.recipe_name|default:"로제 파스타" }}</h2>
+                <p class="difficulty">난이도: {{ log.difficulty|default:"★★★☆☆" }}</p>
+                <p class="satisfaction">만족도: {{ log.satisfaction|default:"★★★★★" }}</p>
+                
+                <div class="ingredients-section">
+                    <h3>&lt;재료&gt;</h3>
+                    <p class="ingredients-text">{{ log.ingredients|default:"파스타면, 베이컨, 양파, 마늘, 토마토소스, 생크림, 올리브유, 소금, 후추, 페페론치노" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="divider"></div>
+
+        <!-- Recipe Steps Section -->
+        <div class="recipe-steps-section">
+            <h3>&lt;레시피&gt;</h3>
+            <ol class="recipe-steps">
+                {% for step in log.recipe_steps %}
+                <li>{{ step }}</li>
+                {% empty %}
+                <li>물에 소금 넉넉히 넣고 면 삶기(8분)</li>
+                <li>팬에 올리브유 두르고 마늘, 양파, 베이컨 순으로 볶기</li>
+                <li>토마토소스 넣고 2분 끓인 뒤 생크림 넣고 잘 섞기</li>
+                <li>면 넣고 센 불에서 빠르게 섞어 소금·후추로 간 맞추기</li>
+                {% endfor %}
+            </ol>
+        </div>
+
+        <!-- Divider -->
+        <div class="divider"></div>
+
+        <!-- Memo Section -->
+        <div class="memo-section">
+            <h3>&lt;메모&gt;</h3>
+            <div class="memo-box">
+                <p>{{ log.memo|default:"맛있었음." }}</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    {% include 'base_with_navbar.html' %}
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="{% static 'js/logs.js' %}"></script>
+<script>
+    // Log detail specific JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        const moreBtn = document.getElementById('moreBtn');
+        if (moreBtn) {
+            moreBtn.addEventListener('click', function() {
+                // 더보기 메뉴 기능 구현
+                console.log('더보기 버튼 클릭');
+            });
+        }
+    });
+</script>
+{% endblock %}
