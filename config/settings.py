@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 
 # .env 파일 내용을 불러옵니다.
@@ -25,12 +26,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v_eb4#s#zw_i1jk*d7&_kcp+(b8m)tv(x(fz98g5juxlb21r8p'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-v_eb4#s#zw_i1jk*d7&_kcp+(b8m)tv(x(fz98g5juxlb21r8p')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -43,6 +44,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
+    'drf_yasg',  # API 문서 자동 생성
+    'django_filters',
     'ingredients',
     'recipes',
     'logs',
@@ -51,6 +57,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -86,11 +93,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',  # postgresql 엔진 사용
-        'NAME': 'recipick_db',                      # pgAdmin에서 만든 DB 이름
-        'USER': 'postgres',                         # 설치 시 기본 ID
+        'NAME': os.getenv('DB_NAME', 'recipick_db'),# pgAdmin에서 만든 DB 이름
+        'USER': os.getenv('DB_USER', 'postgres'),   # 설치 시 기본 ID
         'PASSWORD': os.getenv('DB_PASSWORD'),       # .env 파일에서 비밀번호 가져오기
-        'HOST': 'localhost',                        # 내 컴퓨터
-        'PORT': '5432',                             # 기본 포트
+        'HOST': os.getenv('DB_HOST', 'localhost'),  # 내 컴퓨터
+        'PORT': os.getenv('DB_PORT', '5432'),       # 기본 포트
     }
 }
 
@@ -149,6 +156,44 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Spoonacular API (환경변수로 관리)
 SPOONACULAR_API_KEY = os.getenv('SPOONACULAR_API_KEY', '')
+
+# ==================== REST Framework 설정 ==================== #
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+}
+
+# JWT 설정 (SimpleJWT)
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+# CORS 설정 (프론트엔드와 통신)
+CORS_ALLOWED_ORIGINS = os.getenv(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://localhost:5173'
+).split(',')
+
+CORS_ALLOW_CREDENTIALS = True
+
+# ==================== Spoonacular API 키 확인 ==================== #
+if not SPOONACULAR_API_KEY:
+    print("⚠️  WARNING: SPOONACULAR_API_KEY가 설정되지 않았습니다!")
+    print("   .env 파일에 SPOONACULAR_API_KEY를 추가해주세요.")
+else:
+    print(f"✅ Spoonacular API Key 로드 완료: {SPOONACULAR_API_KEY[:10]}...")
 
 # ▼ 개발 단계에서 static 폴더 위치 지정 (이게 있어야 static 폴더 인식함)
 STATICFILES_DIRS = [

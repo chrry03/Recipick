@@ -242,4 +242,23 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# Static files collected for production
+staticfiles/
+
+# User uploaded media files
+media/
+
+# pytest
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
 # End of https://www.toptal.com/developers/gitignore/api/django,venv,windows,macos

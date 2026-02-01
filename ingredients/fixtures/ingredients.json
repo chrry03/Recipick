@@ -1,0 +1,277 @@
+[
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 1,
+    "fields": {
+      "name_ko": "양파",
+      "name_en": "onion",
+      "category": 1,
+      "aliases": ["양파", "onion"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 2,
+    "fields": {
+      "name_ko": "감자",
+      "name_en": "potato",
+      "category": 1,
+      "aliases": ["감자", "potato"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 3,
+    "fields": {
+      "name_ko": "토마토",
+      "name_en": "tomato",
+      "category": 1,
+      "aliases": ["토마토", "tomato", "방울토마토", "cherry tomato"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 4,
+    "fields": {
+      "name_ko": "마늘",
+      "name_en": "garlic",
+      "category": 1,
+      "aliases": ["마늘", "garlic"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 5,
+    "fields": {
+      "name_ko": "당근",
+      "name_en": "carrot",
+      "category": 1,
+      "aliases": ["당근", "carrot"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 6,
+    "fields": {
+      "name_ko": "대파",
+      "name_en": "green onion",
+      "category": 1,
+      "aliases": ["대파", "파", "green onion", "scallion", "쪽파"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 7,
+    "fields": {
+      "name_ko": "김치",
+      "name_en": "kimchi",
+      "category": 1,
+      "aliases": ["김치", "kimchi", "배추김치"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 8,
+    "fields": {
+      "name_ko": "닭가슴살",
+      "name_en": "chicken breast",
+      "category": 2,
+      "aliases": ["닭가슴살", "chicken breast", "닭고기", "chicken"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 9,
+    "fields": {
+      "name_ko": "돼지고기",
+      "name_en": "pork",
+      "category": 2,
+      "aliases": ["돼지고기", "pork", "삼겹살", "pork belly"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 10,
+    "fields": {
+      "name_ko": "소고기",
+      "name_en": "beef",
+      "category": 2,
+      "aliases": ["소고기", "beef", "쇠고기"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 11,
+    "fields": {
+      "name_ko": "계란",
+      "name_en": "egg",
+      "category": 4,
+      "aliases": ["계란", "달걀", "egg"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 12,
+    "fields": {
+      "name_ko": "우유",
+      "name_en": "milk",
+      "category": 4,
+      "aliases": ["우유", "milk"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 13,
+    "fields": {
+      "name_ko": "치즈",
+      "name_en": "cheese",
+      "category": 4,
+      "aliases": ["치즈", "cheese"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 14,
+    "fields": {
+      "name_ko": "밥",
+      "name_en": "rice",
+      "category": 5,
+      "aliases": ["밥", "쌀", "rice"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 15,
+    "fields": {
+      "name_ko": "파스타면",
+      "name_en": "pasta",
+      "category": 5,
+      "aliases": ["파스타", "스파게티", "pasta", "spaghetti"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 16,
+    "fields": {
+      "name_ko": "간장",
+      "name_en": "soy sauce",
+      "category": 6,
+      "aliases": ["간장", "soy sauce"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 17,
+    "fields": {
+      "name_ko": "고추장",
+      "name_en": "gochujang",
+      "category": 6,
+      "aliases": ["고추장", "gochujang"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 18,
+    "fields": {
+      "name_ko": "식용유",
+      "name_en": "oil",
+      "category": 6,
+      "aliases": ["식용유", "참기름", "oil", "sesame oil"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 19,
+    "fields": {
+      "name_ko": "소금",
+      "name_en": "salt",
+      "category": 6,
+      "aliases": ["소금", "salt"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 20,
+    "fields": {
+      "name_ko": "후추",
+      "name_en": "pepper",
+      "category": 6,
+      "aliases": ["후추", "pepper"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 21,
+    "fields": {
+      "name_ko": "연어",
+      "name_en": "salmon",
+      "category": 3,
+      "aliases": ["연어", "salmon"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 22,
+    "fields": {
+      "name_ko": "새우",
+      "name_en": "shrimp",
+      "category": 3,
+      "aliases": ["새우", "shrimp", "prawn"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 23,
+    "fields": {
+      "name_ko": "두부",
+      "name_en": "tofu",
+      "category": 8,
+      "aliases": ["두부", "tofu"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 24,
+    "fields": {
+      "name_ko": "버섯",
+      "name_en": "mushroom",
+      "category": 1,
+      "aliases": ["버섯", "mushroom", "팽이버섯", "새송이버섯"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
+    "pk": 25,
+    "fields": {
+      "name_ko": "애호박",
+      "name_en": "zucchini",
+      "category": 1,
+      "aliases": ["호박", "애호박", "zucchini"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  }
+]

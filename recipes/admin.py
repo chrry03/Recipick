@@ -1,34 +1,65 @@
 from django.contrib import admin
 from .models import Recipe, RecipeIngredient, FavoriteRecipe
 
-# 레시피 상세 페이지에서 재료를 바로 추가/수정할 수 있게 함 (Inline)
+
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
-    extra = 1
-    # [중요] 식재료가 많으므로 드롭다운 대신 '검색'으로 입력 (IngredientMasterAdmin에 search_fields 필수)
-    autocomplete_fields = ['ingredient'] 
+    extra = 0
+    fields = ['ingredient', 'ingredient_name', 'is_optional']
+    raw_id_fields = ['ingredient']
+
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = (
-        'title', 
-        'source', 
-        'difficulty', 
-        'ready_minutes', 
-        'is_active', 
-        'total_ingredients', # 캐싱된 재료 수 확인
-        'created_at'
+    list_display = [
+        'recipe_id', 'title', 'source', 'difficulty', 'ready_minutes',
+        'total_ingredients', 'required_ingredients', 'is_active', 'created_at'
+    ]
+    list_filter = ['source', 'difficulty', 'is_active', 'created_at']
+    search_fields = ['title', 'external_id']
+    inlines = [RecipeIngredientInline]
+    readonly_fields = ['recipe_id', 'external_id', 'created_at', 'updated_at', 'step_count']
+    
+    fieldsets = (
+        ('기본 정보', {
+            'fields': ('recipe_id', 'external_id', 'source', 'title', 'image_url')
+        }),
+        ('레시피 상세', {
+            'fields': ('ready_minutes', 'difficulty', 'servings', 'step_count')
+        }),
+        ('재료 정보', {
+            'fields': ('total_ingredients', 'required_ingredients')
+        }),
+        ('상태', {
+            'fields': ('is_active',)
+        }),
+        ('시스템', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
     )
-    list_filter = ('source', 'difficulty', 'is_active')
-    search_fields = ('title', 'external_id') # 제목과 외부 ID로 검색
     
-    # 레시피 들어가면 재료 목록도 같이 뜨도록 설정
-    inlines = [RecipeIngredientInline] 
-    
-    # 수정 불가능하게 막고 싶은 필드 (자동 계산되는 캐싱 필드들)
-    readonly_fields = ('total_ingredients', 'required_ingredients', 'created_at', 'updated_at')
+    def save_model(self, request, obj, form, change):
+        """저장 시 난이도 자동 계산"""
+        if not obj.difficulty or obj.difficulty == 'NORMAL':
+            obj.difficulty = obj.calculate_difficulty()
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(RecipeIngredient)
+class RecipeIngredientAdmin(admin.ModelAdmin):
+    list_display = [
+        'recipe_ingredient_id', 'recipe', 'ingredient', 'ingredient_name', 'is_optional'
+    ]
+    list_filter = ['is_optional']
+    search_fields = ['recipe__title', 'ingredient__name_ko', 'ingredient_name']
+    raw_id_fields = ['recipe', 'ingredient']
+
 
 @admin.register(FavoriteRecipe)
 class FavoriteRecipeAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipe', 'created_at')
-    search_fields = ('user__nickname', 'recipe__title')
+    list_display = ['favorite_id', 'user', 'recipe', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['user__username', 'recipe__title']
+    raw_id_fields = ['user', 'recipe']
+    date_hierarchy = 'created_at'
