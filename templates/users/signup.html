@@ -1,1 +1,53 @@
-<!-- 회원가입 화면 -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/users.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-mw">
+    <h2 class="title-mw">회원가입</h2>
+
+    <form id="signup-step1-form" class="form-group-mw">
+        <div class="form-group-mw">
+            <label for="email" style="display:block; margin-bottom:5px; color:#666;">이메일</label>
+            <input type="email" id="email" placeholder="example@email.com" class="input-mw" required>
+        </div>
+        
+        <div class="form-group-mw">
+            <label for="password" style="display:block; margin-bottom:5px; color:#666;">비밀번호</label>
+            <input type="password" id="password" placeholder="비밀번호 입력" class="input-mw" required>
+        </div>
+
+        <div class="form-group-mw">
+            <label for="password_confirm" style="display:block; margin-bottom:5px; color:#666;">비밀번호 확인</label>
+            <input type="password" id="password_confirm" placeholder="비밀번호 확인" class="input-mw" required>
+        </div>
+
+        <button type="submit" class="btn-mw btn-primary-mw">회원가입</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('signup-step1-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('password_confirm').value;
+
+    if (password !== passwordConfirm) {
+        alert('비밀번호가 일치하지 않습니다.');
+        return;
+    }
+
+    // 1단계: 프론트엔드 로컬 저장소에 임시 저장 (명세서 정책 준수)
+    localStorage.setItem('temp_email', email);
+    localStorage.setItem('temp_pw', password);
+
+    // 2단계: 닉네임 설정 페이지로 이동 (API 호출 없이 이동만!)
+    window.location.href = "{% url 'users:nickname' %}";
+});
+</script>
+{% endblock %}
