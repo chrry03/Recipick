@@ -48,8 +48,19 @@ urlpatterns = [
     # API Endpoints
     path('api/', include('ingredients.urls')),
     path('api/', include('recipes.urls')),
+<<<<<<< HEAD
     path('api/users/', include('users.urls')),
+=======
+
+    # Users App
+    path('', include('users.urls')),
+    
+    # Logs App
+    path('logs/', include('logs.urls')),
+>>>>>>> b6536717c1069e5c01f2aba1d52b7dfb53660fdd
 ]
+
+
 
 # 미디어 파일 서빙 설정 (개발 모드용): 개발 모드일 때만 미디어 파일 서빙 가능하도록 설정
 # settings.py의 DEBUG=TRUE일때(개발중일때)만 내 컴퓨터의 media폴더의 이미지를 띄울 수 있게 함
