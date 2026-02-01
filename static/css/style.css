@@ -1,129 +1,154 @@
-/* static/css/style.css */
+/* 공통 스타일 */
 
-/* --- 폰트 설정 (유지) --- */
-@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Gothic:wght@400;700;800&family=Inter:wght@400;600&display=swap');
-
-@font-face {
-    font-family: 'Memoment';
-    src: url('../fonts/MemomentKkukkkuk.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
-
-/* [수정] 화면 크기 확대 및 중앙 정렬 개선 */
-body {
-    /* 기존 450px -> 480px로 확대 (조금 더 시원하게) */
-    width: 100% !important;
-    max-width: 480px !important; 
-    
-    /* 화면 높이 꽉 채우기 (min-height 사용) */
-    min-height: 98vh !important; 
-    height: auto !important;
-    
-    margin: 1vh auto; /* 상하 여백 최소화 */
-    
-    background: linear-gradient(180deg, #F5EDE0 0%, #F6F3EE 100%) !important;
-    border-radius: 30px !important;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important;
-    
-    overflow: hidden; 
-    position: relative;
-    
-    font-family: 'Nanum Gothic', sans-serif;
-    color: #555555;
-    line-height: 1.2;
-}
-
-/* 내부 컨텐츠 스크롤 영역 */
-.app-container {
-    height: 100vh; /* 뷰포트 높이 기준 */
-    overflow-y: auto;
-    padding-bottom: 90px;
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
-    
-    /* [추가] 내부 요소들을 세로로 배치하고, 남은 공간 활용 */
-    display: flex;
-    flex-direction: column;
 }
 
-.app-container::-webkit-scrollbar {
-    width: 4px;
-    display: block;
-}
-.app-container::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
 }
 
-.header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 30px 24px 10px 24px;
-    flex-shrink: 0; /* 헤더는 줄어들지 않음 */
-}
-.logo-img { height: 26px; width: auto; }
-.bell-icon { width: 26px; height: 26px; cursor: pointer; }
-
-/* [수정] 메인 컨텐츠가 남은 공간을 차지하도록 설정 */
-.main-content {
-    padding: 0 24px;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* 남은 공간을 모두 차지함 */
+body {
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(to bottom, #f5ede0, #f6f3ee);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- 하단 네비게이션 바 (유지) --- */
-.bottom-navbar {
-    position: absolute;
+/* 하단 네비게이션 스타일 */
+.bottom-nav {
+    position: fixed;
     bottom: 0;
     left: 0;
+    right: 0;
     width: 100%;
-    height: 85px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
     border-top: 1px solid rgba(229, 229, 229, 0.94);
-    backdrop-filter: blur(10px);
-    border-radius: 0 0 30px 30px;
-    z-index: 100;
-    box-sizing: border-box;
-    padding-top: 5px;
+    border-radius: 1.25rem 1.25rem 0 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
 }
 
-.navbar-list {
+.bottom-nav .nav-content {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    max-width: 448px;
+    gap: 2rem;
+}
+
+.nav-container {
+    max-width: 448px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+}
+
+.nav-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(85, 85, 85, 0.76);
+    border-radius: 1rem;
+    transition: all 0.2s;
+    text-decoration: none;
+    flex: 0 1 auto;
+}
+
+.nav-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.nav-item.active {
+    color: #ff7043;
+}
+
+.nav-item .nav-label {
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.nav-item.active .nav-label {
+    color: #ff7043;
+}
+
+/* 반응형 - 하단 네비게이션 */
+@media (max-width: 448px) {
+    .bottom-nav {
+        max-width: 100%;
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .nav-item {
+        padding: 0.5rem 0.5rem;
+    }
+    
+    .nav-item .nav-label {
+        font-size: 0.7rem;
+    }
+}
+
+/* 헤더 스타일 */
+.app-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 24px;
-    height: 60px;
-    list-style: none;
-    margin-top: 0;
+    padding: 5px 5px;
+    max-width: 448px;
+    margin: 0 auto;
 }
 
-.nav-link {
+.header-logo {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-decoration: none;
-    gap: 6px;
-    width: 50px;
+}
+
+.logo-img {
+    height: 37px;
+    width: auto;
+    display: block;
+}
+
+.app-header .notification-btn {
+    background: none;
+    border: none;
     cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+    text-decoration: none;
 }
 
-.nav-icon-img {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
+.app-header .notification-btn:hover {
+    opacity: 0.7;
 }
 
-.nav-link span:last-child {
-    font-family: 'Inter', sans-serif;
-    font-weight: 400;
-    font-size: 11px;
-    text-align: center;
-    color: rgba(85, 85, 85, 0.76);
-}
-
-.nav-link.active span:last-child {
-    color: #FF7043 !important;
-    font-weight: 600;
+/* 반응형 */
+@media (max-width: 448px) {
+    .app-header {
+        border-radius: 0;
+        max-width: 100%;
+    }
 }

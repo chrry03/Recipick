@@ -1,4 +1,4 @@
-<!-- 닉네임 설정 화면 -->{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block extra_css %}
@@ -8,41 +8,31 @@
 {% block content %}
 <div class="container-mw">
     <h2 class="title-mw">닉네임 설정</h2>
-    <p style="color:#666; margin-bottom:30px; text-align:center;">
-        Recipick에서 사용할<br>멋진 닉네임을 지어주세요!
-    </p>
-
     <form id="nickname-form" class="form-group-mw">
-        <div class="form-group-mw">
+        {% csrf_token %} <div class="form-group-mw">
             <div style="display:flex; gap:10px;">
                 <input type="text" id="nickname" placeholder="닉네임 (한글, 영문, 숫자)" class="input-mw" required>
                 <button type="button" id="check-btn" class="btn-mw" style="width: 100px; padding:0; background-color:#ddd; margin-bottom:0;">중복확인</button>
             </div>
             <p id="check-msg" style="font-size:12px; margin-top:5px; color:#ff6b6b; display:none;"></p>
         </div>
-        
         <button type="submit" class="btn-mw btn-primary-mw">설정 완료</button>
     </form>
 </div>
 
 <script>
-    let isNicknameChecked = false; // 중복확인 완료 여부
+    let isNicknameChecked = false;
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value; // 토큰 가져오기
 
     // 1. 중복 확인 로직
     document.getElementById('check-btn').addEventListener('click', async function() {
         const nickname = document.getElementById('nickname').value;
         const msgBox = document.getElementById('check-msg');
-
-        if (!nickname) {
-            alert('닉네임을 입력해주세요.');
-            return;
-        }
+        if (!nickname) { alert('닉네임을 입력해주세요.'); return; }
 
         try {
-            // API 명세서: GET /api/users/check-nickname/?nickname=...
             const response = await fetch(`/api/users/check-nickname/?nickname=${nickname}`);
             const data = await response.json();
-
             msgBox.style.display = 'block';
             if (response.ok && data.is_available) {
                 msgBox.style.color = 'green';
@@ -59,93 +49,71 @@
         }
     });
 
-    // 닉네임 입력 변경 시 다시 확인하게 함
-    document.getElementById('nickname').addEventListener('input', function() {
-        isNicknameChecked = false;
-        document.getElementById('check-msg').style.display = 'none';
-    });
-
-
-    // nickname.html 내 script 부분
+    // 2. 설정 완료 버튼 로직
     document.getElementById('nickname-form').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
+        if (!isNicknameChecked) { alert('닉네임 중복 확인을 해주세요.'); return; }
+
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         const nickname = document.getElementById('nickname').value;
         const tempEmail = localStorage.getItem('temp_email');
         const tempPw = localStorage.getItem('temp_pw');
 
-        if (!tempEmail || !tempPw) {
-            alert('가입 정보가 유실되었습니다. 다시 가입해 주세요.');
-            window.location.href = "{% url 'users:signup' %}";
-            return;
-        }
-
-        try {
-            // 3단계: 임시 저장된 3개를 합쳐서 POST 요청 (명세서 정책 준수)
-            const response = await fetch('/api/users/signup/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: tempEmail,
-                    password: tempPw,
-                    nickname: nickname
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.status === 201) {
-                alert('회원가입이 완료되었습니다!');
-                // 사용 완료한 임시 데이터 삭제
-                localStorage.removeItem('temp_email');
-                localStorage.removeItem('temp_pw');
-                
-                // 토큰 저장 후 메인으로 이동
-                if (data.token) {
-                    localStorage.setItem('access_token', data.token.access);
-                    localStorage.setItem('refresh_token', data.token.refresh);
-                }
-                window.location.href = "{% url 'users:main' %}"; // 이제야 메인으로 이동
-            } else {
-                alert(data.message || '회원가입 실패');
-            }
-        } catch (error) {
-            console.error(error);
-            alert('서버 오류 발생');
-        }
-
-        } else {
-            // === CASE B: 소셜 로그인 후 닉네임 변경 (temp 정보 없음) ===
-            // 이미 토큰이 있는 상태라고 가정 (소셜 로그인 직후)
-            const token = localStorage.getItem('access_token');
-            if (!token) {
-                alert('로그인 정보가 없습니다. 다시 로그인해주세요.');
-                window.location.href = "{% url 'users:login' %}";
-                return;
-            }
-
+        if (tempEmail && tempPw) {
+            // === CASE A: 일반 회원가입 (signup.html에서 정보를 넘겨받은 경우) ===
             try {
-                // API 명세서: PATCH /api/users/me/
-                const response = await fetch('/api/users/me/', {
-                    method: 'PATCH',
+                const response = await fetch('/api/users/signup/', {
+                    method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` // 토큰 필수
+                        'X-CSRFToken': csrftoken // 헤더에 CSRF 토큰 추가
                     },
                     body: JSON.stringify({
+                        email: tempEmail,
+                        password: tempPw,
                         nickname: nickname
                     })
                 });
 
-                if (response.ok) {
-                    alert('닉네임 설정이 완료되었습니다.');
+                const data = await response.json();
+                if (response.status === 201) {
+                    alert('회원가입이 완료되었습니다!');
+                    localStorage.removeItem('temp_email');
+                    localStorage.removeItem('temp_pw');
+                    if (data.token) {
+                        localStorage.setItem('access_token', data.token.access);
+                        localStorage.setItem('refresh_token', data.token.refresh);
+                    }
                     window.location.href = "{% url 'users:main' %}";
                 } else {
-                    alert('닉네임 설정 실패');
+                    alert(data.message || '회원가입 실패');
                 }
             } catch (error) {
                 console.error(error);
-                alert('서버 오류 발생');
+                alert('서버 응답 처리 중 오류가 발생했습니다.');
+            }
+        } else {
+            // === CASE B: 소셜 로그인 등 (임시 정보가 없는 경우) ===
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                try {
+                    const response = await fetch('/api/users/me/', {
+                        method: 'PATCH',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ nickname: nickname })
+                    });
+                    if (response.ok) {
+                        alert('닉네임 설정이 완료되었습니다.');
+                        window.location.href = "{% url 'users:main' %}";
+                    }
+                } catch (error) { alert('서버 오류 발생'); }
+            } else {
+                alert('가입 정보가 유실되었습니다. 다시 가입해 주세요.');
+                window.location.href = "{% url 'users:signup' %}";
             }
         }
     });

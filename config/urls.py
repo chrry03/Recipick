@@ -27,30 +27,14 @@ urlpatterns = [
     
     # 1. 식재료 앱 (우리가 만든 fridge 페이지는 여기 안에 있음)
     path('ingredients/', include('ingredients.urls')),
-    
-    # ================= [중요] 에러 해결 파트 =================
-    # base_with_navbar.html에 있는 이름들을 임시로 다 등록해줘야 함
-    
-    # 1) 홈 화면 (name='home')
-    path('', temp_view, name='home'), 
-    
-    # 2) 일지 화면 (name='log_list') - 탭바에 있어서 에러 날 예정이라 미리 추가
-    path('logs/', temp_view, name='log_list'),
-    
-    # 3) 레시피 화면 (name='recipe_list')
     path('recipes/', temp_view, name='recipe_list'),
-    
-    # 4) 마이페이지 (name='mypage')
-    path('mypage/', temp_view, name='mypage'),
-    
-    # (참고: name='my_fridge'는 ingredients/urls.py에 이미 있어서 에러 안 남)
-    # ========================================================
 
     # Swagger
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     # Users App
     path('', include('users.urls')),
-    
+    path('api/users/', include('users.urls')),
+
     # Logs App
     path('logs/', include('logs.urls')),
 ]
