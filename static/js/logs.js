@@ -305,3 +305,245 @@
     }
 
 })();
+
+
+// 일지 디테일
+// 뒤로가기 기능
+function goBack() {
+    if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        window.location.href = '/journal/';
+    }
+}
+
+// 새 일지 추가 기능
+function addNewJournal() {
+    window.location.href = '/journal/create/';
+}
+
+// 알림 버튼 클릭
+document.querySelector('.notification-btn')?.addEventListener('click', function() {
+    // 알림 페이지로 이동 또는 알림 모달 표시
+    window.location.href = '/notifications/';
+});
+
+// 더보기 버튼 클릭 (수정/삭제 메뉴)
+document.querySelector('.more-btn')?.addEventListener('click', function() {
+    const menu = document.createElement('div');
+    menu.className = 'context-menu';
+    menu.innerHTML = `
+        <div class="menu-overlay"></div>
+        <div class="menu-content">
+            <button class="menu-item" onclick="editJournal()">수정하기</button>
+            <button class="menu-item delete" onclick="deleteJournal()">삭제하기</button>
+            <button class="menu-item cancel" onclick="closeMenu()">취소</button>
+        </div>
+    `;
+    document.body.appendChild(menu);
+    
+    // 메뉴 스타일 추가
+    const style = document.createElement('style');
+    style.textContent = `
+        .context-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+        }
+        .menu-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .menu-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+        .menu-item {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            background: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .menu-item.delete {
+            color: #ff4444;
+        }
+        .menu-item.cancel {
+            font-weight: 500;
+        }
+        .menu-item:hover {
+            background: #f5f5f5;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 오버레이 클릭시 메뉴 닫기
+    menu.querySelector('.menu-overlay').addEventListener('click', closeMenu);
+});
+
+// 메뉴 닫기
+function closeMenu() {
+    const menu = document.querySelector('.context-menu');
+    if (menu) {
+        menu.style.animation = 'slideDown 0.3s ease';
+        setTimeout(() => menu.remove(), 300);
+    }
+}
+
+// 일지 수정
+function editJournal() {
+    closeMenu();
+    const journalId = getJournalIdFromURL();
+    window.location.href = `/journal/edit/${journalId}/`;
+}
+
+// 일지 삭제
+function deleteJournal() {
+    if (confirm('정말 이 일지를 삭제하시겠습니까?')) {
+        const journalId = getJournalIdFromURL();
+        // CSRF 토큰 가져오기
+        const csrfToken = getCookie('csrftoken');
+        
+        fetch(`/journal/delete/${journalId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('일지가 삭제되었습니다.');
+                window.location.href = '/journal/';
+            } else {
+                alert('삭제에 실패했습니다.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('오류가 발생했습니다.');
+        });
+    }
+    closeMenu();
+}
+
+// URL에서 일지 ID 추출
+function getJournalIdFromURL() {
+    const path = window.location.pathname;
+    const match = path.match(/\/journal\/(\d+)\//);
+    return match ? match[1] : null;
+}
+
+// CSRF 토큰 가져오기
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// 네비게이션 활성화 상태 관리
+function setActiveNav() {
+    const currentPath = window.location.pathname;
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    navItems.forEach(item => {
+        const href = item.getAttribute('href');
+        if (currentPath.includes(href)) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+// 페이지 로드시 실행
+document.addEventListener('DOMContentLoaded', function() {
+    setActiveNav();
+    
+    // 이미지 로드 실패시 기본 이미지 표시
+    const recipeImage = document.querySelector('.recipe-image img');
+    if (recipeImage) {
+        recipeImage.addEventListener('error', function() {
+            this.src = '/static/images/default-recipe.jpg';
+        });
+    }
+    
+    // 뒤로가기 버튼 이벤트
+    document.querySelector('.back-btn')?.addEventListener('click', goBack);
+    
+    // FAB 버튼 이벤트
+    document.querySelector('.fab')?.addEventListener('click', addNewJournal);
+});
+
+// 스크롤시 헤더 그림자 효과
+let lastScroll = 0;
+window.addEventListener('scroll', function() {
+    const header = document.querySelector('.header');
+    const currentScroll = window.pageYOffset;
+    
+    if (currentScroll > 50) {
+        header.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+    } else {
+        header.style.boxShadow = 'none';
+    }
+    
+    lastScroll = currentScroll;
+});
+
+// 터치 제스처 지원 (스와이프로 뒤로가기)
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener('touchstart', function(event) {
+    touchStartX = event.changedTouches[0].screenX;
+}, false);
+
+document.addEventListener('touchend', function(event) {
+    touchEndX = event.changedTouches[0].screenX;
+    handleSwipe();
+}, false);
+
+function handleSwipe() {
+    // 왼쪽에서 오른쪽으로 스와이프 (뒤로가기)
+    if (touchEndX > touchStartX + 50 && touchStartX < 50) {
+        goBack();
+    }
+}
+
