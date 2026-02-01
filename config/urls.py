@@ -38,6 +38,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
+    path('', include('users.urls')),
     
     # API Documentation (Swagger)
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
@@ -47,6 +48,7 @@ urlpatterns = [
     # API Endpoints
     path('api/', include('ingredients.urls')),
     path('api/', include('recipes.urls')),
+    path('api/users/', include('users.urls')),
 ]
 
 # 미디어 파일 서빙 설정 (개발 모드용): 개발 모드일 때만 미디어 파일 서빙 가능하도록 설정

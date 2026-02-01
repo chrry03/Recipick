@@ -10,7 +10,7 @@
     <h1 class="title-mw">Recipick</h1>
 
     <form id="login-form" class="form-group-mw">
-        <div class="form-group-mw">
+        {% csrf_token %} <div class="form-group-mw">
             <input type="email" id="email" placeholder="이메일을 입력해주세요" class="input-mw" required>
         </div>
         <div class="form-group-mw">
@@ -38,12 +38,15 @@
 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
+        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        const csrftoken = csrfInput ? csrfInput.value : '';
 
         try {
             const response = await fetch('/api/users/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
                 },
                 body: JSON.stringify({
                     login_type: 'email',
@@ -59,8 +62,6 @@
                 localStorage.setItem('access_token', data.token.access);
                 localStorage.setItem('refresh_token', data.token.refresh);
                 localStorage.setItem('user_nickname', data.user.nickname); // 편의상 저장
-
-                alert('로그인 성공!');
                 window.location.href = "{% url 'users:main' %}"; // 메인으로 이동
             } else {
                 // 로그인 실패
