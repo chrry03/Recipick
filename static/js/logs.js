@@ -15,6 +15,11 @@
         initLogList();
     }
 
+    // 일지 상세 페이지 초기화
+    if (document.getElementById('instagramShareBtn') && document.getElementById('recipeList') === null) {
+        initLogDetail();
+    }
+
     /**
      * 일지 작성 페이지 초기화
      */
@@ -231,6 +236,17 @@
         });
 
         // 인스타그램 공유 버튼 이벤트
+        if (instagramShareBtn) {
+            instagramShareBtn.addEventListener('click', handleInstagramShare);
+        }
+    }
+
+    /**
+     * 일지 상세 페이지 초기화
+     */
+    function initLogDetail() {
+        const instagramShareBtn = document.getElementById('instagramShareBtn');
+        
         if (instagramShareBtn) {
             instagramShareBtn.addEventListener('click', handleInstagramShare);
         }
