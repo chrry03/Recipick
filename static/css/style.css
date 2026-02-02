@@ -152,3 +152,13 @@ body {
         max-width: 100%;
     }
 }
+
+.app-container {
+    width: 100%;
+    max-width: 448px;  /* 모바일 너비 제한 */
+    margin: 0 auto;    /* 가운데 정렬 */
+    padding-bottom: 6rem; /* 하단 탭바 가림 방지 */
+    position: relative;
+    background-color: linear-gradient(to bottom, #f5ede0, #f6f3ee); /* 배경색 */
+    min-height: 100vh; /* 화면 꽉 차게 */
+}

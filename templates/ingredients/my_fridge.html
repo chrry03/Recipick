@@ -1,179 +1,51 @@
 {% extends 'base_with_navbar.html' %}
 {% load static %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/ingredients.css' %}">
+{% endblock extra_head %}
+
 {% block header %}
-<div class="header-container">
-    <img src="{% static 'images/logo.png' %}" alt="Recipick" class="logo-img">
-    <img src="{% static 'images/bell.png' %}" alt="알림" class="bell-icon">
-</div>
+    {% include 'header.html' %}
 {% endblock header %}
 
 {% block main_content %}
-<style>
-    /* --- 검색창 --- */
-    .search-wrapper {
-        position: relative;
-        width: 100%;
-        height: 45px;
-        margin-top: 10px; 
-        margin-bottom: 25px; 
-        flex-shrink: 0;
-    }
     
-    .search-input {
-        width: 100%;
-        height: 100%;
-        background: transparent;
-        border: 1.5px solid #555555;
-        border-radius: 25px;
-        padding: 0 45px 0 20px;
-        box-sizing: border-box;
-        
-        font-family: 'Gowun Dodum', sans-serif;
-        font-size: 14px;
-        color: #333333;
-    }
-    
-    .search-input::placeholder { color: #888888; }
-    
-    .search-icon-img {
-        position: absolute;
-        right: 18px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 19px;
-        height: 19px;
-        pointer-events: none;
-        opacity: 0.7;
-    }
-
-    /* --- 식재료 등록 카드 --- */
-    .promo-card {
-        background: #FFFFFF;
-        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.05);
-        border-radius: 18px;
-        padding: 25px 25px 30px 25px; 
-        
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        box-sizing: border-box;
-        flex-shrink: 0;
-        margin-bottom: 30px; 
-    }
-
-    .card-title {
-        display: flex;
-        align-items: center;
-        gap: 8px; /* 아이콘과 텍스트 사이 간격 약간 좁힘 */
-        margin-bottom: 12px;
-    }
-
-    /* [수정] 식재료 등록 아이콘 확대 */
-    .register-icon { 
-        width: 20px; /* 13px -> 20px로 확대 */
-        height: auto; 
-        margin-top: 0; /* 수직 정렬을 위해 마진 제거 */
-    }
-
-    .card-title-text {
-        font-family: 'Nanum Gothic', sans-serif;
-        font-weight: 800;
-        font-size: 18px;
-        color: #1A1A1A;
-    }
-
-    .card-desc {
-        font-family: 'Nanum Gothic', sans-serif;
-        font-size: 14px;
-        line-height: 1.5;
-        color: #666666;
-        margin-bottom: 25px;
-    }
-
-    .btn-orange {
-        width: 100%;
-        height: 50px;
-        background: #E76F51; 
-        border-radius: 25px;
-        border: none;
-        
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
-        text-decoration: none;
-        box-shadow: 0 3px 8px rgba(231, 111, 81, 0.2);
-    }
-
-    .btn-orange span {
-        font-family: 'Nanum Gothic', sans-serif;
-        font-size: 16px;
-        color: #FFFFFF;
-        font-weight: 600;
-    }
-
-    /* --- Empty State --- */
-    .empty-area {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start; 
-        flex-grow: 1;
-        
-        padding-top: 8vh;
-        padding-bottom: 20px;
-    }
-
-    .empty-img {
-        width: 130px;
-        height: auto;
-        margin-bottom: 18px;
-        opacity: 0.95;
-    }
-
-    .empty-text {
-        font-family: 'Gowun Dodum', sans-serif;
-        font-size: 13px;
-        line-height: 1.6;
-        text-align: center;
-        color: #999999;
-    }
-</style>
-
-<div class="search-wrapper">
-    <input type="text" class="search-input" placeholder="식재료 검색">
-    <img src="{% static 'images/search.png' %}" alt="검색" class="search-icon-img">
-</div>
-
-<div class="promo-card">
-    <div class="card-title">
-        <img src="{% static 'images/icon_register.png' %}" alt="아이콘" class="register-icon">
-        <span class="card-title-text">식재료 등록</span>
+    <div class="search-wrapper">
+        <input type="text" class="search-input" placeholder="식재료 검색">
+        <img src="{% static 'images/search.png' %}" alt="검색" class="search-icon-img">
     </div>
-    
-    <div class="card-desc">
-        냉장고에 있는 재료를 등록하고<br>
-        맞춤 레시피를 추천받아보세요
-    </div>
-    
-    <a href="{% url 'add_ingredient' %}" class="btn-orange">
-        <span>+ 재료 추가하기</span>
-    </a>
-</div>
 
-{% if not ingredients %}
-    <div class="empty-area">
-        <img src="{% static 'images/empty_fridge.png' %}" alt="텅 빈 냉장고" class="empty-img">
-        <div class="empty-text">
-            냉장고가 텅 비어있어요...<br>
-            '재료 추가 버튼'을 눌러 추가해 주세요!
+    <div class="promo-card">
+        <div class="card-title">
+            <img src="{% static 'images/icon_register.png' %}" alt="아이콘" class="register-icon">
+            <span class="card-title-text">식재료 등록</span>
         </div>
-    </div>
-{% else %}
-    <div class="ingredient-list">
+        
+        <div class="card-desc">
+            냉장고에 있는 재료를 등록하고<br>
+            맞춤 레시피를 추천받아보세요
         </div>
-{% endif %}
+        
+        <a href="{% url 'ingredients:add_ingredient' %}" class="btn-orange">
+            <span>+ 재료 추가하기</span>
+        </a>
+    </div>
+
+    {% if not ingredients %}
+        <div class="empty-area">
+            <img src="{% static 'images/empty_fridge.png' %}" alt="텅 빈 냉장고" class="empty-img">
+            <div class="empty-text">
+                냉장고가 텅 비어있어요...<br>
+                '재료 추가 버튼'을 눌러 추가해 주세요!
+            </div>
+        </div>
+    {% else %}
+        <div class="ingredient-list">
+             <p style="text-align: center; color: #999; padding: 20px;">
+                등록된 식재료 목록이 이곳에 표시됩니다.
+            </p>
+        </div>
+    {% endif %}
 
 {% endblock main_content %}
