@@ -14,14 +14,16 @@
 
         <nav class="bottom-nav">
             <div class="nav-content">
-                <button class="nav-item">
+                <!-- 레시피 버튼 -->
+                <a href="{% url 'recipes:list' %}" class="nav-item{% if request.resolver_match.app_name == 'recipes' %} active{% endif %}">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9.996 5.831V17.493" stroke="#6B6B6B" stroke-width="1.666" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M2.499 14.994C2.278 14.994 2.066 14.906 1.910 14.750C1.754 14.594 1.666 14.382 1.666 14.161V3.332C1.666 3.111 1.754 2.899 1.910 2.743C2.066 2.587 2.278 2.499 2.499 2.499H6.664C7.548 2.499 8.395 2.850 9.020 3.475C9.645 4.100 9.996 4.947 9.996 5.831C9.996 4.947 10.347 4.100 10.972 3.475C11.597 2.850 12.444 2.499 13.328 2.499H17.493C17.714 2.499 17.926 2.587 18.082 2.743C18.238 2.899 18.326 3.111 18.326 3.332V14.161C18.326 14.382 18.238 14.594 18.082 14.750C17.926 14.906 17.714 14.994 17.493 14.994H12.495C11.832 14.994 11.196 15.257 10.728 15.726C10.259 16.194 9.996 16.830 9.996 17.493C9.996 16.830 9.733 16.194 9.264 15.726C8.795 15.257 8.160 14.994 7.497 14.994H2.499Z" stroke="#6B6B6B" stroke-width="1.666" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9.996 5.831V17.493" stroke="{% if request.resolver_match.app_name == 'recipes' %}#FF7043{% else %}#6B6B6B{% endif %}" stroke-width="1.666" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2.499 14.994C2.278 14.994 2.066 14.906 1.910 14.750C1.754 14.594 1.666 14.382 1.666 14.161V3.332C1.666 3.111 1.754 2.899 1.910 2.743C2.066 2.587 2.278 2.499 2.499 2.499H6.664C7.548 2.499 8.395 2.850 9.020 3.475C9.645 4.100 9.996 4.947 9.996 5.831C9.996 4.947 10.347 4.100 10.972 3.475C11.597 2.850 12.444 2.499 13.328 2.499H17.493C17.714 2.499 17.926 2.587 18.082 2.743C18.238 2.899 18.326 3.111 18.326 3.332V14.161C18.326 14.382 18.238 14.594 18.082 14.750C17.926 14.906 17.714 14.994 17.493 14.994H12.495C11.832 14.994 11.196 15.257 10.728 15.726C10.259 16.194 9.996 16.830 9.996 17.493C9.996 16.830 9.733 16.194 9.264 15.726C8.795 15.257 8.160 14.994 7.497 14.994H2.499Z" stroke="{% if request.resolver_match.app_name == 'recipes' %}#FF7043{% else %}#6B6B6B{% endif %}" stroke-width="1.666" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <span class="nav-label">레시피</span>
-                </button>
+                    <span class="nav-label{% if request.resolver_match.app_name == 'recipes' %} active{% endif %}">레시피</span>
+                </a>
                 
+                <!-- 식재료 버튼 -->
                 <a href="{% url 'ingredients:my_fridge' %}" class="nav-item{% if request.resolver_match.app_name == 'ingredients' %} active{% endif %}">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9.996 5.438V2.499C9.996 2.278 10.084 2.066 10.240 1.910C10.396 1.754 10.608 1.666 10.829 1.666" 
@@ -34,6 +36,7 @@
                     <span class="nav-label{% if request.resolver_match.app_name == 'ingredients' %} active{% endif %}">식재료</span>
                 </a>
                 
+                <!-- 홈 버튼 -->
                 <a href="{% url 'users:main' %}" class="nav-item{% if request.resolver_match.url_name == 'main' %} active{% endif %}">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12.495 17.493V10.829C12.495 10.608 12.407 10.396 12.251 10.240C12.095 10.084 11.883 9.996 11.662 9.996H8.330C8.109 9.996 7.897 10.084 7.741 10.240C7.585 10.396 7.497 10.608 7.497 10.829V17.493" stroke="{% if request.resolver_match.url_name == 'main' %}#FF7043{% else %}#6B6B6B{% endif %}" stroke-width="1.666" stroke-linecap="round" stroke-linejoin="round"/>
@@ -42,6 +45,7 @@
                     <span class="nav-label{% if request.resolver_match.url_name == 'main' %} active{% endif %}">홈</span>
                 </a>
                 
+                <!-- 일지 버튼 -->
                 <a href="{% url 'logs:list' %}" class="nav-item{% if request.resolver_match.app_name == 'logs' and request.resolver_match.url_name == 'list' %} active{% endif %}">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6.664 1.666V4.998" stroke="{% if request.resolver_match.app_name == 'logs' and request.resolver_match.url_name == 'list' %}#FF7043{% else %}#6B6B6B{% endif %}" stroke-width="1.666" stroke-linecap="round" stroke-linejoin="round"/>
@@ -52,15 +56,16 @@
                     <span class="nav-label{% if request.resolver_match.app_name == 'logs' and request.resolver_match.url_name == 'list' %} active{% endif %}">일지</span>
                 </a>
                 
-                <button class="nav-item">
+                <!-- 마이페이지 버튼 -->
+                <a href="{% url 'users:mypage' %}" class="nav-item{% if request.resolver_match.url_name == 'mypage' %} active{% endif %}">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.827 17.493V15.827C15.827 14.943 15.476 14.096 14.851 13.471C14.226 12.846 13.379 12.495 12.495 12.495H7.497C6.613 12.495 5.766 12.846 5.141 13.471C4.516 14.096 4.165 14.943 4.165 15.827V17.493" stroke="rgba(85,85,85,0.76)" stroke-width="1.666" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M9.996 9.163C11.836 9.163 13.328 7.671 13.328 5.831C13.328 3.991 11.836 2.499 9.996 2.499C8.156 2.499 6.664 3.991 6.664 5.831C6.664 7.671 8.156 9.163 9.996 9.163Z" stroke="rgba(85,85,85,0.76)" stroke-width="1.666" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15.827 17.493V15.827C15.827 14.943 15.476 14.096 14.851 13.471C14.226 12.846 13.379 12.495 12.495 12.495H7.497C6.613 12.495 5.766 12.846 5.141 13.471C4.516 14.096 4.165 14.943 4.165 15.827V17.493" stroke="{% if request.resolver_match.url_name == 'mypage' %}#FF7043{% else %}rgba(85,85,85,0.76){% endif %}" stroke-width="1.666" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9.996 9.163C11.836 9.163 13.328 7.671 13.328 5.831C13.328 3.991 11.836 2.499 9.996 2.499C8.156 2.499 6.664 3.991 6.664 5.831C6.664 7.671 8.156 9.163 9.996 9.163Z" stroke="{% if request.resolver_match.url_name == 'mypage' %}#FF7043{% else %}rgba(85,85,85,0.76){% endif %}" stroke-width="1.666" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <span class="nav-label">마이</span>
-                </button>
+                    <span class="nav-label{% if request.resolver_match.url_name == 'mypage' %} active{% endif %}">마이</span>
+                </a>
             </div>
         </nav>
 
     </div>
-    {% endblock %}
+{% endblock %}

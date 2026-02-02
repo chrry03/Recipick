@@ -33,3 +33,7 @@ django-filter==23.5
 
 # 10. Date Utilities
 python-dateutil==2.8.2
+
+# 11. Caching
+django-redis==5.4.0
+redis==5.0.1
