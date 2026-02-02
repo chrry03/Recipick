@@ -1,325 +1,356 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.db.models import Q
-from django.conf import settings
+from django.db.models import Q, Prefetch, Count
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
 
-from .models import Recipe, FavoriteRecipe
+from .models import Recipe, RecipeIngredient
 from ingredients.models import UserIngredient, IngredientMaster
-from .serializers import (
-    RecipeListSerializer,
-    RecipeDetailSerializer,
-    FavoriteRecipeSerializer,
-    RecipeSearchSerializer
-)
+from .serializers import RecipeListSerializer, RecipeDetailSerializer
+from ingredients.utils.mapper import IngredientMapper
 
-# Create your views here.
-class RecipeViewSet(viewsets.ReadOnlyModelViewSet):
-    """레시피 조회 및 추천"""
+
+# ==================== 템플릿 뷰 (HTML 페이지) ==================== #
+
+def recipe_list_view(request):
+    """레시피 목록 페이지"""
+    return render(request, 'recipes/recipe_list.html')
+
+
+def recipe_detail_view(request, recipe_id):
+    """레시피 상세 페이지"""
+    recipe = get_object_or_404(Recipe, recipe_id=recipe_id)
+    return render(request, 'recipes/recipe_detail.html', {
+        'recipe': recipe
+    })
+
+
+# ==================== API 뷰 ==================== #
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_recipe_recommendations(request):
+    """
+    통합 레시피 추천 API
     
-    queryset = Recipe.objects.filter(is_active=True)
-    permission_classes = [AllowAny]
+    POST /api/recipes/api/recommendations/
+    Body:
+    {
+        "ingredient_ids": [1, 2, 3],  // 선택한 식재료 ID들 (선택사항)
+        "use_all": false,  // true면 보유한 모든 식재료 사용
+        "include_spoonacular": true,  // Spoonacular API 사용 여부
+        "max_results": 20  // 최대 결과 개수
+    }
+    """
+    user = request.user
     
-    def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return RecipeDetailSerializer
-        return RecipeListSerializer
+    # 요청 파라미터
+    ingredient_ids = request.data.get('ingredient_ids', [])
+    use_all = request.data.get('use_all', False)
+    include_spoonacular = request.data.get('include_spoonacular', True)
+    max_results = request.data.get('max_results', 20)
     
-    def get_queryset(self):
-        """
-        레시피 목록 조회
-        
-        Query Parameters:
-        - sort: recommend(추천순, 기본), time(시간순)
-        - min_score: 최소 추천 점수 (기본 60)
-        - limit: 결과 개수 (기본 10)
-        - filter: owned_only(보유 식재료만), favorited(찜한 레시피만)
-        """
-        queryset = super().get_queryset()
-        
-        # 필터링 옵션
-        filter_type = self.request.query_params.get('filter')
-        
-        # 찜한 레시피만 보기
-        if filter_type == 'favorited' and self.request.user.is_authenticated:
-            favorited_recipe_ids = FavoriteRecipe.objects.filter(
-                user=self.request.user
-            ).values_list('recipe_id', flat=True)
-            queryset = queryset.filter(recipe_id__in=favorited_recipe_ids)
-        
-        # 보유 식재료만으로 만들 수 있는 레시피
-        if filter_type == 'owned_only' and self.request.user.is_authenticated:
-            queryset = self._filter_by_owned_ingredients(queryset)
-        
-        # 정렬 방식
-        sort_by = self.request.query_params.get('sort', 'recommend')
-        
-        if sort_by == 'recommend' and self.request.user.is_authenticated:
-            # 추천순 정렬 (팀 모델 메서드 활용)
-            return self._get_recommended_recipes(queryset)
-        elif sort_by == 'time':
-            queryset = queryset.order_by('ready_minutes')
-        
-        return queryset.prefetch_related('recipe_ingredients__ingredient')
+    # 사용자 보유 식재료 조회
+    user_ingredients = UserIngredient.objects.filter(
+        user=user,
+        is_consumed=False
+    ).select_related('ingredient', 'ingredient__category')
     
-    def _get_recommended_recipes(self, queryset):
-        """
-        추천 알고리즘 적용 (팀 모델 메서드 활용)
-        """
-        user = self.request.user
-        min_score = float(self.request.query_params.get('min_score', 60))
-        limit = int(self.request.query_params.get('limit', 20))
-        
-        # Recipe.get_recommendations_for_user() 메서드 활용
-        recommendations = Recipe.get_recommendations_for_user(
-            user=user,
-            limit=limit * 2,  # 필터링 후 부족할 수 있으므로 여유있게
-            min_score=min_score
-        )
-        
-        # 추천 결과를 Recipe 객체 리스트로 변환하고 점수 정보 추가
-        recipes = []
-        for rec in recommendations[:limit]:
-            recipe = rec['recipe']
-            # 동적 속성 추가
-            if rec['scores']:
-                recipe.recommendation_score = rec['scores']['total_score']
-                recipe.score_details = rec['scores']
-                recipe.recommendation_category = rec['category']
-                recipe.missing_ingredients_count = rec['scores']['missing_ingredients_count']
-                if 'ingredients_status' in rec:
-                    recipe.ingredients_status = rec['ingredients_status']
-            recipes.append(recipe)
-        
-        return recipes
+    if use_all:
+        selected_ingredients = user_ingredients
+    elif ingredient_ids:
+        selected_ingredients = user_ingredients.filter(user_ingredient_id__in=ingredient_ids)
+    else:
+        selected_ingredients = user_ingredients
     
-    def _filter_by_owned_ingredients(self, queryset):
-        """
-        보유 식재료만으로 만들 수 있는 레시피 필터링
-        (부족한 재료가 0개인 레시피만)
-        """
-        user = self.request.user
-        
-        # 사용자 보유 식재료 가져오기
-        user_ingredients = UserIngredient.objects.filter(
-            user=user,
-            is_consumed=False
-        ).select_related('ingredient')
-        
-        if not user_ingredients.exists():
-            return queryset.none()
-        
-        # 보유 식재료 ID 세트
-        owned_ingredient_ids = set(ui.ingredient_id for ui in user_ingredients)
-        
-        # 필터링: 필수 재료가 모두 보유 목록에 있는 레시피만
-        filtered_recipe_ids = []
-        
-        for recipe in queryset.prefetch_related('recipe_ingredients'):
-            # 필수 재료만 확인
-            required_ingredient_ids = set(
-                recipe.recipe_ingredients.filter(is_optional=False)
-                .values_list('ingredient_id', flat=True)
-            )
-            
-            # 모든 필수 재료를 보유한 경우
-            if required_ingredient_ids.issubset(owned_ingredient_ids):
-                filtered_recipe_ids.append(recipe.recipe_id)
-        
-        return queryset.filter(recipe_id__in=filtered_recipe_ids)
-    
-    def retrieve(self, request, *args, **kwargs):
-        """레시피 상세 조회 (추천 점수 포함)"""
-        recipe = self.get_object()
-        
-        # 로그인 사용자에게는 추천 점수 계산
-        if request.user.is_authenticated:
-            user_ingredients = UserIngredient.objects.filter(
-                user=request.user,
-                is_consumed=False
-            ).select_related('ingredient')
-            
-            user_ingredient_ids = [ui.ingredient_id for ui in user_ingredients]
-            user_ingredients_dict = {ui.ingredient_id: ui for ui in user_ingredients}
-            
-            # User skill level
-            if hasattr(request.user, 'profile'):
-                user_skill = request.user.profile.cooking_level
-            else:
-                user_skill = 'BEGINNER'
-            
-            # 점수 계산
-            score_data = recipe.calculate_recommendation_score(
-                user=request.user,
-                user_ingredient_ids=user_ingredient_ids,
-                user_ingredients_dict=user_ingredients_dict,
-                user_skill_level=user_skill
-            )
-            
-            # 재료 상태 정보
-            ingredients_status = recipe.get_ingredients_status_for_user(
-                user_ingredients_dict
-            )
-            
-            # 동적 속성 추가
-            recipe.recommendation_score = score_data['total_score']
-            recipe.score_details = score_data
-            recipe.ingredients_status = ingredients_status
-        
-        serializer = self.get_serializer(recipe)
-        return Response(serializer.data)
-    
-    @action(detail=False, methods=['get'])
-    def search(self, request):
-        """
-        레시피 검색 (Spoonacular API 활용)
-        
-        Query Parameters:
-        - keyword: 검색어
-        - ingredients: 재료 (콤마로 구분)
-        - max_ready_time: 최대 조리 시간
-        - difficulty: 난이도
-        """
-        # 파라미터 검증
-        serializer = RecipeSearchSerializer(data=request.query_params)
-        serializer.is_valid(raise_exception=True)
-        params = serializer.validated_data
-        
-        # Spoonacular API 호출
-        api_key = getattr(settings, 'SPOONACULAR_API_KEY', '')
-        if not api_key:
-            return Response(
-                {'detail': 'Spoonacular API 키가 설정되지 않았습니다.'},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE
-            )
-        
-        # 재료 기반 검색
-        if params.get('ingredients'):
-            ingredient_names = [name.strip() for name in params['ingredients'].split(',')]
-            recipe_ids = Recipe.search_by_ingredients_spoonacular(
-                ingredient_names=ingredient_names,
-                api_key=api_key,
-                number=params.get('limit', 10)
-            )
-            
-            # IngredientMaster 매핑 생성
-            ingredient_mapping = IngredientMaster.create_ingredient_mapping_for_api()
-            
-            # 각 레시피 정보 가져오기
-            recipes = []
-            for recipe_id in recipe_ids:
-                recipe = Recipe.fetch_and_save_from_spoonacular(
-                    recipe_id=recipe_id,
-                    api_key=api_key,
-                    ingredient_mapping=ingredient_mapping
-                )
-                if recipe:
-                    recipes.append(recipe)
-        
-        # 키워드 검색
-        elif params.get('keyword'):
-            # DB에서 먼저 검색
-            recipes = Recipe.objects.filter(
-                Q(title__icontains=params['keyword']) |
-                Q(recipe_ingredients__ingredient_name__icontains=params['keyword']),
-                is_active=True
-            ).distinct()
-            
-            # 난이도 필터
-            if params.get('difficulty'):
-                recipes = recipes.filter(difficulty=params['difficulty'])
-            
-            # 조리 시간 필터
-            if params.get('max_ready_time'):
-                recipes = recipes.filter(ready_minutes__lte=params['max_ready_time'])
-            
-            recipes = recipes[:params.get('limit', 10)]
-        
-        else:
-            # 필터만 적용
-            recipes = Recipe.objects.filter(is_active=True)
-            
-            if params.get('difficulty'):
-                recipes = recipes.filter(difficulty=params['difficulty'])
-            
-            if params.get('max_ready_time'):
-                recipes = recipes.filter(ready_minutes__lte=params['max_ready_time'])
-            
-            recipes = recipes[:params.get('limit', 10)]
-        
-        # 추천순 정렬 적용 (로그인 사용자)
-        if request.user.is_authenticated and params.get('sort') == 'recommend':
-            recipe_ids = [r.recipe_id for r in recipes]
-            queryset = Recipe.objects.filter(recipe_id__in=recipe_ids)
-            recommended = self._get_recommended_recipes(queryset)
-            serializer = RecipeListSerializer(
-                recommended,
-                many=True,
-                context={'request': request}
-            )
-        else:
-            serializer = RecipeListSerializer(
-                recipes,
-                many=True,
-                context={'request': request}
-            )
-        
-        return Response(serializer.data)
-    
-    @action(detail=True, methods=['post'])
-    def favorite(self, request, pk=None):
-        """
-        레시피 찜하기/취소
-        
-        POST /recipes/{id}/favorite
-        """
-        if not request.user.is_authenticated:
-            return Response(
-                {'detail': '로그인이 필요합니다.'},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-        
-        recipe = self.get_object()
-        
-        favorite, created = FavoriteRecipe.objects.get_or_create(
-            user=request.user,
-            recipe=recipe
-        )
-        
-        if not created:
-            # 이미 찜한 경우 -> 취소
-            favorite.delete()
-            return Response({
-                'is_favorited': False,
-                'message': '찜이 취소되었습니다.'
-            })
-        
+    if not selected_ingredients.exists():
         return Response({
-            'is_favorited': True,
-            'message': '찜 목록에 추가되었습니다.'
-        }, status=status.HTTP_201_CREATED)
+            'message': '선택된 식재료가 없습니다',
+            'recipes': []
+        }, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=False, methods=['get'])
-    def favorites(self, request):
-        """
-        찜한 레시피 목록 조회
-        
-        GET /recipes/favorites
-        """
-        if not request.user.is_authenticated:
-            return Response(
-                {'detail': '로그인이 필요합니다.'},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-        
-        favorites = FavoriteRecipe.objects.filter(
-            user=request.user
-        ).select_related('recipe')
-        
-        limit = int(request.query_params.get('limit', 10))
-        favorites = favorites[:limit]
-        
-        serializer = FavoriteRecipeSerializer(favorites, many=True)
-        return Response(serializer.data)
+    # 식재료 ID 리스트
+    selected_ingredient_ids = list(selected_ingredients.values_list('ingredient_id', flat=True))
     
+    # 식재료 딕셔너리 (유통기한 계산용)
+    user_ingredients_dict = {
+        ui.ingredient_id: ui for ui in selected_ingredients
+    }
+    
+    # 1. DB에서 레시피 검색
+    db_recipes = search_recipes_from_db(
+        selected_ingredient_ids,
+        user
+    )
+    
+    # 2. Spoonacular API에서 레시피 검색 (선택적)
+    spoon_recipes = []
+    if include_spoonacular:
+        spoon_recipes = search_recipes_from_spoonacular(
+            selected_ingredients,
+            max_results=10
+        )
+    
+    # 3. 레시피 통합 및 추천 점수 계산
+    all_recipes = list(db_recipes) + spoon_recipes
+    
+    # 중복 제거 (external_id 기준)
+    unique_recipes = {}
+    for recipe in all_recipes:
+        if recipe.external_id not in unique_recipes:
+            unique_recipes[recipe.external_id] = recipe
+    
+    # 4. 각 레시피에 대해 추천 점수 계산
+    scored_recipes = []
+    
+    # 사용자 스킬 레벨 가져오기 (User 모델에 skill_level 필드가 있다고 가정)
+    # 없으면 기본값 'INTERMEDIATE' 사용
+    if hasattr(user, 'skill_level'):
+        user_skill_level = user.skill_level
+    elif hasattr(user, 'profile') and hasattr(user.profile, 'cooking_level'):
+        user_skill_level = user.profile.cooking_level
+    else:
+        user_skill_level = 'INTERMEDIATE'  # 기본값
+    
+    for recipe in unique_recipes.values():
+        score_data = recipe.calculate_recommendation_score(
+            user=user,
+            user_ingredient_ids=selected_ingredient_ids,
+            user_ingredients_dict=user_ingredients_dict,
+            user_skill_level=user_skill_level
+        )
+        
+        # 필터링: 60점 이상만
+        if score_data['total_score'] >= 60:
+            scored_recipes.append({
+                'recipe': recipe,
+                'score_data': score_data
+            })
+    
+    # 5. 점수순으로 정렬
+    scored_recipes.sort(key=lambda x: x['score_data']['total_score'], reverse=True)
+    
+    # 6. 최대 결과 개수 제한
+    scored_recipes = scored_recipes[:max_results]
+    
+    # 7. 카테고리별 분류
+    categorized = {
+        'urgent_ready': [],  # 90점 이상 (유통기한 임박 포함)
+        'ready': [],         # 75-89점 (바로 가능)
+        'almost_ready': [],  # 60-74점 (1-2개 재료 부족)
+    }
+    
+    for item in scored_recipes:
+        recipe = item['recipe']
+        score_data = item['score_data']
+        
+        category = recipe.get_recommendation_category(score_data['total_score'])
+        
+        # Serializer를 통해 데이터 변환
+        recipe_data = RecipeListSerializer(recipe).data
+        recipe_data['recommendation_score'] = score_data
+        
+        if category in categorized:
+            categorized[category].append(recipe_data)
+    
+    return Response({
+        'message': '레시피 추천 완료',
+        'total_count': len(scored_recipes),
+        'selected_ingredients_count': len(selected_ingredient_ids),
+        'categories': {
+            'urgent_ready': {
+                'label': '지금 바로 만들 수 있어요! (유통기한 임박)',
+                'count': len(categorized['urgent_ready']),
+                'recipes': categorized['urgent_ready']
+            },
+            'ready': {
+                'label': '지금 바로 만들 수 있어요!',
+                'count': len(categorized['ready']),
+                'recipes': categorized['ready']
+            },
+            'almost_ready': {
+                'label': '재료 1~2개만 있으면 가능해요',
+                'count': len(categorized['almost_ready']),
+                'recipes': categorized['almost_ready']
+            }
+        }
+    })
+
+
+def search_recipes_from_db(ingredient_ids, user):
+    """
+    DB에서 레시피 검색
+    - 한식 DB + 이전에 저장된 Spoonacular 레시피
+    """
+    # 사용자의 알러지/제한 식재료
+    excluded_ingredients = []
+    if hasattr(user, 'allergies') and user.allergies:
+        excluded_ingredients.extend(user.allergies)
+    if hasattr(user, 'dietary_restrictions') and user.dietary_restrictions:
+        excluded_ingredients.extend(user.dietary_restrictions)
+    if hasattr(user, 'profile'):
+        if hasattr(user.profile, 'allergies') and user.profile.allergies:
+            excluded_ingredients.extend(user.profile.allergies)
+        if hasattr(user.profile, 'banned_ingredients') and user.profile.banned_ingredients:
+            excluded_ingredients.extend(user.profile.banned_ingredients)
+    
+    # 기본 쿼리
+    recipes = Recipe.objects.prefetch_related(
+        Prefetch(
+            'recipe_ingredients',
+            queryset=RecipeIngredient.objects.select_related('ingredient')
+        )
+    ).filter(
+        recipe_ingredients__ingredient_id__in=ingredient_ids
+    ).distinct()
+    
+    # 알러지 식재료 제외
+    if excluded_ingredients:
+        recipes = recipes.exclude(
+            recipe_ingredients__ingredient_id__in=excluded_ingredients
+        )
+    
+    # 매칭 개수로 정렬 (보유 재료를 많이 사용하는 순)
+    recipes = recipes.annotate(
+        matching_count=Count('recipe_ingredients', filter=Q(
+            recipe_ingredients__ingredient_id__in=ingredient_ids
+        ))
+    ).order_by('-matching_count')
+    
+    return recipes[:50]  # 최대 50개
+
+
+def search_recipes_from_spoonacular(user_ingredients, max_results=10):
+    """
+    Spoonacular API에서 레시피 검색
+    """
+    try:
+        from .services.spoonacular import SpoonacularService
+        service = SpoonacularService()
+    except (ValueError, ImportError) as e:
+        # API 키가 없거나 서비스 로드 실패 시 빈 리스트 반환
+        print(f"Spoonacular 서비스 로드 실패: {e}")
+        return []
+    
+    # 식재료 이름을 영어로 변환
+    ingredient_names = []
+    
+    for ui in user_ingredients:
+        ing_name = ui.ingredient.name_ko
+        
+        # 한글 -> 영어 매핑
+        eng_name = None
+        for eng, kor in IngredientMapper.BASE_MAPPINGS.items():
+            if kor == ing_name:
+                eng_name = eng
+                break
+        
+        if eng_name:
+            ingredient_names.append(eng_name)
+        else:
+            # 매핑이 없으면 name_en 사용
+            if ui.ingredient.name_en:
+                ingredient_names.append(ui.ingredient.name_en)
+    
+    if not ingredient_names:
+        return []
+    
+    # API 호출
+    try:
+        search_results = service.search_recipes_by_ingredients(
+            ingredients=ingredient_names[:5],  # 최대 5개 재료
+            number=max_results
+        )
+    except Exception as e:
+        print(f"Spoonacular API 검색 실패: {e}")
+        return []
+    
+    # 결과에서 레시피 ID 추출
+    recipe_ids = [r['id'] for r in search_results]
+    
+    # 각 레시피를 DB에 저장하고 반환
+    recipes = []
+    for recipe_id in recipe_ids:
+        try:
+            recipe = service.save_recipe_to_db(recipe_id)
+            if recipe:
+                recipes.append(recipe)
+        except Exception as e:
+            print(f'레시피 {recipe_id} 저장 실패: {e}')
+            continue
+    
+    return recipes
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def search_recipes(request):
+    """
+    레시피 검색 (키워드)
+    
+    GET /api/recipes/api/search/?q=김치볶음밥
+    """
+    query = request.GET.get('q', '').strip()
+    
+    if not query:
+        return Response({
+            'message': '검색어를 입력해주세요',
+            'recipes': []
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # DB에서 검색 (title 필드 사용)
+    recipes = Recipe.objects.filter(
+        Q(title__icontains=query)  # ← name이 아닌 title
+    ).prefetch_related(
+        'recipe_ingredients__ingredient'
+    )[:20]
+    
+    serializer = RecipeListSerializer(recipes, many=True)
+    
+    return Response({
+        'message': '검색 완료',
+        'count': recipes.count(),
+        'recipes': serializer.data
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def recipe_list(request):
+    """레시피 목록 조회 API"""
+    recipes = Recipe.objects.all().prefetch_related(
+        'recipe_ingredients__ingredient'
+    )[:20]
+    
+    serializer = RecipeListSerializer(recipes, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def recipe_detail(request, recipe_id):
+    """레시피 상세 조회 API"""
+    recipe = get_object_or_404(
+        Recipe.objects.prefetch_related('recipe_ingredients__ingredient'),
+        recipe_id=recipe_id
+    )
+    
+    serializer = RecipeDetailSerializer(recipe)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_favorite(request, recipe_id):
+    """레시피 찜하기/취소 API"""
+    recipe = get_object_or_404(Recipe, recipe_id=recipe_id)
+    user = request.user
+    
+    # 찜 토글 로직 (추후 구현)
+    # FavoriteRecipe 모델 필요
+    
+    return Response({
+        'message': '찜하기 기능은 추후 구현 예정입니다'
+    })

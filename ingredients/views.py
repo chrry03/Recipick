@@ -4,7 +4,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from datetime import date, timedelta
+
 from .models import IngredientMaster, IngredientCategory, UserIngredient
 from .serializers import (
     IngredientSerializer,
@@ -15,7 +17,9 @@ from .serializers import (
     UserIngredientConsumeSerializer
 )
 
-# Create your views here.
+
+# ==================== API ViewSets ==================== #
+
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """식재료 마스터 데이터 조회 (읽기 전용)"""
     
@@ -48,7 +52,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     def search(self, request):
         """
         식재료 자동완성 검색
-        GET /ingredients/search?keyword=토마토
+        GET /api/ingredients/search/?keyword=토마토
         """
         keyword = request.query_params.get('keyword', '')
         if not keyword:
@@ -105,12 +109,14 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
 
         queryset = UserIngredient.objects.filter(user=user)
 
+        # is_consumed 필터
         is_consumed = self.request.query_params.get('is_consumed')
         if is_consumed is not None:
             queryset = queryset.filter(
                 is_consumed=is_consumed.lower() in ['true', '1']
             )
 
+        # 유통기한 만료 필터
         include_expired = self.request.query_params.get('include_expired', 'true')
         if include_expired.lower() in ['false', '0']:
             queryset = queryset.filter(
@@ -150,7 +156,7 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
     def expiring(self, request):
         """
         유통기한 임박 식재료 조회
-        GET /user-ingredients/expiring?days_threshold=5
+        GET /api/ingredients/user-ingredients/expiring/?days_threshold=5
         """
         days_threshold = int(request.query_params.get('days_threshold', 5))
         
@@ -167,7 +173,7 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
     def expired(self, request):
         """
         유통기한 지난 식재료 조회
-        GET /user-ingredients/expired
+        GET /api/ingredients/user-ingredients/expired/
         """
         ingredients = UserIngredient.get_expired_ingredients(user=request.user)
         serializer = UserIngredientSerializer(ingredients, many=True)
@@ -177,7 +183,7 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
     def consume(self, request, pk=None):
         """
         식재료 소비 처리
-        PATCH /user-ingredients/{id}/consume
+        PATCH /api/ingredients/user-ingredients/{id}/consume/
         Body: { "is_consumed": true }
         """
         ingredient = self.get_object()
@@ -190,14 +196,27 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
         return Response(response_serializer.data)
 
 
+# ==================== 템플릿 뷰 (HTML 페이지) ==================== #
+
+@login_required
 def my_fridge_view(request):
-    # 빈 리스트를 보내서 'Empty State' 화면 유지
-    ingredients = [] 
-    return render(request, 'ingredients/my_fridge.html', {'ingredients': ingredients})
+    """내 냉장고 (식재료 목록) 페이지"""
+    # 사용자의 식재료 조회
+    user_ingredients = request.user.ingredients.filter(
+        is_consumed=False
+    ).select_related('ingredient', 'ingredient__category')
+    
+    context = {
+        'ingredients': user_ingredients
+    }
+    return render(request, 'ingredients/my_fridge.html', context)
 
 
+@login_required
 def add_ingredient_view(request):
-    # 1. 요청하신 카테고리 전체 목록
+    """식재료 추가 페이지"""
+    
+    # 1. 카테고리 전체 목록
     categories = [
         "전체", "채소", "양념", "해산물", "조미료", 
         "곡물/면류", "제빵", "과일", "육류", "가공식품", 
@@ -212,7 +231,7 @@ def add_ingredient_view(request):
         {'name': '소고기', 'category': '육류', 'is_added': False, 'icon_name': 'beef.png'},
         {'name': '돼지고기', 'category': '육류', 'is_added': False, 'icon_name': 'pork.png'},
         {'name': '우유', 'category': '유제품/계란', 'is_added': False, 'icon_name': 'milk.png'},
-        {'name': '계란', 'category': '유제품/계란', 'is_added': True, 'icon_name': 'egg.png'}, # 이미 추가됨 예시
+        {'name': '계란', 'category': '유제품/계란', 'is_added': True, 'icon_name': 'egg.png'},
         
         # --- 아이콘 미보유 (기본 이미지) ---
         {'name': '브로콜리', 'category': '채소', 'is_added': False, 'icon_name': None},

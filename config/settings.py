@@ -11,49 +11,43 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os
 from datetime import timedelta
+import os
 from dotenv import load_dotenv
 
-# .env 파일 내용을 불러옵니다.
+# .env 파일 로드
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-v_eb4#s#zw_i1jk*d7&_kcp+(b8m)tv(x(fz98g5juxlb21r8p')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-change-this')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://127.0.0.1:8000',
-    'http://localhost:8000',
-]
-
 # Application definition
-
 INSTALLED_APPS = [
-    'users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist', # 민욱 추가
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'drf_yasg',  # API 문서 자동 생성
     'django_filters',
+    'drf_yasg',
+    
+    # Local apps
+    'users',
     'ingredients',
     'recipes',
     'logs',
@@ -90,26 +84,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# 기존 sqlite3 설정은 지우고 아래 내용으로 교체!
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # postgresql 엔진 사용
-        'NAME': os.getenv('DB_NAME', 'recipick_db'),# pgAdmin에서 만든 DB 이름
-        'USER': os.getenv('DB_USER', 'postgres'),   # 설치 시 기본 ID
-        'PASSWORD': os.getenv('DB_PASSWORD'),       # .env 파일에서 비밀번호 가져오기
-        'HOST': os.getenv('DB_HOST', 'localhost'),  # 내 컴퓨터
-        'PORT': os.getenv('DB_PORT', '5432'),       # 기본 포트
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'recipick_db'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
-
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -125,42 +112,26 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'ko'
-
+LANGUAGE_CODE = 'ko-kr'
 TIME_ZONE = 'Asia/Seoul'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-# 정적 파일 (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Media files (사용자 업로드)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 기본 django 모델 말고 직접 만든 유저 모델 사용
+# Custom User Model
 AUTH_USER_MODEL = 'users.User'
-
-# logs/models.py의 이미지 관련
-# 1. 브라우저에서 접근할 때 쓸 URL 주소 (예: http://localhost:8000/media/...)
-MEDIA_URL = '/media/'
-# 2. 실제로 파일이 저장될 컴퓨터 내의 경로 (프로젝트 폴더 내 'media' 폴더)
-import os
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Spoonacular API (환경변수로 관리)
-SPOONACULAR_API_KEY = os.getenv('SPOONACULAR_API_KEY', '')
 
 # ==================== REST Framework 설정 ==================== #
 REST_FRAMEWORK = {
@@ -177,7 +148,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-# JWT 설정 (SimpleJWT)
+# JWT 설정
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -186,22 +157,34 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'user_id',
 }
 
-# CORS 설정 (프론트엔드와 통신)
+# CORS 설정
 CORS_ALLOWED_ORIGINS = os.getenv(
     'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000,http://localhost:5173'
+    'http://localhost:3000,http://localhost:8000'
 ).split(',')
-
 CORS_ALLOW_CREDENTIALS = True
 
-# ==================== Spoonacular API 키 확인 ==================== #
-if not SPOONACULAR_API_KEY:
+# ==================== Spoonacular API 설정 ==================== #
+SPOONACULAR_API_KEY = os.getenv('SPOONACULAR_API_KEY', '')
+
+# API 키 검증
+if not SPOONACULAR_API_KEY and DEBUG:
     print("⚠️  WARNING: SPOONACULAR_API_KEY가 설정되지 않았습니다!")
     print("   .env 파일에 SPOONACULAR_API_KEY를 추가해주세요.")
-else:
-    print(f"✅ Spoonacular API Key 로드 완료: {SPOONACULAR_API_KEY[:10]}...")
 
-# ▼ 개발 단계에서 static 폴더 위치 지정 (이게 있어야 static 폴더 인식함)
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+# ==================== 캐시 설정 (파일 기반) ==================== #
+# Redis 없이 파일 기반 캐시 사용
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': BASE_DIR / 'cache',
+    }
+}
+
+# Redis 사용 시 아래 주석 해제하고 django-redis 패키지 설치
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#         'LOCATION': f"redis://{os.getenv('REDIS_HOST', '127.0.0.1')}:{os.getenv('REDIS_PORT', '6379')}/1",
+#     }
+# }
