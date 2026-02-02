@@ -1,1 +1,323 @@
-<!-- 취향 설정 (4단계 - JS로 단계 전환 or 별도 파일) -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* 전체 레이아웃 */
+    .pref-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 0 20px;
+        text-align: center;
+    }
+    .step-section { display: none; } /* 기본적으로 다 숨김 */
+    .step-section.active { display: block; } /* 활성화된 것만 보임 */
+
+    .step-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 40px;
+        color: #333;
+    }
+
+    /* === STEP 1: 알러지 선택 === */
+    .allergy-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 20px;
+        max-height: 500px; /* 세로로 길면 스크롤 */
+        overflow-y: auto;
+        padding: 10px;
+    }
+    .allergy-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+    }
+    .allergy-img-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #eee;
+        border: 3px solid transparent; /* 선택 시 테두리용 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        transition: all 0.2s;
+    }
+    .allergy-img-box img {
+        width: 100%; height: 100%; object-fit: cover;
+    }
+    .allergy-item.selected .allergy-img-box {
+        border-color: #ff6b6b; /* 선택 시 포인트 컬러 */
+        background-color: #ffecec;
+        transform: scale(1.05);
+    }
+    .allergy-name {
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    /* === STEP 2: 제외 재료 선택 === */
+    .exclude-layout {
+        display: flex;
+        gap: 20px;
+        height: 500px;
+        text-align: left;
+    }
+    /* 왼쪽: 카테고리 (혹은 전체 리스트 설명) */
+    .exclude-sidebar {
+        flex: 1;
+        border-right: 2px solid #ddd; /* 오른쪽에 선 긋기 */
+        padding-right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .category-item {
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 8px;
+    }
+    .category-item:hover { background-color: #f5f5f5; }
+    .category-item.active { background-color: #eee; font-weight: bold; }
+
+    /* 오른쪽: 흰색 박스 (스크롤 영역) */
+    .exclude-content-box {
+        flex: 2;
+        background-color: white;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .box-header {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 10px;
+    }
+    .btn-select-all {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .ingredient-list {
+        flex: 1;
+        overflow-y: auto; /* 내용 많으면 스크롤 */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .ing-check-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border-bottom: 1px solid #f9f9f9;
+        cursor: pointer;
+    }
+    .ing-check-item:hover { background-color: #fcfcfc; }
+    .ing-check-item input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
+
+    /* === STEP 3: 난이도 설정 === */
+    .level-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+        margin-top: 50px;
+    }
+    .btn-level {
+        width: 300px;
+        padding: 20px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        border-radius: 15px;
+        border: 2px solid #ddd;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    /* 버튼별 스타일 */
+    .btn-level.beginner { border-color: #888; color: #555; } /* 무명 */
+    .btn-level.intermediate { border-color: #333; background-color: #333; color: #fff; } /* 흑 */
+    .btn-level.expert { border-color: #eee; background-color: #fff; color: #333; box-shadow: 0 5px 15px rgba(0,0,0,0.1); } /* 백 */
+
+    .btn-level:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+    /* 하단 공통 버튼 */
+    .bottom-action { margin-top: 40px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pref-container">
+
+    <div id="step-1" class="step-section active">
+        <h2 class="step-title">알러지 선택</h2>
+        <div class="allergy-grid" id="allergy-list">
+            </div>
+        <div class="bottom-action">
+            <button class="btn-mw btn-primary-mw" onclick="goToStep(2)">선택 완료</button>
+        </div>
+    </div>
+
+    <div id="step-2" class="step-section">
+        <h2 class="step-title">제외할 식재료</h2>
+        <div class="exclude-layout">
+            <div class="exclude-sidebar">
+                <div class="category-item active">육류</div>
+                <div class="category-item">해산물</div>
+                <div class="category-item">채소류</div>
+                <div class="category-item">유제품</div>
+                <div class="category-item">기타</div>
+            </div>
+
+            <div class="exclude-content-box">
+                <div class="box-header">
+                    <button type="button" class="btn-select-all" onclick="toggleSelectAll()">전체 선택</button>
+                </div>
+                <div class="ingredient-list" id="ingredient-list">
+                    </div>
+            </div>
+        </div>
+        <div class="bottom-action">
+            <button class="btn-mw btn-primary-mw" onclick="goToStep(3)">선택 완료</button>
+        </div>
+    </div>
+
+    <div id="step-3" class="step-section">
+        <h2 class="step-title">레시피 난이도 설정</h2>
+        <div class="level-container">
+            <button class="btn-level beginner" onclick="finishPreference('BEGINNER')">무명요리사 (초급)</button>
+            <button class="btn-level intermediate" onclick="finishPreference('INTERMEDIATE')">흑요리사 (중급)</button>
+            <button class="btn-level expert" onclick="finishPreference('EXPERT')">백요리사 (고급)</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // === 데이터 설정 ===
+    // 1. 알러지 19종 (임시 데이터)
+    const allergies = [
+        "난류", "우유", "메밀", "땅콩", "대두", "밀", "고등어", "게", "새우", "돼지고기", 
+        "복숭아", "토마토", "아황산류", "호두", "닭고기", "쇠고기", "오징어", "조개류", "잣"
+    ];
+
+    // 2. 식재료 (임시 데이터)
+    const ingredients = [
+        "오이", "당근", "양파", "파프리카", "버섯", "가지", "고수", 
+        "브로콜리", "시금치", "피망", "콩", "호박", "무", "배추", "깻잎"
+    ];
+
+    const selectedAllergies = new Set();
+    const bannedIngredients = new Set();
+
+    // === 초기화 ===
+    document.addEventListener('DOMContentLoaded', () => {
+        renderAllergies();
+        renderIngredients();
+    });
+
+    // === 렌더링 함수: 알러지 ===
+    function renderAllergies() {
+        const container = document.getElementById('allergy-list');
+        container.innerHTML = allergies.map(name => `
+            <div class="allergy-item" onclick="toggleAllergy(this, '${name}')">
+                <div class="allergy-img-box">
+                    <img src="https://via.placeholder.com/80?text=${name}" alt="${name}">
+                </div>
+                <div class="allergy-name">${name}</div>
+            </div>
+        `).join('');
+    }
+
+    function toggleAllergy(el, name) {
+        el.classList.toggle('selected');
+        if (selectedAllergies.has(name)) selectedAllergies.delete(name);
+        else selectedAllergies.add(name);
+    }
+
+    // === 렌더링 함수: 제외 재료 ===
+    function renderIngredients() {
+        const container = document.getElementById('ingredient-list');
+        container.innerHTML = ingredients.map((ing, idx) => `
+            <label class="ing-check-item">
+                <input type="checkbox" value="${ing}" class="ing-checkbox" onchange="updateBanned(this)">
+                <span>${ing}</span>
+            </label>
+        `).join('');
+    }
+
+    function updateBanned(checkbox) {
+        if (checkbox.checked) bannedIngredients.add(checkbox.value);
+        else bannedIngredients.delete(checkbox.value);
+    }
+
+    function toggleSelectAll() {
+        const checkboxes = document.querySelectorAll('.ing-checkbox');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked;
+            updateBanned(cb);
+        });
+    }
+
+    // === 단계 이동 ===
+    function goToStep(stepNum) {
+        document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
+        document.getElementById(`step-${stepNum}`).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    // === 최종 저장 및 이동 ===
+    async function finishPreference(level) {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            alert("로그인이 필요합니다.");
+            window.location.href = "{% url 'users:login' %}";
+            return;
+        }
+
+        try {
+            // 서버로 데이터 전송 (현재 UserProfile 모델에 저장)
+            const response = await fetch('/api/users/me/', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    profile: {
+                        cooking_level: level,
+                        allergies: Array.from(selectedAllergies),
+                        banned_ingredients: Array.from(bannedIngredients)
+                    }
+                })
+            });
+
+            if (response.ok) {
+                alert("취향 설정이 완료되었습니다!");
+                window.location.href = "{% url 'users:main' %}";
+            } else {
+                alert("설정 저장 실패");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("서버 통신 오류");
+        }
+    }
+</script>
+{% endblock %}

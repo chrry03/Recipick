@@ -75,7 +75,7 @@ def login_view(request):
                 return JsonResponse({
                     'message': '로그인 성공',
                     'user': {
-                        'id': user.id,
+                        'id': user.user_id,
                         'nickname': user.nickname
                     },
                     'token': {
@@ -130,6 +130,9 @@ def check_nickname_view(request):
 
 def nickname_view(request): return render(request, 'users/nickname.html')
 def mypage_view(request): return render(request, 'users/mypage.html')
+def preference_view(request):
+    """취향 설정(알러지/기피재료/요리실력) 페이지 렌더링"""
+    return render(request, 'users/preference_steps.html')
 
 def notification(request):
     """알림 페이지 뷰"""
