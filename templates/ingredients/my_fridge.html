@@ -7,49 +7,55 @@
 
 {% block main_content %}
 <style>
-    /* 빈 화면 스타일 */
+    /* ... (기존 스타일 생략, 그대로 유지) ... */
+    .search-wrapper { position: relative; width: 100%; height: 45px; margin-top: 10px; margin-bottom: 25px; flex-shrink: 0; }
+    .search-input { width: 100%; height: 100%; background: transparent; border: 1.5px solid #555555; border-radius: 25px; padding: 0 45px 0 20px; box-sizing: border-box; font-family: 'Gowun Dodum', sans-serif; font-size: 14px; color: #333333; }
+    .search-icon-img { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 19px; height: 19px; pointer-events: none; opacity: 0.7; }
     .promo-card { background: #FFFFFF; border-radius: 18px; padding: 25px; display: flex; flex-direction: column; margin-bottom: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
     .card-title { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
     .register-icon { width: 20px; height: auto; }
     .card-title-text { font-family: 'Nanum Gothic', sans-serif; font-weight: 800; font-size: 18px; color: #1A1A1A; }
     .card-desc { font-size: 14px; line-height: 1.5; color: #666; margin-bottom: 25px; }
     .btn-orange { width: 100%; height: 50px; background: #E76F51; border-radius: 25px; border: none; display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer; text-decoration: none; color: white; font-weight: 600; box-shadow: 0 3px 8px rgba(231, 111, 81, 0.2); }
-    
     .empty-area { display: flex; flex-direction: column; align-items: center; padding-top: 5vh; }
     .empty-img { width: 130px; margin-bottom: 18px; opacity: 0.95; }
     .empty-text { font-size: 13px; line-height: 1.6; text-align: center; color: #999; }
-
-    /* 채워진 냉장고 (카드형) 스타일 */
     .my-fridge-card { background: #FFF; border-radius: 24px; padding: 25px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); min-height: 500px; position: relative; margin-top: 10px; }
-    
     .filter-bar { display: flex; gap: 8px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
     .filter-bar::-webkit-scrollbar { display: none; }
-    .filter-chip { padding: 6px 14px; background: #EEE; border-radius: 20px; font-size: 13px; color: #777; white-space: nowrap; cursor: pointer; }
+    
+    /* 필터 칩 스타일 */
+    .filter-chip { padding: 6px 14px; background: #EEE; border-radius: 20px; font-size: 13px; color: #777; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
     .filter-chip.active { background: #E76F51; color: white; }
-
+    
     .shelf-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
-    .fridge-item { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; }
-    
+    .fridge-item { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; cursor: pointer; }
     .item-icon-box { position: relative; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; background: #F9F9F9; border-radius: 50%; }
+    .default-icon { width: 100%; height: 100%; background: #F5F5F5; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
     .item-img { width: 80%; height: 80%; object-fit: contain; }
-    
     .d-day-badge { position: absolute; top: -5px; left: 50%; transform: translateX(-50%); background: #FFF; border: 1px solid #ddd; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 800; color: #333; white-space: nowrap; z-index: 2; }
     .urgent .d-day-badge { color: #E76F51; border-color: #E76F51; }
-
     .item-name { font-size: 14px; color: #333; font-weight: 500; }
-    
-    /* 선반 라인 효과 */
     .shelf-deco { width: 100%; height: 2px; background: #F0F0F0; margin-top: 10px; border-radius: 1px; }
-
-    /* 플로팅 추가 버튼 (+) */
-    .fab-add { position: fixed; bottom: 100px; /* 네비게이션 위 */ right: max(20px, calc(50% - 224px + 20px)); /* 448px 중앙 정렬 기준 우측 */ width: 60px; height: 60px; background: #E76F51; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(231, 111, 81, 0.4); z-index: 100; transition: transform 0.2s; }
+    .fab-add { position: fixed; bottom: 100px; right: max(20px, calc(50% - 224px + 20px)); width: 60px; height: 60px; background: #E76F51; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(231, 111, 81, 0.4); z-index: 100; transition: transform 0.2s; }
     .fab-add:active { transform: scale(0.95); }
     .fab-icon { width: 30px; height: 30px; fill: none; stroke: white; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    
+    /* 모달 스타일 */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .date-modal { background: white; width: 80%; max-width: 320px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .modal-title { font-size: 18px; font-weight: 800; color: #333; margin-bottom: 20px; }
+    .date-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; margin-bottom: 20px; box-sizing: border-box; font-family: inherit; }
+    .modal-btn-group { display: flex; gap: 10px; }
+    .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 14px; }
+    .btn-cancel { background: #f0f0f0; color: #666; }
+    .btn-confirm { background: #E76F51; color: white; }
 </style>
 
-<div class="search-wrapper" style="margin-bottom: 20px;">
-    <input type="text" class="search-input" placeholder="식재료 검색">
-    <img src="{% static 'images/search.png' %}" class="search-icon-img" style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 19px; opacity: 0.7;">
+<div class="search-wrapper">
+    <input type="text" id="searchInput" class="search-input" placeholder="식재료 검색" onkeyup="filterSearch()">
+    <img src="{% static 'images/search.png' %}" class="search-icon-img">
 </div>
 
 {% if not ingredients %}
@@ -67,22 +73,33 @@
     </div>
 {% else %}
     <div class="filter-bar">
-        <div class="filter-chip active">전체({{ ingredients|length }})</div>
-        <div class="filter-chip">채소류</div>
-        <div class="filter-chip">어패류</div>
-        <div class="filter-chip">양념</div>
+        {% for cat in categories %}
+            <div class="filter-chip {% if forloop.first %}active{% endif %}" 
+                 onclick="filterCategory(this, '{{ cat.name }}')">
+                {{ cat.name }}({{ cat.count }})
+            </div>
+        {% endfor %}
     </div>
 
     <div class="my-fridge-card">
         <div class="shelf-row">
             {% for ui in ingredients %}
-            <div class="fridge-item">
+            <div class="fridge-item" 
+                 onclick="openEditModal(this)"
+                 data-name="{{ ui.ingredient.name_ko }}"
+                 data-category="{{ ui.ingredient.category.name }}" 
+                 data-expiry="{{ ui.expire_at|date:'Y-m-d' }}">
+                
                 <div class="item-icon-box {% if ui.days_left <= 3 %}urgent{% endif %}">
                     <div class="d-day-badge">D-{{ ui.days_left|default:"Day" }}</div>
-                    <img src="{% static 'images/ingredients/'|add:ui.ingredient.icon_name %}" class="item-img">
+                    {% if ui.ingredient.icon_name %}
+                        <img src="{% static 'images/ingredients/'|add:ui.ingredient.icon_name %}" class="item-img">
+                    {% else %}
+                        <div class="default-icon"></div>
+                    {% endif %}
                 </div>
                 <div class="shelf-deco"></div>
-                <span class="item-name">{{ ui.ingredient.name }}</span>
+                <span class="item-name">{{ ui.ingredient.name_ko }}</span>
             </div>
             {% endfor %}
         </div>
@@ -92,5 +109,100 @@
         <svg class="fab-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     </a>
 {% endif %}
+
+<div class="modal-overlay" id="editModal">
+    <div class="date-modal">
+        <div class="modal-title"><span id="modalIngredientName"></span>의<br>소비기한을 수정할까요?</div>
+        <input type="date" id="expiryInput" class="date-input">
+        <div class="modal-btn-group">
+            <button class="modal-btn btn-cancel" onclick="closeModal()">취소</button>
+            <button class="modal-btn btn-confirm" onclick="updateIngredient()">수정 완료</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // [NEW] 카테고리 필터링 함수
+    function filterCategory(pill, categoryName) {
+        // 1. 칩 스타일 변경
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        pill.classList.add('active');
+
+        // 2. 아이템 숨기기/보이기
+        const items = document.querySelectorAll('.fridge-item');
+        items.forEach(item => {
+            const itemCat = item.dataset.category;
+            // 전체이면 다 보여주고, 아니면 카테고리 일치하는 것만
+            if (categoryName === '전체' || itemCat === categoryName) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    // [NEW] 검색 필터링 (이름 기준)
+    function filterSearch() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const items = document.querySelectorAll('.fridge-item');
+        
+        items.forEach(item => {
+            const name = item.dataset.name;
+            // 검색어가 포함되어 있으면 보임 (현재 선택된 카테고리 무시하고 검색 우선)
+            if (name.includes(input)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    // 기존 모달 로직
+    let currentEditItem = null;
+
+    function openEditModal(element) {
+        currentEditItem = {
+            name: element.dataset.name,
+            category: element.dataset.category
+        };
+        document.getElementById('modalIngredientName').innerText = element.dataset.name;
+        document.getElementById('expiryInput').value = element.dataset.expiry;
+        document.getElementById('editModal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').classList.remove('open');
+        currentEditItem = null;
+    }
+
+    function updateIngredient() {
+        if (!currentEditItem) return;
+        const newExpiry = document.getElementById('expiryInput').value;
+        if (!newExpiry) { alert("날짜를 선택해주세요"); return; }
+
+        const payload = [{
+            name: currentEditItem.name,
+            category: currentEditItem.category,
+            expiry_date: newExpiry
+        }];
+
+        fetch("{% url 'ingredients:add_ingredient' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ ingredients: payload })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert("수정 실패");
+            }
+        });
+    }
+</script>
 
 {% endblock main_content %}
