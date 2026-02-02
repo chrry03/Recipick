@@ -505,6 +505,11 @@
     transform: scale(0.95);
 }
 
+/* 일지 상세 페이지에서 공유 버튼 위치 조정 */
+.log-detail-container .floating-btn {
+    bottom: 2rem;
+}
+
 /* 반응형 */
 @media (min-width: 448px) {
     .floating-btn {
@@ -520,6 +525,11 @@
     .floating-btn {
         right: 1rem;
         bottom: 6.5rem;
+    }
+    
+    /* 일지 상세 페이지에서 공유 버튼 위치 조정 */
+    .log-detail-container .floating-btn {
+        bottom: 2rem;
     }
 }
 
@@ -609,6 +619,45 @@
 
 .detail-header .more-btn:hover {
     opacity: 0.7;
+}
+
+/* 옵션 메뉴 (알림 페이지와 동일한 스타일) */
+.detail-header .options-menu {
+    position: absolute;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    min-width: 120px;
+    overflow: hidden;
+}
+
+.detail-header .option-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.2s;
+    font-family: 'Gowun Dodum', sans-serif;
+}
+
+.detail-header .option-item:hover {
+    background-color: #f5f5f5;
+}
+
+.detail-header .option-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.detail-header .option-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.detail-header .option-item:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .detail-content {

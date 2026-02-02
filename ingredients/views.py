@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
+from django.shortcuts import render
 from datetime import date, timedelta
 from .models import IngredientMaster, IngredientCategory, UserIngredient
 from .serializers import (
@@ -187,19 +188,13 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
         # 응답은 상세 정보로
         response_serializer = UserIngredientSerializer(ingredient)
         return Response(response_serializer.data)
-    
-from django.shortcuts import render
+
 
 def my_fridge_view(request):
     # 빈 리스트를 보내서 'Empty State' 화면 유지
     ingredients = [] 
     return render(request, 'ingredients/my_fridge.html', {'ingredients': ingredients})
 
-from django.shortcuts import render
-
-def my_fridge_view(request):
-    ingredients = [] 
-    return render(request, 'ingredients/my_fridge.html', {'ingredients': ingredients})
 
 def add_ingredient_view(request):
     # 1. 요청하신 카테고리 전체 목록
@@ -208,7 +203,7 @@ def add_ingredient_view(request):
         "곡물/면류", "제빵", "과일", "육류", "가공식품", 
         "음료", "건조", "유제품/계란", "절임", "기타"
     ]
-
+    
     # 2. 식재료 마스터 데이터 (아이콘 매칭)
     # 아이콘이 있는 것은 파일명을 적고, 없는 것은 None으로 두어 기본 접시가 뜨게 함
     master_ingredients = [

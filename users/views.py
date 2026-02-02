@@ -163,7 +163,7 @@ def main(request):
             'name': '간장 계란 밥',
             'difficulty': 1,
             'cookingTime': '10분',
-            'image': 'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400'
+            'image': '/static/images/ex/gangaebab.png'
         },
         {
             'id': 2,
@@ -177,7 +177,7 @@ def main(request):
             'name': '로제 파스타',
             'difficulty': 3,
             'cookingTime': '25분',
-            'image': 'https://images.unsplash.com/photo-1676300184847-4ee4030409c0?w=400'
+            'image': '/static/images/ex/pasta.png'
         },
     ]
     
@@ -186,13 +186,13 @@ def main(request):
         {
             'id': 1,
             'name': '김치말이국수',
-            'image': 'https://images.unsplash.com/photo-1626803774007-f92c2c32cbe7?w=400',
+            'image': '/static/images/ex/gimmalguk.png',
             'isFavorite': True
         },
         {
             'id': 2,
             'name': '로제 파스타',
-            'image': 'https://images.unsplash.com/photo-1676300184847-4ee4030409c0?w=400',
+            'image': '/static/images/ex/pasta.png',
             'isFavorite': True
         },
     ]
@@ -203,19 +203,19 @@ def main(request):
             'id': 1,
             'name': '당근',
             'daysLeft': 1,
-            'image': 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=200'
+            'image': '/static/images/ex/ingre1.png'
         },
         {
             'id': 2,
             'name': '돼지고기',
             'daysLeft': 10,
-            'image': 'https://images.unsplash.com/photo-1602470520998-f4a52199a3d6?w=200'
+            'image': '/static/images/ex/ingre2.png'
         },
         {
             'id': 3,
             'name': '버섯',
             'daysLeft': 11,
-            'image': 'https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?w=200'
+            'image': '/static/images/ex/ingre3.png'
         },
     ]
     
@@ -225,13 +225,13 @@ def main(request):
             'id': 1,
             'title': '로제 파스타',
             'date': '26.01.11',
-            'image': 'https://images.unsplash.com/photo-1676300184847-4ee4030409c0?w=400'
+            'image': '/static/images/ex/pasta.png'
         },
         {
             'id': 2,
             'title': '새송이 덮밥',
             'date': '26.01.11',
-            'image': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400'
+            'image': '/static/images/ex/mushroom,.png'
         },
         {
             'id': 3,

@@ -14,7 +14,7 @@
     
     <!-- Header with Back Button, Date/Time, and More Button -->
     <header class="detail-header">
-        <button class="back-btn" onclick="window.history.back()" aria-label="뒤로가기">
+        <button class="back-btn" onclick="window.location.href='{% url 'logs:list' %}'" aria-label="뒤로가기">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M15 18L9 12L15 6" stroke="#555555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -92,24 +92,9 @@
     <button class="floating-btn" id="instagramShareBtn" aria-label="인스타그램 공유">
         <img src="{% static 'images/insta_share_btn.png' %}" alt="인스타그램 공유" width="56" height="56">
     </button>
-
-    <!-- Bottom Navigation -->
-    {% include 'base_with_navbar.html' %}
 </div>
 {% endblock %}
 
 {% block extra_script %}
 <script src="{% static 'js/logs.js' %}"></script>
-<script>
-    // Log detail specific JavaScript
-    document.addEventListener('DOMContentLoaded', function() {
-        const moreBtn = document.getElementById('moreBtn');
-        if (moreBtn) {
-            moreBtn.addEventListener('click', function() {
-                // 더보기 메뉴 기능 구현
-                console.log('더보기 버튼 클릭');
-            });
-        }
-    });
-</script>
 {% endblock %}

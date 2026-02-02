@@ -228,6 +228,15 @@
         recipeItems.forEach((item) => {
             item.addEventListener('click', () => {
                 const logId = item.dataset.logId;
+                const recipeTitle = item.querySelector('.recipe-title');
+                const recipeName = recipeTitle ? recipeTitle.textContent.trim() : '';
+                
+                // 임시: 로제파스타 클릭 시 logs/1/로 이동
+                if (recipeName === '로제파스타' || recipeName === '로제 파스타') {
+                    window.location.href = '/logs/1/';
+                    return;
+                }
+                
                 if (logId) {
                     // TODO: 상세 페이지로 이동
                     console.log('일지 상세 페이지로 이동:', logId);
@@ -246,11 +255,112 @@
      */
     function initLogDetail() {
         const instagramShareBtn = document.getElementById('instagramShareBtn');
+        const moreBtn = document.getElementById('moreBtn');
         
         if (instagramShareBtn) {
             instagramShareBtn.addEventListener('click', handleInstagramShare);
         }
+        
+        // 더보기 버튼 이벤트 (중복 등록 방지)
+        if (moreBtn && !moreBtn.hasAttribute('data-listener-attached')) {
+            moreBtn.setAttribute('data-listener-attached', 'true');
+            moreBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                showLogOptionsMenu(e, this);
+            });
+        }
     }
+    
+    /**
+     * 일지 상세 페이지 옵션 메뉴 표시 함수
+     */
+    function showLogOptionsMenu(event, buttonElement) {
+        // 기존 메뉴가 있으면 제거
+        const existingMenu = document.querySelector('.detail-header .options-menu');
+        if (existingMenu) {
+            existingMenu.remove();
+            return;
+        }
+
+        // 버튼이 속한 헤더 컨테이너 찾기
+        const detailHeader = buttonElement.closest('.detail-header');
+        if (!detailHeader) return;
+
+        // URL에서 일지 ID 추출
+        const path = window.location.pathname;
+        const match = path.match(/\/logs\/(\d+)\//);
+        const logId = match ? match[1] : null;
+
+        // 새 메뉴 생성
+        const menu = document.createElement('div');
+        menu.className = 'options-menu';
+        if (logId) {
+            menu.setAttribute('data-log-id', logId);
+        }
+        menu.innerHTML = `
+            <div class="option-item" onclick="editLog(${logId || 'null'})">수정하기</div>
+            <div class="option-item" onclick="deleteLog(${logId || 'null'})">삭제하기</div>
+        `;
+
+        // 메뉴를 헤더 내부에 추가 (relative positioning을 위해)
+        detailHeader.appendChild(menu);
+
+        // 위치 계산 (버튼 바로 아래)
+        const buttonRect = buttonElement.getBoundingClientRect();
+        const headerRect = detailHeader.getBoundingClientRect();
+        
+        // 버튼의 오른쪽 끝에서 메뉴의 오른쪽 끝까지의 거리
+        const rightOffset = headerRect.right - buttonRect.right;
+
+        // 스타일 추가
+        menu.style.position = 'absolute';
+        menu.style.right = rightOffset + 'px';
+        menu.style.top = '100%';
+        menu.style.marginTop = '5px';
+
+        // 외부 클릭시 메뉴 닫기
+        setTimeout(() => {
+            document.addEventListener('click', window.closeLogMenu);
+        }, 0);
+    }
+    
+    /**
+     * 일지 수정 함수 (전역 함수로 노출)
+     */
+    window.editLog = function(logId) {
+        if (!logId || logId === 'null') {
+            console.log('일지 ID를 찾을 수 없습니다.');
+            return;
+        }
+        window.closeLogMenu();
+        // TODO: 일지 수정 페이지로 이동
+        console.log('일지 수정:', logId);
+        // window.location.href = `/logs/${logId}/edit/`;
+    };
+    
+    /**
+     * 일지 삭제 함수 (전역 함수로 노출)
+     */
+    window.deleteLog = function(logId) {
+        if (!logId || logId === 'null') {
+            console.log('일지 ID를 찾을 수 없습니다.');
+            return;
+        }
+        if (confirm('정말 이 일지를 삭제하시겠습니까?')) {
+            window.closeLogMenu();
+            // TODO: 일지 삭제 API 호출
+            console.log('일지 삭제:', logId);
+            // fetch(`/logs/${logId}/delete/`, {
+            //     method: 'DELETE',
+            //     headers: {
+            //         'X-CSRFToken': getCookie('csrftoken')
+            //     }
+            // }).then(() => {
+            //     window.location.href = '/logs/';
+            // });
+        }
+    };
 
     /**
      * 인스타그램 공유 처리
@@ -344,8 +454,10 @@ document.querySelector('.notification-btn')?.addEventListener('click', function(
     window.location.href = '/notifications/';
 });
 
-// 더보기 버튼 클릭 (수정/삭제 메뉴)
-document.querySelector('.more-btn')?.addEventListener('click', function() {
+// 더보기 버튼 클릭 (수정/삭제 메뉴) - 일지 상세 페이지가 아닐 때만 실행
+const moreBtnGlobal = document.querySelector('.more-btn');
+if (moreBtnGlobal && !moreBtnGlobal.closest('.detail-header')) {
+    moreBtnGlobal.addEventListener('click', function() {
     const menu = document.createElement('div');
     menu.className = 'context-menu';
     menu.innerHTML = `
@@ -423,7 +535,8 @@ document.querySelector('.more-btn')?.addEventListener('click', function() {
     
     // 오버레이 클릭시 메뉴 닫기
     menu.querySelector('.menu-overlay').addEventListener('click', closeMenu);
-});
+    });
+}
 
 // 메뉴 닫기
 function closeMenu() {
