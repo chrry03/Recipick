@@ -78,6 +78,7 @@
                 const signupData = await signupRes.json();
                 if (signupRes.status === 201) {
                     alert('회원가입이 완료되었습니다!');
+                    localStorage.setItem('user_nickname', nickname);
                     localStorage.removeItem('temp_email');
                     localStorage.removeItem('temp_pw');
                     if (signupData.token) {
@@ -104,6 +105,7 @@
                     });
                     if (updateRes.ok) {
                         alert('닉네임 설정이 완료되었습니다.');
+                        localStorage.setItem('user_nickname', nickname);
                         window.location.href = nextUrl;
                     } else {
                         alert('닉네임 변경 실패');

@@ -28,17 +28,17 @@
     </a>
 
     <div class="social-container-mw">
-        <button type="button" class="btn-mw btn-social-mw google-mw" onclick="alert('구글 로그인')">
+        <button type="button" class="btn-mw btn-social-mw google-mw">
             <img src="{% static 'images/icon_google.png' %}" class="social-icon" alt="G">
             구글로 로그인
         </button>
         
-        <button type="button" class="btn-mw btn-social-mw naver-mw" onclick="alert('네이버 로그인')">
+        <button type="button" class="btn-mw btn-social-mw naver-mw">
             <img src="{% static 'images/icon_naver.png' %}" class="social-icon" alt="N">
             네이버로 로그인
         </button>
         
-        <button type="button" class="btn-mw btn-social-mw kakao-mw" onclick="alert('카카오 로그인')">
+        <button type="button" class="btn-mw btn-social-mw kakao-mw">
             <img src="{% static 'images/icon_kakao.png' %}" class="social-icon" alt="K">
             카카오로 로그인
         </button>
@@ -50,12 +50,61 @@
 </div>
 
 <script>
+    // 1. 쿠키에서 CSRF 토큰을 가져오는 함수 (장고 공식 가이드 방식)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
     document.getElementById('login-form').addEventListener('submit', async function(e) {
-        e.preventDefault(); 
-        // ... (기존 로그인 로직 유지) ...
+        e.preventDefault();
+
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-        // (API 연동 로직은 그대로 두시면 됩니다)
+        
+        // 2. 쿠키에서 csrftoken 값을 가져옴
+        const csrftoken = getCookie('csrftoken');
+
+        try {
+            const response = await fetch('/api/users/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // 3. 올바른 토큰값을 헤더에 실어 보냄
+                    'X-CSRFToken': csrftoken
+                },
+                mode: 'same-origin', // 보안을 위해 추가
+                body: JSON.stringify({
+                    login_type: 'email',
+                    email: email,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('access_token', data.token.access);
+                localStorage.setItem('refresh_token', data.token.refresh);
+                localStorage.setItem('user_nickname', data.user.nickname);
+                window.location.href = "{% url 'users:main' %}";
+            } else {
+                alert(data.message || '로그인 실패');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('서버 통신 중 오류가 발생했습니다.');
+        }
     });
 </script>
 {% endblock %}
