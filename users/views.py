@@ -1,6 +1,5 @@
 # users/views.py
 from django.shortcuts import render
-<<<<<<< HEAD
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -131,11 +130,6 @@ def check_nickname_view(request):
 
 def nickname_view(request): return render(request, 'users/nickname.html')
 def mypage_view(request): return render(request, 'users/mypage.html')
-def main_view(request): return render(request, 'main.html')
-=======
-import json
-
-# Create your views here.
 
 def notification(request):
     """알림 페이지 뷰"""
@@ -256,4 +250,3 @@ def main(request):
         'diary_entries': json.dumps(diary_entries, ensure_ascii=False),
     }
     return render(request, 'main.html', context)
->>>>>>> b6536717c1069e5c01f2aba1d52b7dfb53660fdd
