@@ -60,32 +60,51 @@
 </div>
 
 <script>
-    // 기존 스크립트 유지
-    document.addEventListener('DOMContentLoaded', function() {
-        const token = localStorage.getItem('access_token');
-        const nickname = localStorage.getItem('user_nickname');
-        const loggedInView = document.getElementById('logged-in-view');
-        const loggedOutView = document.getElementById('logged-out-view');
-        const nicknameDisplay = document.getElementById('display-nickname');
+    document.addEventListener('DOMContentLoaded', async function() {
+    const token = localStorage.getItem('access_token');
+    const nicknameDisplay = document.getElementById('display-nickname');
+    const loggedInView = document.getElementById('logged-in-view');
+    const loggedOutView = document.getElementById('logged-out-view');
 
-        if (token) {
-            loggedInView.style.display = 'flex';
-            if(nicknameDisplay) nicknameDisplay.textContent = nickname || '사용자';
-        } else {
-            loggedOutView.style.display = 'flex';
-        }
+    if (!token) {
+        loggedOutView.style.display = 'flex';
+        return;
+    }
 
-        const logoutBtn = document.getElementById('btn-logout');
-        if(logoutBtn){
-            logoutBtn.addEventListener('click', function(){
-                if(confirm('로그아웃 하시겠습니까?')){
-                    localStorage.removeItem('access_token');
-                    localStorage.removeItem('refresh_token');
-                    localStorage.removeItem('user_nickname');
-                    window.location.reload();
-                }
-            });
+    // 우선 로컬에 저장된 닉네임을 보여줌 (빠른 응답성)
+    nicknameDisplay.textContent = localStorage.getItem('user_nickname') || '사용자';
+    loggedInView.style.display = 'flex';
+
+    // 서버에서 최신 프로필 정보를 가져와 동기화
+    try {
+        const response = await fetch('/api/users/me/', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            const userData = await response.json();
+            // 서버의 최신 닉네임으로 화면과 로컬 스토리지 갱신
+            nicknameDisplay.textContent = userData.nickname;
+            localStorage.setItem('user_nickname', userData.nickname);
         }
-    });
+    } catch (error) {
+        console.error('최신 정보를 불러오는 중 오류 발생:', error);
+    }
+
+const logoutBtn = document.getElementById('btn-logout');
+if(logoutBtn){
+    logoutBtn.addEventListener('click', function(){
+        if(confirm('로그아웃 하시겠습니까?')){
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user_nickname');
+            window.location.reload();
+            }
+        });
+    }
+});
 </script>
 {% endblock %}
