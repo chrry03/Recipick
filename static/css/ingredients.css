@@ -1,12 +1,14 @@
 /* static/css/ingredients.css */
 
-/* --- 검색창 --- */
+/* =========================================
+   1. 공통 요소 (검색창, 기본 버튼 등)
+   ========================================= */
 .search-wrapper {
     position: relative;
     width: 100%;
     height: 45px;
-    margin-top: 10px; 
-    margin-bottom: 25px; 
+    margin-top: 10px;
+    margin-bottom: 20px;
     flex-shrink: 0;
 }
 
@@ -36,7 +38,31 @@
     opacity: 0.7;
 }
 
-/* --- 식재료 등록 카드 --- */
+.btn-orange {
+    width: 100%;
+    height: 50px;
+    background: #E76F51; 
+    border-radius: 25px;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 3px 8px rgba(231, 111, 81, 0.2);
+}
+
+.btn-orange span {
+    font-family: 'Nanum Gothic', sans-serif;
+    font-size: 16px;
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+/* =========================================
+   2. 내 냉장고 (my_fridge.html) - 빈 상태
+   ========================================= */
 .promo-card {
     background: #FFFFFF;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.05);
@@ -78,36 +104,13 @@
     margin-bottom: 25px;
 }
 
-.btn-orange {
-    width: 100%;
-    height: 50px;
-    background: #E76F51; 
-    border-radius: 25px;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    text-decoration: none;
-    box-shadow: 0 3px 8px rgba(231, 111, 81, 0.2);
-}
-
-.btn-orange span {
-    font-family: 'Nanum Gothic', sans-serif;
-    font-size: 16px;
-    color: #FFFFFF;
-    font-weight: 600;
-}
-
-/* --- Empty State --- */
 .empty-area {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start; 
     flex-grow: 1;
-    padding-top: 8vh;
+    padding-top: 5vh;
     padding-bottom: 20px;
 }
 
@@ -124,4 +127,328 @@
     line-height: 1.6;
     text-align: center;
     color: #999999;
+}
+
+/* =========================================
+   3. 내 냉장고 (my_fridge.html) - 채워진 상태
+   ========================================= */
+.filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+    padding: 6px 14px;
+    background: #EEE;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #777;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-chip.active {
+    background: #E76F51;
+    color: white;
+}
+
+.my-fridge-card {
+    background: #FFF;
+    border-radius: 24px;
+    padding: 25px 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    min-height: 500px;
+    position: relative;
+    /* margin-bottom: 80px; */ /* 필요 시 추가 */
+}
+
+.shelf-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.fridge-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.item-icon-box {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F9F9F9;
+    border-radius: 50%;
+}
+
+.item-img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+.d-day-badge {
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #FFF;
+    border: 1px solid #ddd;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    white-space: nowrap;
+}
+
+.urgent .d-day-badge {
+    color: #E76F51;
+    border-color: #E76F51;
+}
+
+.item-name {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+.fab-add {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background: #E76F51;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(231, 111, 81, 0.4);
+    font-size: 30px;
+    color: white;
+    text-decoration: none;
+    z-index: 10;
+}
+
+/* =========================================
+   4. 재료 추가 (add_ingredient.html)
+   ========================================= */
+.category-scroll-area {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.category-scroll-area::-webkit-scrollbar { display: none; }
+
+.category-pill {
+    display: inline-block;
+    padding: 6px 16px;
+    margin-right: 8px;
+    border-radius: 20px;
+    background: #E0E0E0;
+    color: #555555;
+    font-family: 'Nanum Gothic', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.category-pill.active { background: #E76F51; color: #FFFFFF; }
+
+.add-container {
+    background: #FFFFFF;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 80px;
+    position: relative;
+    min-height: 400px;
+}
+
+.ingredient-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 25px;
+    column-gap: 10px;
+    margin-top: 10px;
+}
+
+.ingredient-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+.ingredient-item:active { transform: scale(0.95); }
+
+.shelf-line {
+    position: absolute;
+    bottom: -10px;
+    width: 80%;
+    height: 1px;
+    background: #EEEEEE;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.ingredient-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.default-icon {
+    width: 100%;
+    height: 100%;
+    background: #F5F5F5;
+    border-radius: 50%;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.ingredient-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));
+}
+
+.ingredient-name {
+    font-family: 'Nanum Gothic', sans-serif;
+    font-size: 13px;
+    color: #333333;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* 추가된 상태 (Dimmed) */
+.ingredient-item.added .ingredient-icon-wrapper,
+.ingredient-item.added .ingredient-name {
+    opacity: 0.5;
+}
+
+.added-badge {
+    display: none;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #E76F51;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.ingredient-item.added .added-badge { display: block; }
+
+/* 모달 */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.date-modal {
+    background: white;
+    width: 80%;
+    max-width: 320px;
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.date-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.modal-btn-group { display: flex; gap: 10px; }
+.modal-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+}
+.btn-cancel { background: #f0f0f0; color: #666; }
+.btn-confirm { background: #E76F51; color: white; }
+
+/* 완료 버튼 플로팅 */
+.complete-btn-wrapper {
+    position: fixed;
+    bottom: 80px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+}
+.btn-complete {
+    pointer-events: auto;
+    background: #E76F51;
+    color: white;
+    width: 90%;
+    max-width: 400px;
+    height: 50px;
+    border-radius: 25px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(231, 111, 81, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
