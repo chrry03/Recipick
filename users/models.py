@@ -9,6 +9,10 @@ class User(AbstractUser):
     """
     user_id = models.BigAutoField(primary_key=True)
 
+    @property
+    def id(self):
+        return self.user_id
+
     nickname = models.CharField(max_length=50, null=False)
     # email field is already in AbstractUser, but we can enforce it to be unique
     email = models.EmailField(unique=True, null=False)

@@ -7,25 +7,22 @@
 
 {% block content %}
 <div class="container-mw">
-    <h2 class="title-mw">회원가입</h2>
+    
+    <div class="logo-area">
+        <h1 class="title-text">Recipick</h1>
+    </div>
 
-    <form id="signup-step1-form" class="form-group-mw">
-        <div class="form-group-mw">
-            <label for="email" style="display:block; margin-bottom:5px; color:#666;">이메일</label>
-            <input type="email" id="email" placeholder="example@email.com" class="input-mw" required>
-        </div>
+    <form id="signup-step1-form" class="signup-form-area">
         
-        <div class="form-group-mw">
-            <label for="password" style="display:block; margin-bottom:5px; color:#666;">비밀번호</label>
-            <input type="password" id="password" placeholder="비밀번호 입력" class="input-mw" required>
-        </div>
+        <input type="email" id="email" placeholder="이메일" class="input-mw" required>
+        
+        <input type="password" id="password" placeholder="비밀번호" class="input-mw" required>
 
-        <div class="form-group-mw">
-            <label for="password_confirm" style="display:block; margin-bottom:5px; color:#666;">비밀번호 확인</label>
-            <input type="password" id="password_confirm" placeholder="비밀번호 확인" class="input-mw" required>
-        </div>
+        <input type="password" id="password_confirm" placeholder="비밀번호 확인" class="input-mw" required>
 
-        <button type="submit" class="btn-mw btn-primary-mw">회원가입</button>
+        <button type="submit" class="btn-mw btn-primary-mw" style="margin-top: 16px;">
+            회원가입
+        </button>
     </form>
 </div>
 
@@ -42,12 +39,10 @@
             return;
         }
 
-        // 1단계: 임시 저장
+        // 임시 저장 후 닉네임 설정 페이지로 이동
         localStorage.setItem('temp_email', email);
         localStorage.setItem('temp_pw', password);
-
-        // 2단계: 닉네임 설정 페이지로 이동 (API 호출 없음)
-        window.location.href = "{% url 'users:nickname' %}";
+        window.location.href = "{% url 'users:nickname' %}?next=preference";
     });
 </script>
 {% endblock %}

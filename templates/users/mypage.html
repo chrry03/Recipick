@@ -2,165 +2,79 @@
 {% load static %}
 
 {% block extra_css %}
-<style>
-    /* 마이페이지 전용 스타일 */
-    .mypage-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 80vh; /* 화면 중앙 정렬을 위한 높이 설정 */
-    }
-
-    /* === 로그인 상태일 때: 흰색 박스 스타일 === */
-    .profile-card {
-        background-color: white;
-        width: 100%;
-        max-width: 600px;
-        padding: 50px;
-        border-radius: 20px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        display: flex;
-        align-items: center;
-        gap: 40px; /* 로고와 텍스트 사이 간격 */
-    }
-
-    .profile-logo {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%; /* 원형 로고 */
-        object-fit: cover;
-        background-color: #f0f0f0; /* 이미지가 없을 때 배경색 */
-    }
-
-    .profile-info {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
-    .user-nickname {
-        font-size: 2.5rem; /* 큰 글씨 */
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 10px;
-    }
-
-    .btn-change-nickname {
-        font-size: 0.9rem; /* 작은 글씨 */
-        color: #888;
-        background: none;
-        border: none;
-        padding: 0;
-        text-align: left;
-        cursor: pointer;
-        text-decoration: underline;
-    }
-    .btn-change-nickname:hover {
-        color: #555;
-    }
-
-    /* === 비로그인 상태일 때: 중앙 정렬 스타일 === */
-    .logout-view {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 20px;
-    }
-
-    .logout-logo {
-        width: 150px;
-        height: 150px;
-        background-color: #ddd; /* 로고 이미지 자리 */
-        border-radius: 50%;
-        margin-bottom: 10px;
-        /* 실제 로고 이미지가 있다면 background-image로 대체 가능 */
-    }
-
-    .logo-text {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 20px;
-    }
-
-    /* 공통 버튼 스타일 (기존 btn-mw 클래스 활용 가능) */
-    .btn-login-move {
-        padding: 15px 40px;
-        font-size: 1.1rem;
-        background-color: #ff6b6b; /* 포인트 컬러 */
-        color: white;
-        border: none;
-        border-radius: 30px;
-        cursor: pointer;
-        text-decoration: none; /* a태그일 경우 밑줄 제거 */
-        transition: background-color 0.3s;
-    }
-    .btn-login-move:hover {
-        background-color: #ff5252;
-    }
-</style>
+    <link rel="stylesheet" href="{% static 'css/users.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container-mw mypage-container">
+<div class="container-mw">
     
-    <div id="logged-in-view" class="profile-card" style="display: none;">
-        <img src="{% static 'images/logo_placeholder.png' %}" 
-            onerror="this.src='https://via.placeholder.com/150?text=Logo'" 
-            alt="프로필 로고" class="profile-logo">
-        
-        <div class="profile-info">
-            <h1 id="display-nickname" class="user-nickname">닉네임</h1>
-            <button type="button" class="btn-change-nickname" data-url="{% url 'users:nickname' %}"> 닉네임 변경 </button>
-            <script>
-                document.querySelector('.btn-change-nickname').addEventListener('click', function() {location.href = this.dataset.url;});
-            </script>
-            <br>
-            <button type="button" id="btn-logout" style="margin-top:20px; background:none; border:none; color:#ff6b6b; cursor:pointer;">
-                로그아웃
-            </button>
+    <div id="logged-in-view" style="display: none; flex-direction: column; align-items: center; width:100%;">
+        <div class="mypage-header">
+            <div class="header-logo">Recipick</div>
+            <a href="{% url 'users:notification' %}" class="header-bell">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z" stroke="#555555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
         </div>
+        
+        <div class="profile-card-mw">
+            <div class="profile-icon-area"><span style="font-size: 50px;">🍴</span></div>
+            <div class="profile-text-group">
+                <h2 id="display-nickname" class="profile-nickname">닉네임</h2>
+                <a href="{% url 'users:nickname' %}" class="profile-edit-link">닉네임 변경</a>
+            </div>
+        </div>
+
+        <a href="{% url 'users:preference' %}" class="btn-mw btn-primary-mw" style="margin-top: 126px; text-decoration: none;">취향 재설정</a>
+        <button type="button" id="btn-logout" class="btn-mw btn-secondary-mw" style="margin-top: 15px;">로그아웃</button>
     </div>
 
-    <div id="logged-out-view" class="logout-view" style="display: none;">
-        <img src="{% static 'images/logo_placeholder.png' %}" 
-            onerror="this.src='https://via.placeholder.com/150?text=Recipick'" 
-            alt="로고" class="logout-logo">
+    <div id="logged-out-view" style="display: none; flex-direction: column; align-items: center; width:100%;">
         
-        <h2 class="logo-text">Recipick</h2>
-        
-        <a href="{% url 'users:login' %}" class="btn-login-move">
-            로그인 하러 가기
+        <div class="mypage-header">
+            <div class="header-logo">Recipick</div>
+            <div class="header-bell">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#555555" stroke-width="2">
+                    <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="big-logo-area">
+            <div class="big-logo-icon">
+                <svg width="101" height="74" viewBox="0 0 101 74" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 54L40 34" stroke="#888" stroke-width="5" stroke-linecap="round"/>
+                    <text x="10" y="50" font-size="50">🍴</text>
+                </svg>
+            </div>
+            <div class="big-logo-text">Recipick</div>
+        </div>
+
+        <a href="{% url 'users:login' %}" class="btn-mw btn-secondary-mw" style="margin-top: 495px; text-decoration: none;">
+            로그인
         </a>
+
     </div>
 
 </div>
 
 <script>
+    // 기존 스크립트 유지
     document.addEventListener('DOMContentLoaded', function() {
-        // localStorage에서 토큰과 닉네임 확인
         const token = localStorage.getItem('access_token');
         const nickname = localStorage.getItem('user_nickname');
-
         const loggedInView = document.getElementById('logged-in-view');
         const loggedOutView = document.getElementById('logged-out-view');
         const nicknameDisplay = document.getElementById('display-nickname');
 
         if (token) {
-            // === 로그인 상태 ===
-            loggedInView.style.display = 'flex'; // flex로 보여야 스타일 유지됨
-            loggedOutView.style.display = 'none';
-            
-            // 저장된 닉네임 표시 (없으면 기본값)
-            nicknameDisplay.textContent = nickname || '알 수 없는 사용자';
+            loggedInView.style.display = 'flex';
+            if(nicknameDisplay) nicknameDisplay.textContent = nickname || '사용자';
         } else {
-            // === 비로그인 상태 ===
-            loggedInView.style.display = 'none';
             loggedOutView.style.display = 'flex';
         }
 
-        // 로그아웃 기능 (토큰 삭제 후 새로고침)
         const logoutBtn = document.getElementById('btn-logout');
         if(logoutBtn){
             logoutBtn.addEventListener('click', function(){
@@ -168,8 +82,7 @@
                     localStorage.removeItem('access_token');
                     localStorage.removeItem('refresh_token');
                     localStorage.removeItem('user_nickname');
-                    alert('로그아웃 되었습니다.');
-                    window.location.reload(); // 페이지 새로고침하여 비로그인 화면으로 전환
+                    window.location.reload();
                 }
             });
         }
