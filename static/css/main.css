@@ -476,7 +476,7 @@
 
 .diary-card-inner {
   background: #f9f9f9;
-  border-radius: 0.5rem;
+  border-radius: 0;
   box-shadow: -1px 1px 2px 0px rgba(207, 207, 207, 0.2),
               1px -1px 2px 0px rgba(207, 207, 207, 0.2),
               -1px -1px 2px 0px rgba(255, 255, 255, 0.9),
@@ -486,7 +486,7 @@
 
 .diary-image {
   aspect-ratio: 1;
-  border-radius: 0.25rem;
+  border-radius: 0;
   overflow: hidden;
   margin-bottom: 0.5rem;
   background-color: #e5e5e5;
