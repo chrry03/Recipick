@@ -1,8 +1,17 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import RecipeViewSet
+from django.urls import path
+from . import views
 
-router = DefaultRouter()
-router.register('recipes', RecipeViewSet, basename='recipe')
+app_name = 'recipes'
 
-urlpatterns = router.urls
+urlpatterns = [
+    # 화면 페이지 (Template View)
+    path('', views.recipe_list_view, name='list'),
+    path('<int:recipe_id>/', views.recipe_detail_view, name='detail'),
+    
+    # API 엔드포인트
+    path('api/list/', views.recipe_list, name='api-list'),
+    path('api/search/', views.search_recipes, name='api-search'),
+    path('api/recommendations/', views.get_recipe_recommendations, name='api-recommendations'),
+    path('api/<int:recipe_id>/', views.recipe_detail, name='api-detail'),
+    path('api/<int:recipe_id>/favorite/', views.toggle_favorite, name='api-favorite'),
+]

@@ -5,6 +5,7 @@ Ingredients App Models
 이 파일은 사용자가 보유한 식재료와 식재료 마스터 데이터를 관리합니다.
 - IngredientCategory: 식재료 카테고리 (대/소분류) -> 아이콘 관리 포함
 - IngredientMaster: 표준 식재료 목록 -> 영문명(API용) 포함
+- IngredientNameMapping: 식재료 이름 매핑 (신규 추가) ← 이것만 추가됨
 - UserIngredient: 사용자 냉장고 식재료
 """
 from django.db import models
@@ -223,6 +224,62 @@ class IngredientMaster(models.Model):
                     mapping[alias.lower()] = ingredient
         
         return mapping
+
+
+# ==================== 신규 추가: 식재료 이름 매핑 모델 ====================
+class IngredientNameMapping(models.Model):
+    """
+    식재료 이름 매핑 테이블 (신규)
+    - Spoonacular와 한식 DB의 식재료 이름을 통합 관리
+    - IngredientMaster를 보완하는 추가 매핑 테이블
+    """
+    ingredient = models.ForeignKey(
+        IngredientMaster,
+        on_delete=models.CASCADE,
+        related_name='name_mappings',
+        verbose_name='표준 식재료'
+    )
+    
+    alternative_name = models.CharField(
+        max_length=100,
+        verbose_name='대체 이름',
+        help_text='다른 이름, 영어 이름, 별칭 등'
+    )
+    
+    source = models.CharField(
+        max_length=20,
+        choices=[
+            ('spoonacular', 'Spoonacular API'),
+            ('korean_db', '한식 DB'),
+            ('user', '사용자 입력'),
+            ('manual', '수동 매핑')
+        ],
+        default='manual',
+        verbose_name='출처'
+    )
+    
+    confidence = models.FloatField(
+        default=1.0,
+        verbose_name='신뢰도',
+        help_text='0.0 ~ 1.0 사이의 매칭 신뢰도'
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'IngredientNameMapping'
+        verbose_name = '식재료 이름 매핑'
+        verbose_name_plural = '식재료 이름 매핑'
+        unique_together = ['ingredient', 'alternative_name']
+        indexes = [
+            models.Index(fields=['alternative_name'], name='idx_mapping_alt_name'),
+            models.Index(fields=['source'], name='idx_mapping_source'),
+        ]
+
+    def __str__(self):
+        return f'{self.alternative_name} → {self.ingredient.name_ko}'
+# ==================== 신규 추가 끝 ====================
 
 
 class UserIngredient(models.Model):

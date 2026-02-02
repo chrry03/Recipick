@@ -1,48 +1,43 @@
 from django.contrib import admin
-from .models import IngredientMaster, IngredientCategory, UserIngredient
+from .models import IngredientCategory, IngredientMaster, UserIngredient, IngredientNameMapping
 
 
 @admin.register(IngredientCategory)
 class IngredientCategoryAdmin(admin.ModelAdmin):
-    list_display = ['category_id', 'name', 'parent', 'icon_url', 'is_parent']
-    list_filter = ['parent']
+    list_display = ['category_id', 'name', 'parent', 'icon_url']
     search_fields = ['name']
-    ordering = ['category_id']
+    list_filter = ['parent']
 
 
 @admin.register(IngredientMaster)
 class IngredientMasterAdmin(admin.ModelAdmin):
     list_display = ['ingredient_id', 'name_ko', 'name_en', 'category', 'created_at']
+    search_fields = ['name_ko', 'name_en']
     list_filter = ['category']
-    search_fields = ['name_ko', 'name_en', 'aliases']
-    ordering = ['name_ko']
+    autocomplete_fields = ['category']
+
+
+@admin.register(IngredientNameMapping)
+class IngredientNameMappingAdmin(admin.ModelAdmin):
+    """식재료 이름 매핑 관리 (신규)"""
+    list_display = ['alternative_name', 'ingredient', 'source', 'confidence', 'created_at']
+    search_fields = ['alternative_name', 'ingredient__name_ko']
+    list_filter = ['source', 'confidence']
+    autocomplete_fields = ['ingredient']
     
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('category')
+    fieldsets = (
+        ('기본 정보', {
+            'fields': ('ingredient', 'alternative_name')
+        }),
+        ('메타 정보', {
+            'fields': ('source', 'confidence')
+        }),
+    )
 
 
 @admin.register(UserIngredient)
 class UserIngredientAdmin(admin.ModelAdmin):
-    list_display = [
-        'user_ingredient_id', 'user', 'get_ingredient_name', 
-        'expire_at', 'days_until_expiry', 'is_consumed', 'created_at'
-    ]
-    list_filter = ['is_consumed', 'created_at']
-    search_fields = ['user__username', 'ingredient__name_ko']
-    date_hierarchy = 'created_at'
-    
-    def get_ingredient_name(self, obj):
-        return obj.ingredient.name_ko
-    get_ingredient_name.short_description = '식재료명'
-    
-    def days_until_expiry(self, obj):
-        days = obj.days_until_expiry
-        if days is None:
-            return '-'
-        if days < 0:
-            return f'만료 ({days}일)'
-        return f'{days}일'
-    days_until_expiry.short_description = '유통기한'
-    
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('user', 'ingredient')
+    list_display = ['user_ingredient_id', 'user', 'ingredient', 'expire_at', 'is_consumed', 'created_at']
+    search_fields = ['user__nickname', 'ingredient__name_ko']
+    list_filter = ['is_consumed', 'expire_at']
+    date_hierarchy = 'expire_at'
