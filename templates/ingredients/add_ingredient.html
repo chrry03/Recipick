@@ -1,122 +1,202 @@
-<!-- 식재료 검색 및 추가 화면 -->
 {% extends 'base_with_navbar.html' %}
 {% load static %}
 
 {% block header %}
-<header class="page-header">
-    <div class="logo-area">
-        <span class="logo-text">🥄 Recipick</span>
-    </div>
-    <div class="header-icons">
-        <button class="icon-btn">🔍</button>
-        <button class="icon-btn">🔔</button>
-    </div>
-</header>
-<div class="search-bar-container">
-    <div class="search-input-box">
-        <span class="search-icon-inside">🔍</span>
-        <input type="text" placeholder="식재료 검색">
-    </div>
+<div class="header-container">
+    <img src="{% static 'images/logo.png' %}" alt="Recipick" class="logo-img">
+    <img src="{% static 'images/bell.png' %}" alt="알림" class="bell-icon">
 </div>
 {% endblock header %}
 
 {% block main_content %}
 <style>
-    /* 카테고리 필터 (가로 스크롤) */
-    .filter-scroll-area {
-        overflow-x: auto;
+    /* --- 기존 스타일 유지 --- */
+    .search-wrapper {
+        position: relative; width: 100%; height: 45px;
+        margin-top: 10px; margin-bottom: 20px; flex-shrink: 0;
+    }
+    .search-input {
+        width: 100%; height: 100%; background: transparent;
+        border: 1.5px solid #555555; border-radius: 25px;
+        padding: 0 45px 0 20px; box-sizing: border-box;
+        font-family: 'Gowun Dodum', sans-serif; font-size: 14px; color: #333333;
+    }
+    .search-icon-img {
+        position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+        width: 19px; height: 19px; pointer-events: none; opacity: 0.7;
+    }
+
+    /* 카테고리 스크롤 */
+    .category-scroll-area {
+        width: 100%; overflow-x: auto; white-space: nowrap;
+        padding-bottom: 5px; margin-bottom: 15px;
+        -ms-overflow-style: none; scrollbar-width: none;
+    }
+    .category-scroll-area::-webkit-scrollbar { display: none; }
+
+    .category-pill {
+        display: inline-block; padding: 6px 16px; margin-right: 8px;
+        border-radius: 20px; background: #E0E0E0; color: #555555;
+        font-family: 'Nanum Gothic', sans-serif; font-size: 13px; font-weight: 600;
+        cursor: pointer; transition: all 0.2s;
+    }
+    .category-pill.active { background: #E76F51; color: #FFFFFF; }
+
+    /* 냉장고 컨테이너 */
+    .fridge-container {
+        background: #FFFFFF; border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        padding: 20px; flex-grow: 1; display: flex; flex-direction: column;
+        margin-bottom: 20px; position: relative; min-height: 400px;
+    }
+
+    /* 그리드 */
+    .ingredient-grid {
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        row-gap: 25px; column-gap: 10px; margin-top: 10px;
+    }
+
+    .ingredient-item {
+        display: flex; flex-direction: column; align-items: center;
+        position: relative; cursor: pointer; transition: transform 0.1s;
+    }
+    .ingredient-item:active { transform: scale(0.95); } /* 클릭 효과 */
+
+    /* 선반 라인 */
+    .shelf-line {
+        position: absolute; bottom: -10px; width: 80%; height: 1px;
+        background: #EEEEEE; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    /* 아이콘 영역 */
+    .ingredient-icon-wrapper {
+        width: 60px; height: 60px; display: flex;
+        align-items: center; justify-content: center;
+        margin-bottom: 8px; position: relative;
+    }
+    
+    .default-icon {
+        width: 100%; height: 100%; background: #F5F5F5;
+        border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    
+    .ingredient-img {
+        width: 100%; height: 100%; object-fit: contain;
+        filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));
+    }
+
+    .ingredient-name {
+        font-family: 'Nanum Gothic', sans-serif; font-size: 13px;
+        color: #333333; font-weight: 600; text-align: center;
+    }
+
+    /* --- [기능] 추가된 상태 (Dimmed + Badge) --- */
+    .ingredient-item.added .ingredient-icon-wrapper,
+    .ingredient-item.added .ingredient-name {
+        opacity: 0.4;
+    }
+
+    /* 배지: 기본은 숨김 */
+    .added-badge {
+        display: none;
+        position: absolute; top: 0; right: -5px;
+        background: #555555; color: white;
+        font-size: 10px; padding: 3px 6px; border-radius: 10px;
+        font-family: 'Gowun Dodum', sans-serif; z-index: 10;
         white-space: nowrap;
-        padding: 10px 20px;
-        background-color: var(--color-bg);
-        scrollbar-width: none; /* 파이어폭스 스크롤 숨김 */
-    }
-    .filter-scroll-area::-webkit-scrollbar { display: none; } /* 크롬 스크롤 숨김 */
-
-    .filter-chip {
-        display: inline-block;
-        padding: 8px 16px;
-        margin-right: 8px;
-        border-radius: 20px;
-        background-color: #E0E0E0;
-        color: #555;
-        font-size: 13px;
-        border: none;
-        cursor: pointer;
-    }
-    .filter-chip.active {
-        background-color: var(--color-primary);
-        color: white;
     }
 
-    /* 재료 그리드 */
-    .selection-grid {
-        padding: 20px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
+    /* added 클래스가 있을 때만 배지 보이기 */
+    .ingredient-item.added .added-badge {
+        display: block;
     }
-    
-    /* 선택 아이템 스타일 (my_fridge와 유사하지만 클릭 가능) */
-    .select-item {
-        width: calc(33.33% - 10px);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        cursor: pointer;
-        position: relative;
-    }
-    .select-img-circle {
-        width: 70px; height: 70px;
-        background-color: #fff;
-        border-radius: 50%;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 그림자 추가 */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 8px;
-        transition: transform 0.2s;
-    }
-    /* 선택되었을 때 효과 (옵션) */
-    .select-item.selected .select-img-circle {
-        border: 3px solid var(--color-primary);
-        transform: scale(1.05);
-    }
-    .select-item.selected .ing-name {
-        color: var(--color-primary);
-        font-weight: bold;
-    }
-    
-    .ing-name { font-size: 14px; color: #333; }
 </style>
 
-<div class="filter-scroll-area">
-    <button class="filter-chip active">전체(xx)</button>
-    <button class="filter-chip">채소류(xx)</button>
-    <button class="filter-chip">어패류(xx)</button>
-    <button class="filter-chip">양념(xx)</button>
-    <button class="filter-chip">육류(xx)</button>
+<div class="search-wrapper">
+    <input type="text" id="searchInput" class="search-input" placeholder="식재료 검색" onkeyup="filterIngredients()">
+    <img src="{% static 'images/search.png' %}" alt="검색" class="search-icon-img">
 </div>
 
-<div class="selection-grid">
-    <div class="select-item" onclick="toggleSelect(this)">
-        <div class="select-img-circle"><img src="{% static 'images/carrot.png' %}" width="40"></div>
-        <span class="ing-name">당근</span>
+<div class="category-scroll-area">
+    {% for cat in categories %}
+        <div class="category-pill {% if forloop.first %}active{% endif %}" 
+             onclick="selectCategory(this, '{{ cat }}')">
+            {{ cat }}
+        </div>
+    {% endfor %}
+</div>
+
+<div class="fridge-container">
+    <div class="ingredient-grid" id="ingredientGrid">
+        {% for item in ingredients %}
+        <div class="ingredient-item {% if item.is_added %}added{% endif %}" 
+             data-category="{{ item.category }}"
+             data-name="{{ item.name }}"
+             onclick="toggleIngredient(this)">
+            
+            <div class="ingredient-icon-wrapper">
+                <span class="added-badge">추가된 재료</span>
+                
+                {% if item.icon_name %}
+                    <img src="{% static 'images/ingredients/'|add:item.icon_name %}" class="ingredient-img" alt="{{ item.name }}">
+                {% else %}
+                    <div class="default-icon"></div>
+                {% endif %}
+            </div>
+            
+            <span class="ingredient-name">{{ item.name }}</span>
+            <div class="shelf-line"></div>
+        </div>
+        {% endfor %}
     </div>
-    <div class="select-item" onclick="toggleSelect(this)">
-        <div class="select-img-circle"><img src="{% static 'images/meat.png' %}" width="40"></div>
-        <span class="ing-name">소고기</span>
-    </div>
-    <div class="select-item" onclick="toggleSelect(this)">
-        <div class="select-img-circle"><img src="{% static 'images/broccoli.png' %}" width="40"></div>
-        <span class="ing-name">브로콜리</span>
-    </div>
-    </div>
+</div>
 
 <script>
-    // 간단한 선택 토글 스크립트
-    function toggleSelect(element) {
-        element.classList.toggle('selected');
-        // 추후 선택된 재료들을 모아 submit 하는 로직 필요
+    // 1. 재료 선택/해제 토글 함수
+    function toggleIngredient(element) {
+        // 'added' 클래스를 줬다 뺐다 함 (CSS가 알아서 디자인 변경)
+        element.classList.toggle('added');
+        
+        // TODO: 여기서 실제 DB에 ajax 요청을 보내거나, form input에 값을 담으면 됩니다.
+        // console.log("Selected:", element.dataset.name, element.classList.contains('added'));
+    }
+
+    // 2. 카테고리 선택 함수
+    function selectCategory(pillElement, category) {
+        // 1) 모든 필의 active 제거
+        document.querySelectorAll('.category-pill').forEach(pill => {
+            pill.classList.remove('active');
+        });
+        // 2) 클릭한 필만 active 추가
+        pillElement.classList.add('active');
+
+        // 3) 그리드 아이템 필터링
+        const items = document.querySelectorAll('.ingredient-item');
+        items.forEach(item => {
+            if (category === '전체' || item.dataset.category === category) {
+                item.style.display = 'flex'; // 보이기
+            } else {
+                item.style.display = 'none'; // 숨기기
+            }
+        });
+    }
+
+    // 3. 검색 필터링 함수 (보너스)
+    function filterIngredients() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase();
+        const items = document.querySelectorAll('.ingredient-item');
+
+        items.forEach(item => {
+            const name = item.dataset.name;
+            // 현재 카테고리 상태도 고려해야 완벽하지만, 일단 검색어 우선으로 구현
+            if (name.includes(filter)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
     }
 </script>
+
 {% endblock main_content %}

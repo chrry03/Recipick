@@ -1,66 +1,44 @@
-"""
-URL configuration for config project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings             # [추가] 설정 가져오기
-from django.conf.urls.static import static   # [추가] 정적 파일 서빙 함수
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django.http import HttpResponse # [추가] 임시 응답용
+
+# [추가] 아직 안 만든 페이지들에러 방지용 임시 함수
+def temp_view(request):
+    return HttpResponse("준비 중인 페이지입니다.")
 
 schema_view = get_schema_view(
     openapi.Info(
         title="Recipick API",
         default_version='v1',
-        description="레시픽(Recipick) - 식재료 기반 레시피 추천 서비스 API",
-        terms_of_service="https://www.google.com/policies/terms/",
+        description="레시픽(Recipick) API",
         contact=openapi.Contact(email="contact@recipick.com"),
-        license=openapi.License(name="BSD License"),
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
 )
 
 urlpatterns = [
-    # Admin
     path('admin/', admin.site.urls),
-    path('', include('users.urls')),
     
-    # API Documentation (Swagger)
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    
-    # API Endpoints
-    path('api/', include('ingredients.urls')),
-    path('api/', include('recipes.urls')),
-    path('api/users/', include('users.urls')),
+    # 1. 식재료 앱 (우리가 만든 fridge 페이지는 여기 안에 있음)
+    path('ingredients/', include('ingredients.urls')),
+    path('recipes/', temp_view, name='recipe_list'),
 
+    # Swagger
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     # Users App
     path('', include('users.urls')),
-    
+    path('api/users/', include('users.urls')),
+
     # Logs App
     path('logs/', include('logs.urls')),
 ]
 
-
-
-# 미디어 파일 서빙 설정 (개발 모드용): 개발 모드일 때만 미디어 파일 서빙 가능하도록 설정
-# settings.py의 DEBUG=TRUE일때(개발중일때)만 내 컴퓨터의 media폴더의 이미지를 띄울 수 있게 함
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
