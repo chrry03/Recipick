@@ -262,3 +262,7 @@ htmlcov/
 .idea/
 
 # End of https://www.toptal.com/developers/gitignore/api/django,venv,windows,macos
+
+# Django Cache
+cache/
+*.djcache
