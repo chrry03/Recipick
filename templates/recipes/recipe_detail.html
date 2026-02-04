@@ -1,12 +1,25 @@
-<!-- 레시피 상세 (단계별) -->
- {% extends 'base_with_navbar.html' %}
+{% extends 'base_with_navbar.html' %}
 {% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/recipes.css' %}">
+{% endblock extra_head %}
 
 {% block header %}
 <header class="page-header detail-header">
-    <button class="back-btn" onclick="history.back()">←</button>
+    <button type="button" 
+            class="back-btn" 
+            id="backBtn"
+            aria-label="이전 페이지로 돌아가기">
+        ←
+    </button>
     <h1 class="header-title">레시피 상세</h1>
-    <button class="header-action-btn like-toggle-btn" data-recipe-id="{{ recipe.id }}">
+    <button type="button" 
+            class="header-action-btn like-toggle-btn" 
+            id="likeBtn" 
+            data-recipe-id="{{ recipe.id }}"
+            aria-label="좋아요"
+            aria-pressed="{% if is_liked %}true{% else %}false{% endif %}">
         {% if is_liked %}❤️{% else %}🤍{% endif %}
     </button>
 </header>
@@ -15,20 +28,22 @@
 {% block main_content %}
 <section class="recipe-detail-container">
     <div class="detail-main-image">
-        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+        <img src="{{ recipe.image.url }}" 
+             alt="{{ recipe.title }}"
+             loading="lazy">
     </div>
 
     <div class="detail-header-info">
         <h2 class="detail-title">{{ recipe.title }}</h2>
         <p class="detail-desc">{{ recipe.description }}</p>
-        <div class="detail-meta-badges">
-            <span class="badge">{{ recipe.time }}분</span>
-            <span class="badge">{{ recipe.difficulty }}</span>
-            <span class="badge">{{ recipe.calories }}kcal</span>
+        <div class="detail-meta-badges" role="list">
+            <span class="badge" role="listitem">{{ recipe.time }}분</span>
+            <span class="badge" role="listitem">{{ recipe.difficulty }}</span>
+            <span class="badge" role="listitem">{{ recipe.calories }}kcal</span>
         </div>
     </div>
 
-    <hr class="section-divider">
+    <hr class="section-divider" aria-hidden="true">
 
     <div class="detail-ingredients">
         <h3 class="section-title">준비 재료</h3>
@@ -38,14 +53,14 @@
                 <span class="name">{{ ingredient.name }}</span>
                 <span class="amount">{{ ingredient.quantity }}</span>
                 {% if ingredient.is_owned %}
-                <span class="owned-badge">보유중</span>
+                <span class="owned-badge" aria-label="보유 중">보유중</span>
                 {% endif %}
             </li>
             {% endfor %}
         </ul>
     </div>
 
-    <hr class="section-divider">
+    <hr class="section-divider" aria-hidden="true">
 
     <div class="detail-steps-preview">
         <h3 class="section-title">조리 순서</h3>
@@ -58,8 +73,17 @@
 </section>
 
 <div class="floating-action-container">
-    <a href="{% url 'cooking_mode_step' recipe.id step=1 %}" class="btn-primary-full">
+    <a href="{% url 'recipes:cooking_mode_step' recipe.id step=1 %}" 
+       class="btn-primary-full"
+       aria-label="요리 시작하기">
         요리 시작하기 🍳
     </a>
 </div>
 {% endblock main_content %}
+
+{% block extra_script %}
+<div data-favorite-url="{% url 'recipes:api-favorite' recipe.id %}" 
+     data-csrf-token="{{ csrf_token }}" 
+     style="display: none;"></div>
+<script src="{% static 'js/recipes.js' %}"></script>
+{% endblock extra_script %}

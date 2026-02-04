@@ -1,56 +1,26 @@
 {% extends 'base_with_navbar.html' %}
 {% load static %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/ingredients.css' %}">
+{% endblock %}
+
 {% block header %}
-    {% include 'header.html' %}
+{% include 'header.html' %}
 {% endblock header %}
 
 {% block main_content %}
-<style>
-    /* ... (기존 스타일 생략, 동일합니다) ... */
-    .search-wrapper { position: relative; width: 100%; height: 45px; margin-top: 10px; margin-bottom: 20px; flex-shrink: 0; }
-    .search-input { width: 100%; height: 100%; background: transparent; border: 1.5px solid #555555; border-radius: 25px; padding: 0 45px 0 20px; box-sizing: border-box; font-family: 'Gowun Dodum', sans-serif; font-size: 14px; color: #333333; }
-    .search-icon-img { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 19px; height: 19px; pointer-events: none; opacity: 0.7; }
-    .category-scroll-area { width: 100%; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; margin-bottom: 15px; -ms-overflow-style: none; scrollbar-width: none; }
-    .category-scroll-area::-webkit-scrollbar { display: none; }
-    .category-pill { display: inline-block; padding: 6px 16px; margin-right: 8px; border-radius: 20px; background: #E0E0E0; color: #555555; font-family: 'Nanum Gothic', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .category-pill.active { background: #E76F51; color: #FFFFFF; }
-    .fridge-container { background: #FFFFFF; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 20px; flex-grow: 1; display: flex; flex-direction: column; padding-bottom: 100px; min-height: 400px; }
-    .ingredient-grid { display: grid; grid-template-columns: repeat(3, 1fr); row-gap: 25px; column-gap: 10px; margin-top: 10px; }
-    .ingredient-item { display: flex; flex-direction: column; align-items: center; position: relative; cursor: pointer; transition: transform 0.1s; }
-    .ingredient-item:active { transform: scale(0.95); }
-    .shelf-line { position: absolute; bottom: -10px; width: 80%; height: 1px; background: #EEEEEE; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-    .ingredient-icon-wrapper { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; position: relative; }
-    .default-icon { width: 100%; height: 100%; background: #F5F5F5; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
-    .ingredient-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
-    .ingredient-name { font-family: 'Nanum Gothic', sans-serif; font-size: 13px; color: #333333; font-weight: 600; text-align: center; }
-    .ingredient-item.added .ingredient-icon-wrapper, .ingredient-item.added .ingredient-name { opacity: 0.4; }
-    .added-badge { display: none; position: absolute; top: 0; right: -5px; background: #555555; color: white; font-size: 10px; padding: 3px 6px; border-radius: 10px; font-family: 'Gowun Dodum', sans-serif; z-index: 10; white-space: nowrap; }
-    .ingredient-item.added .added-badge { display: block; }
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; align-items: center; justify-content: center; }
-    .modal-overlay.open { display: flex; }
-    .date-modal { background: white; width: 80%; max-width: 320px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .modal-title { font-size: 18px; font-weight: 800; color: #333; margin-bottom: 20px; }
-    .date-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; margin-bottom: 20px; box-sizing: border-box; font-family: inherit; }
-    .modal-btn-group { display: flex; gap: 10px; }
-    .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 14px; }
-    .btn-cancel { background: #f0f0f0; color: #666; }
-    .btn-confirm { background: #E76F51; color: white; }
-    .complete-btn-wrapper { position: fixed; bottom: 110px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 100; pointer-events: none; }
-    .btn-complete { pointer-events: auto; background: #E76F51; color: white; width: 90%; max-width: 400px; height: 50px; border-radius: 25px; border: none; font-family: 'Nanum Gothic', sans-serif; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 4px 12px rgba(231, 111, 81, 0.3); cursor: pointer; }
-</style>
-
 <div class="search-wrapper">
-    <input type="text" id="searchInput" class="search-input" placeholder="식재료 검색" onkeyup="filterIngredients()">
+    <input type="text" id="searchInput" class="search-input" placeholder="식재료 검색">
     <img src="{% static 'images/search.png' %}" alt="검색" class="search-icon-img">
 </div>
 
 <div class="category-scroll-area">
     {% for cat in categories %}
-        <div class="category-pill {% if forloop.first %}active{% endif %}" 
-             onclick="selectCategory(this, '{{ cat.name }}')">
-            {{ cat.name }}({{ cat.count }})
-        </div>
+    <div class="category-pill {% if forloop.first %}active{% endif %}" 
+         data-category="{{ cat.name }}">
+        {{ cat.name }}({{ cat.count }})
+    </div>
     {% endfor %}
 </div>
 
@@ -59,18 +29,17 @@
         {% for item in ingredients %}
         <div class="ingredient-item {% if item.is_added %}added{% endif %}" 
              data-category="{{ item.category }}"
-             data-name="{{ item.name }}"
-             onclick="toggleIngredient(this)">
-            
+             data-name="{{ item.name }}">
             <div class="ingredient-icon-wrapper">
                 <span class="added-badge">추가된 재료</span>
                 {% if item.icon_name %}
-                    <img src="{% static 'images/ingredients/'|add:item.icon_name %}" class="ingredient-img" alt="{{ item.name }}">
+                <img src="{% static 'images/ingredients/'|add:item.icon_name %}" 
+                     class="ingredient-img" 
+                     alt="{{ item.name }}">
                 {% else %}
-                    <div class="default-icon"></div>
+                <div class="default-icon"></div>
                 {% endif %}
             </div>
-            
             <span class="ingredient-name">{{ item.name }}</span>
             <div class="shelf-line"></div>
         </div>
@@ -79,125 +48,30 @@
 </div>
 
 <div class="complete-btn-wrapper">
-    <button class="btn-complete" onclick="submitIngredients()">
+    <button type="button" class="btn-complete" id="submitBtn">
         식재료 추가 완료 <span id="countBadge">(0)</span>
     </button>
 </div>
 
 <div class="modal-overlay" id="dateModal">
     <div class="date-modal">
-        <div class="modal-title"><span id="modalIngredientName"></span>의<br>소비기한을 알려주세요!</div>
+        <div class="modal-title">
+            <span id="modalIngredientName"></span>의<br>소비기한을 알려주세요!
+        </div>
         <input type="date" id="expiryInput" class="date-input">
         <div class="modal-btn-group">
-            <button class="modal-btn btn-cancel" onclick="closeModal()">취소</button>
-            <button class="modal-btn btn-confirm" onclick="confirmIngredient()">확인</button>
+            <button type="button" class="modal-btn btn-cancel" id="cancelBtn">취소</button>
+            <button type="button" class="modal-btn btn-confirm" id="confirmBtn">확인</button>
         </div>
     </div>
 </div>
 
-<script>
-    let selectedItems = {};
-    let currentTarget = null;
-
-    function toggleIngredient(element) {
-        if (element.classList.contains('added')) {
-            // 이미 추가된 건 (DB에 있거나, 방금 선택했거나)
-            // 여기서는 단순 토글만 하고, 실제 로직은 모달/삭제 로직에 따라 다름
-            // 간단하게 '추가 모달' 띄우기 전 단계로 봄
-            
-            // 만약 방금 선택해서 리스트에 있다면 삭제
-            if (selectedItems[element.dataset.name]) {
-                delete selectedItems[element.dataset.name];
-                element.classList.remove('added');
-                updateCount();
-                return;
-            }
-            // 원래 있던 거라면? (여기선 해제 불가능하게 하거나 알림)
-            // 일단 해제 가능하게 처리
-            element.classList.remove('added');
-            return;
-        }
-        
-        // 새로 추가 -> 모달 열기
-        currentTarget = element;
-        document.getElementById('modalIngredientName').innerText = element.dataset.name;
-        
-        const today = new Date();
-        today.setDate(today.getDate() + 7);
-        document.getElementById('expiryInput').valueAsDate = today;
-
-        document.getElementById('dateModal').classList.add('open');
-    }
-
-    function closeModal() {
-        document.getElementById('dateModal').classList.remove('open');
-        currentTarget = null;
-    }
-
-    function confirmIngredient() {
-        if (!currentTarget) return;
-        const dateVal = document.getElementById('expiryInput').value;
-        if (!dateVal) { alert("날짜를 선택해주세요"); return; }
-        
-        currentTarget.classList.add('added');
-        
-        // 이름(name)을 키로 사용 (ID가 템플릿에 없어서 name으로 대체)
-        selectedItems[currentTarget.dataset.name] = {
-            expiry: dateVal,
-            name: currentTarget.dataset.name,
-            category: currentTarget.dataset.category
-        };
-        
-        updateCount();
-        closeModal();
-    }
-
-    function submitIngredients() {
-        const names = Object.keys(selectedItems);
-        if (names.length === 0) { alert("추가할 식재료를 선택해주세요!"); return; }
-
-        const payload = names.map(name => ({
-            name: selectedItems[name].name,
-            category: selectedItems[name].category,
-            expiry_date: selectedItems[name].expiry
-        }));
-
-        fetch("{% url 'ingredients:add_ingredient' %}", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-            body: JSON.stringify({ ingredients: payload })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                window.location.href = "{% url 'ingredients:my_fridge' %}";
-            } else {
-                alert("저장 실패");
-            }
-        });
-    }
-
-    function updateCount() {
-        const count = Object.keys(selectedItems).length;
-        document.getElementById('countBadge').innerText = `(${count})`;
-    }
-
-    function selectCategory(pillElement, category) {
-        document.querySelectorAll('.category-pill').forEach(pill => pill.classList.remove('active'));
-        pillElement.classList.add('active');
-        document.querySelectorAll('.ingredient-item').forEach(item => {
-            if (category === '전체' || item.dataset.category === category) item.style.display = 'flex';
-            else item.style.display = 'none';
-        });
-    }
-
-    function filterIngredients() {
-        const filter = document.getElementById('searchInput').value.toLowerCase();
-        document.querySelectorAll('.ingredient-item').forEach(item => {
-            if (item.dataset.name.includes(filter)) item.style.display = 'flex';
-            else item.style.display = 'none';
-        });
-    }
-</script>
-
 {% endblock main_content %}
+
+{% block extra_script %}
+<div data-add-ingredient-url="{% url 'ingredients:add_ingredient' %}" 
+     data-my-fridge-url="{% url 'ingredients:my_fridge' %}" 
+     data-csrf-token="{{ csrf_token }}" 
+     style="display: none;"></div>
+<script src="{% static 'js/ingredients.js' %}"></script>
+{% endblock %}

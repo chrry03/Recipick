@@ -1,19 +1,4 @@
-/* 기본 리셋 */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Gowun Dodum', sans-serif;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f5f5f5;
-}
+/* 요리 모드 페이지 스타일 */
 
 /* 메인 컨테이너 */
 .recipe-container {
@@ -27,20 +12,20 @@ body {
     overflow: hidden;
 }
 
-/* 로고 (header.html 사용 시) */
-.app-header {
+/* 로고 (header.html 사용 시 - 요리 모드 페이지 전용) */
+.recipe-container .app-header {
     position: absolute;
     top: 12px;
     left: 12px;
     z-index: 10;
 }
 
-.app-header .header-logo {
+.recipe-container .app-header .header-logo {
     width: 175px;
     height: 37px;
 }
 
-.app-header .logo-img {
+.recipe-container .app-header .logo-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -194,4 +179,178 @@ body {
         border-radius: 0;
         max-height: 100vh;
     }
+}
+
+
+.recipe-list-container {
+    padding: 20px;
+    padding-bottom: 100px;
+}
+
+.search-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.search-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.recommendation-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.recipe-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.recipe-card:hover {
+    transform: translateY(-4px);
+}
+
+.recipe-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    background: #f5f5f5;
+}
+
+.recipe-info {
+    padding: 12px;
+}
+
+.recipe-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.recipe-meta {
+    display: flex;
+    gap: 10px;
+    font-size: 12px;
+    color: #666;
+}
+
+.recipe-time,
+.recipe-difficulty {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state img {
+    width: 120px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.btn-recommend {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 20px auto;
+    padding: 14px;
+    background: #FF7043;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-recommend:hover {
+    background: #FF5722;
+}
+
+.btn-recommend:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 40px;
+}
+
+.loading-spinner.show {
+    display: block;
+}
+
+.score-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.score-urgent {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.score-ready {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.score-almost {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.login-link {
+    color: #FF7043;
+    text-decoration: underline;
+    transition: opacity 0.2s;
+}
+
+.login-link:hover {
+    opacity: 0.8;
 }

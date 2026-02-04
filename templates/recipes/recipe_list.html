@@ -3,170 +3,6 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/recipes.css' %}">
-<style>
-    .recipe-list-container {
-        padding: 20px;
-        padding-bottom: 100px;
-    }
-    
-    .search-wrapper {
-        position: relative;
-        margin-bottom: 20px;
-    }
-    
-    .search-input {
-        width: 100%;
-        padding: 12px 40px 12px 16px;
-        border: 1px solid #ddd;
-        border-radius: 12px;
-        font-size: 14px;
-    }
-    
-    .search-icon {
-        position: absolute;
-        right: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-    }
-    
-    .recommendation-section {
-        margin-bottom: 30px;
-    }
-    
-    .section-title {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 15px;
-        color: #333;
-    }
-    
-    .recipe-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-    
-    .recipe-card {
-        background: white;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        cursor: pointer;
-        transition: transform 0.2s;
-    }
-    
-    .recipe-card:hover {
-        transform: translateY(-4px);
-    }
-    
-    .recipe-image {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-        background: #f5f5f5;
-    }
-    
-    .recipe-info {
-        padding: 12px;
-    }
-    
-    .recipe-name {
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 8px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    
-    .recipe-meta {
-        display: flex;
-        gap: 10px;
-        font-size: 12px;
-        color: #666;
-    }
-    
-    .recipe-time,
-    .recipe-difficulty {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #999;
-    }
-    
-    .empty-state img {
-        width: 120px;
-        margin-bottom: 20px;
-        opacity: 0.5;
-    }
-    
-    .btn-recommend {
-        display: block;
-        width: 100%;
-        max-width: 300px;
-        margin: 20px auto;
-        padding: 14px;
-        background: #FF7043;
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-    
-    .btn-recommend:hover {
-        background: #FF5722;
-    }
-    
-    .btn-recommend:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-    }
-    
-    .loading-spinner {
-        display: none;
-        text-align: center;
-        padding: 40px;
-    }
-    
-    .loading-spinner.show {
-        display: block;
-    }
-    
-    .score-badge {
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 11px;
-        font-weight: 600;
-        margin-top: 4px;
-    }
-    
-    .score-urgent {
-        background: #ffebee;
-        color: #c62828;
-    }
-    
-    .score-ready {
-        background: #e8f5e9;
-        color: #2e7d32;
-    }
-    
-    .score-almost {
-        background: #fff3e0;
-        color: #ef6c00;
-    }
-</style>
 {% endblock extra_head %}
 
 {% block header %}
@@ -175,32 +11,40 @@
 
 {% block main_content %}
 <div class="recipe-list-container">
-    <!-- 검색 -->
     <div class="search-wrapper">
-        <input type="text" id="recipe-search-input" class="search-input" placeholder="레시피 검색 (예: 김치볶음밥)">
-        <img src="{% static 'images/search.png' %}" alt="검색" class="search-icon" id="search-btn">
+        <input type="text" 
+               id="recipe-search-input" 
+               class="search-input" 
+               placeholder="레시피 검색 (예: 김치볶음밥)"
+               aria-label="레시피 검색">
+        <img src="{% static 'images/search.png' %}" 
+             alt="검색" 
+             class="search-icon" 
+             id="search-btn"
+             role="button"
+             tabindex="0"
+             aria-label="검색 실행">
     </div>
     
-    <!-- 추천 받기 버튼 -->
     {% if user.is_authenticated %}
-    <button class="btn-recommend" id="get-recommendations-btn">
+    <button type="button" 
+            class="btn-recommend" 
+            id="get-recommendations-btn"
+            aria-label="내 식재료로 레시피 추천받기">
         🎯 내 식재료로 레시피 추천받기
     </button>
     {% else %}
     <div class="empty-state">
         <p>로그인 후 식재료를 등록하고<br>레시피 추천을 받아보세요!</p>
-        <a href="{% url 'users:login' %}" style="color: #FF7043; text-decoration: underline;">로그인하기</a>
+        <a href="{% url 'users:login' %}" class="login-link">로그인하기</a>
     </div>
     {% endif %}
     
-    <!-- 로딩 스피너 -->
-    <div class="loading-spinner" id="loading-spinner">
+    <div class="loading-spinner" id="loading-spinner" role="status" aria-live="polite">
         <p>레시피를 불러오는 중...</p>
     </div>
     
-    <!-- 추천 결과 -->
-    <div id="recipe-recommendations">
-        <!-- 기본 상태 -->
+    <div id="recipe-recommendations" role="region" aria-label="레시피 목록">
         {% if user.is_authenticated %}
         <div class="empty-state">
             <img src="{% static 'images/empty_fridge.png' %}" alt="빈 상태">
@@ -209,123 +53,8 @@
         {% endif %}
     </div>
 </div>
-
-<script src="{% static 'js/recipe_recommendation.js' %}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 추천 버튼 클릭
-    const recommendBtn = document.getElementById('get-recommendations-btn');
-    if (recommendBtn) {
-        recommendBtn.addEventListener('click', async function() {
-            const spinner = document.getElementById('loading-spinner');
-            const resultsContainer = document.getElementById('recipe-recommendations');
-            
-            recommendBtn.disabled = true;
-            spinner.classList.add('show');
-            resultsContainer.innerHTML = '';
-            
-            try {
-                const data = await getRecipeRecommendations([], true, true);
-                renderRecipeRecommendations(data);
-            } catch (error) {
-                console.error('추천 실패:', error);
-                resultsContainer.innerHTML = '<div class="empty-state"><p>레시피 추천에 실패했습니다.<br>식재료를 등록했는지 확인해주세요.</p></div>';
-            } finally {
-                spinner.classList.remove('show');
-                recommendBtn.disabled = false;
-            }
-        });
-    }
-    
-    // 검색 기능
-    const searchInput = document.getElementById('recipe-search-input');
-    const searchBtn = document.getElementById('search-btn');
-    
-    async function performSearch() {
-        const query = searchInput.value.trim();
-        if (!query) return;
-        
-        const spinner = document.getElementById('loading-spinner');
-        const resultsContainer = document.getElementById('recipe-recommendations');
-        
-        spinner.classList.add('show');
-        resultsContainer.innerHTML = '';
-        
-        try {
-            const data = await searchRecipes(query);
-            renderSearchResults(data);
-        } catch (error) {
-            console.error('검색 실패:', error);
-            resultsContainer.innerHTML = '<div class="empty-state"><p>검색에 실패했습니다.</p></div>';
-        } finally {
-            spinner.classList.remove('show');
-        }
-    }
-    
-    searchBtn.addEventListener('click', performSearch);
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            performSearch();
-        }
-    });
-});
-
-function renderSearchResults(data) {
-    const container = document.getElementById('recipe-recommendations');
-    
-    if (!data.recipes || data.recipes.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>검색 결과가 없습니다.</p></div>';
-        return;
-    }
-    
-    let html = '<div class="recommendation-section">';
-    html += `<h2 class="section-title">검색 결과 (${data.count}개)</h2>`;
-    html += '<div class="recipe-grid">';
-    
-    data.recipes.forEach(recipe => {
-        html += createRecipeCardHTML(recipe);
-    });
-    
-    html += '</div></div>';
-    container.innerHTML = html;
-}
-
-function createRecipeCardHTML(recipe) {
-    // difficulty는 enum 값 ('EASY', 'NORMAL', 'DIFFICULT')
-    const difficultyMap = {
-        'EASY': '쉬움',
-        'NORMAL': '보통',
-        'DIFFICULT': '어려움'
-    };
-    const difficultyText = difficultyMap[recipe.difficulty] || '보통';
-    
-    const defaultImage = '{% static "images/default-recipe.jpg" %}';
-    const imageUrl = recipe.image_url || defaultImage;
-    
-    let scoreHTML = '';
-    if (recipe.recommendation_score) {
-        const score = recipe.recommendation_score.total_score;
-        let scoreClass = '';
-        if (score >= 90) scoreClass = 'score-urgent';
-        else if (score >= 75) scoreClass = 'score-ready';
-        else scoreClass = 'score-almost';
-        
-        scoreHTML = `<div class="score-badge ${scoreClass}">추천 ${score.toFixed(0)}점</div>`;
-    }
-    
-    return `
-        <div class="recipe-card" onclick="location.href='/recipes/${recipe.recipe_id}/'">
-            <img src="${imageUrl}" alt="${recipe.title}" class="recipe-image" onerror="this.src='${defaultImage}'">
-            <div class="recipe-info">
-                <div class="recipe-name">${recipe.title}</div>
-                <div class="recipe-meta">
-                    <span class="recipe-time">⏱️ ${recipe.ready_minutes}분</span>
-                    <span class="recipe-difficulty">${difficultyText}</span>
-                </div>
-                ${scoreHTML}
-            </div>
-        </div>
-    `;
-}
-</script>
 {% endblock main_content %}
+
+{% block extra_script %}
+<script src="{% static 'js/recipes.js' %}"></script>
+{% endblock extra_script %}
