@@ -9,9 +9,10 @@
     /**
      * 식재료 추가 페이지 관리 클래스
      */
-    class IngredientAdder {
+class IngredientAdder {
         constructor() {
-            this.selectedItems = {};
+            this.selectedItems = {};      // 새로 추가할 목록
+            this.removedItems = new Set(); // 삭제할 목록 (보유 취소)
             this.currentTarget = null;
             this.initElements();
             this.attachEventListeners();
@@ -47,39 +48,47 @@
                 });
             });
 
-            if (this.cancelBtn) {
-                this.cancelBtn.addEventListener('click', () => this.closeModal());
-            }
-
-            if (this.confirmBtn) {
-                this.confirmBtn.addEventListener('click', () => this.confirmIngredient());
-            }
-
-            if (this.submitBtn) {
-                this.submitBtn.addEventListener('click', () => this.submitIngredients());
-            }
-
+            if (this.cancelBtn) this.cancelBtn.addEventListener('click', () => this.closeModal());
+            if (this.confirmBtn) this.confirmBtn.addEventListener('click', () => this.confirmIngredient());
+            if (this.submitBtn) this.submitBtn.addEventListener('click', () => this.submitIngredients());
+            
             if (this.dateModal) {
                 this.dateModal.addEventListener('click', (e) => {
-                    if (e.target === this.dateModal) {
-                        this.closeModal();
-                    }
+                    if (e.target === this.dateModal) this.closeModal();
                 });
             }
         }
 
         toggleIngredient(element) {
-            if (element.classList.contains('added')) {
-                if (this.selectedItems[element.dataset.name]) {
-                    delete this.selectedItems[element.dataset.name];
-                    element.classList.remove('added');
-                    this.updateCount();
-                    return;
+            const name = element.dataset.name;
+            // [중요] HTML에서 설정한 속성으로 초기 보유 여부 확인
+            const isInitiallyOwned = element.dataset.initialOwned === 'true';
+
+            // CASE 1: 원래 보유하고 있던 재료인 경우 (삭제/복구 토글)
+            if (isInitiallyOwned) {
+                if (this.removedItems.has(name)) {
+                    // 이미 삭제하려고 눌러뒀던 걸 다시 누름 -> 삭제 취소 (다시 보유 상태로)
+                    this.removedItems.delete(name);
+                    element.classList.add('added'); // UI: 다시 찐하게 표시
+                } else {
+                    // 보유중인데 누름 -> 삭제 목록에 추가
+                    this.removedItems.add(name);
+                    element.classList.remove('added'); // UI: 흐리게(선택 해제된 것처럼)
                 }
-                element.classList.remove('added');
+                this.updateCount();
                 return;
             }
 
+            // CASE 2: 원래 없던 재료인 경우 (추가/취소 토글)
+            if (element.classList.contains('added')) {
+                // 이미 추가하려고 선택했던 걸 다시 누름 -> 추가 취소
+                delete this.selectedItems[name];
+                element.classList.remove('added');
+                this.updateCount();
+                return;
+            }
+
+            // 새로 추가 -> 모달 열기
             this.currentTarget = element;
             this.modalIngredientName.textContent = element.dataset.name;
 
@@ -117,17 +126,18 @@
         }
 
         async submitIngredients() {
-            const names = Object.keys(this.selectedItems);
-            if (names.length === 0) {
-                alert('추가할 식재료를 선택해주세요!');
-                return;
-            }
+            const addedNames = Object.keys(this.selectedItems);
+            const removedNames = Array.from(this.removedItems);
 
-            const payload = names.map(name => ({
-                name: this.selectedItems[name].name,
-                category: this.selectedItems[name].category,
-                expiry_date: this.selectedItems[name].expiry
-            }));
+            // Payload 구성: 추가할 것(added) + 삭제할 것(removed)
+            const payload = {
+                added: addedNames.map(name => ({
+                    name: this.selectedItems[name].name,
+                    category: this.selectedItems[name].category,
+                    expiry_date: this.selectedItems[name].expiry
+                })),
+                removed: removedNames
+            };
 
             try {
                 const response = await fetch(this.getAddIngredientUrl(), {
@@ -136,14 +146,15 @@
                         'Content-Type': 'application/json',
                         'X-CSRFToken': this.getCsrfToken()
                     },
-                    body: JSON.stringify({ ingredients: payload })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();
                 if (data.status === 'success') {
+                    // 성공 시 이동
                     window.location.href = this.getMyFridgeUrl();
                 } else {
-                    alert('저장 실패');
+                    alert('저장 실패: ' + (data.message || ''));
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -152,9 +163,10 @@
         }
 
         updateCount() {
+            // "새로 추가 예정인" 개수만 배지에 표시 (기획에 따라 변경 가능)
             const count = Object.keys(this.selectedItems).length;
             if (this.countBadge) {
-                this.countBadge.textContent = `(${count})`;
+                this.countBadge.textContent = count > 0 ? `(${count})` : '';
             }
         }
 
