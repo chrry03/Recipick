@@ -1,0 +1,197 @@
+/* 기본 리셋 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Gowun Dodum', sans-serif;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f5f5f5;
+}
+
+/* 메인 컨테이너 */
+.recipe-container {
+    position: relative;
+    width: 100%;
+    max-width: 385px;
+    height: 100%;
+    max-height: 844px;
+    background: linear-gradient(180deg, #f5ede0 0%, #f6f3ee 100%);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+/* 로고 (header.html 사용 시) */
+.app-header {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 10;
+}
+
+.app-header .header-logo {
+    width: 175px;
+    height: 37px;
+}
+
+.app-header .logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 단계 번호 */
+.step-number {
+    position: absolute;
+    top: 199px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 5;
+}
+
+.step-number p {
+    font-family: 'MemomentKkukkukk', sans-serif;
+    font-size: 100px;
+    line-height: 1;
+    color: #000;
+    font-weight: 900;
+    margin: 0;
+}
+
+/* 설명 텍스트 */
+.description {
+    position: absolute;
+    top: 285px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 312px;
+    max-width: calc(100% - 40px);
+    text-align: center;
+    z-index: 5;
+}
+
+.description p {
+    font-family: 'Gowun Dodum', 'Arial', sans-serif;
+    font-size: 20px;
+    line-height: 1.4;
+    color: #000;
+    white-space: pre-wrap;
+    margin: 0;
+}
+
+/* 마스크 그룹 (이미지 컨테이너) */
+.mask-group {
+    position: absolute;
+    top: 350px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 353px;
+    max-width: calc(100% - 32px);
+    z-index: 1;
+}
+
+.image-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 17px;
+    background-color: #e5e5e5;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e5e5e5;
+}
+
+.image-placeholder svg {
+    opacity: 0.5;
+}
+
+/* 네비게이션 버튼 */
+.nav-buttons {
+    position: absolute;
+    bottom: 41px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 33px;
+}
+
+.btn {
+    width: 89px;
+    height: 33px;
+    border-radius: 30px;
+    border: none;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-prev {
+    background-color: #d9d9d9;
+    color: #000;
+}
+
+.btn-prev:hover {
+    background-color: #c9c9c9;
+}
+
+.btn-exit {
+    background-color: #d9d9d9;
+    color: #000;
+}
+
+.btn-exit:hover {
+    background-color: #c9c9c9;
+}
+
+.btn-next {
+    background-color: #ff7043;
+    color: #f2f2f2;
+}
+
+.btn-next:hover {
+    background-color: #ff5722;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 385px) {
+    .recipe-container {
+        border-radius: 0;
+        max-height: 100vh;
+    }
+}

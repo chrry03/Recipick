@@ -1,2 +1,97 @@
-<!-- 요리 과정 단계별 보기 + 타이머 -->
- 
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ recipe.title }} - 단계 {{ current_step }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recipes.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="recipe-container" 
+     data-recipe-id="{{ recipe.recipe_id }}" 
+     data-total-steps="{{ total_steps }}"
+     data-current-step="{{ current_step }}">
+    
+    <!-- Header -->
+    {% include 'header.html' %}
+
+    <!-- 단계 번호 -->
+    <div class="step-number" aria-label="현재 단계">
+        <p>{{ current_step }}</p>
+    </div>
+
+    <!-- 설명 텍스트 -->
+    <div class="description" role="article">
+        {% if step_data %}
+            <p>{{ step_data.description|linebreaksbr }}</p>
+        {% else %}
+            <p class="no-step-data">단계 정보가 없습니다.</p>
+        {% endif %}
+    </div>
+
+    <!-- 이미지 섹션 -->
+    <div class="mask-group">
+        {% if step_data.image %}
+            <div class="image-container">
+                <img src="{{ step_data.image }}" 
+                     alt="{{ recipe.title }} - 단계 {{ current_step }}" 
+                     loading="lazy"
+                     onerror="this.style.display='none';">
+            </div>
+        {% elif recipe.image_url %}
+            <div class="image-container">
+                <img src="{{ recipe.image_url }}" 
+                     alt="{{ recipe.title }} - 단계 {{ current_step }}" 
+                     loading="lazy"
+                     onerror="this.style.display='none';">
+            </div>
+        {% else %}
+            <!-- 기본 이미지 플레이스홀더 -->
+            <div class="image-container">
+                <div class="image-placeholder">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 네비게이션 버튼 -->
+    <nav class="nav-buttons" aria-label="단계 네비게이션">
+        {% if current_step == 1 %}
+        <!-- 1단계일 때는 종료 버튼 -->
+        <button type="button" 
+                class="btn btn-exit" 
+                id="exitBtn"
+                aria-label="요리 종료하고 홈으로 이동">
+            종료
+        </button>
+        {% else %}
+        <!-- 2단계 이상일 때는 이전 버튼 -->
+        <button type="button" 
+                class="btn btn-prev" 
+                id="prevStepBtn"
+                aria-label="이전 단계로 이동">
+            이전
+        </button>
+        {% endif %}
+        
+        <button type="button" 
+                class="btn btn-next" 
+                id="nextStepBtn"
+                aria-label="다음 단계로 이동"
+                {% if current_step >= total_steps %}disabled aria-disabled="true"{% endif %}>
+            다음
+        </button>
+    </nav>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="{% static 'js/recipe_step.js' %}"></script>
+{% endblock %}
