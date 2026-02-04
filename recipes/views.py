@@ -27,6 +27,48 @@ def recipe_detail_view(request, recipe_id):
     })
 
 
+
+def cooking_mode_view(request, recipe_id, step=1):
+    """요리 모드 페이지 (단계별) - 테스트용 더미 데이터"""
+    # 테스트용 더미 데이터
+    test_recipe = {
+        'recipe_id': recipe_id,
+        'title': '로제 파스타',
+        'image_url': '/static/images/ex/pasta.png',
+        'instructions': [
+            {"step": 1, "description": "물에 소금 넉넉히 넣고 면 삶기(8분)"},
+            {"step": 2, "description": "팬에 올리브유 두르고 마늘, 양파, 베이컨 순으로 볶기"},
+            {"step": 3, "description": "토마토소스 넣고 2분 끓인 뒤 생크림 넣고 잘 섞기"},
+            {"step": 4, "description": "면 넣고 센 불에서 빠르게 섞어 소금·후추로 간 맞추기"},
+        ]
+    }
+    
+    instructions = test_recipe['instructions']
+    total_steps = len(instructions)
+    current_step_data = None
+    if instructions and 1 <= step <= total_steps:
+        current_step_data = instructions[step - 1]
+    
+    # 레시피 객체처럼 사용할 수 있도록 속성 추가
+    class RecipeObj:
+        def __init__(self, data):
+            self.recipe_id = data['recipe_id']
+            self.title = data['title']
+            self.image_url = data.get('image_url')
+    
+    recipe_obj = RecipeObj(test_recipe)
+    
+    return render(request, 'recipes/cooking_mode.html', {
+        'recipe': recipe_obj,
+        'current_step': step,
+        'total_steps': total_steps,
+        'step_data': current_step_data,
+        'instructions': instructions,
+    })
+
+
+
+
 # ==================== API 뷰 ==================== #
 
 @api_view(['POST'])
