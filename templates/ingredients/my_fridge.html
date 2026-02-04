@@ -35,6 +35,7 @@
         냉장고가 텅 비어있어요...<br>'재료 추가 버튼'을 눌러 추가해 주세요!
     </div>
 </div>
+
 {% else %}
 <div class="filter-bar">
     {% for cat in categories %}
@@ -52,8 +53,10 @@
              data-name="{{ ui.ingredient.name_ko }}"
              data-category="{{ ui.ingredient.category.name }}" 
              data-expiry="{{ ui.expire_at|date:'Y-m-d' }}">
-            <div class="item-icon-box {% if ui.days_left <= 3 %}urgent{% endif %}">
-                <div class="d-day-badge">D-{{ ui.days_left|default:"Day" }}</div>
+            
+            <div class="item-icon-box {% if ui.is_expired %}urgent{% endif %}">
+                <div class="d-day-badge">{{ ui.d_day_tag }}</div>
+                
                 {% if ui.ingredient.icon_name %}
                 <img src="{% static 'images/ingredients/'|add:ui.ingredient.icon_name %}" 
                      class="item-img" 
@@ -69,12 +72,6 @@
     </div>
 </div>
 
-<a href="{% url 'ingredients:add_ingredient' %}" class="fab-add" aria-label="재료 추가">
-    <svg class="fab-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
-</a>
 {% endif %}
 
 <div class="modal-overlay" id="editModal">
@@ -90,7 +87,10 @@
     </div>
 </div>
 
-{% endblock main_content %}
+<a href="{% url 'ingredients:add_ingredient' %}" class="floating-add-btn" aria-label="재료 추가">
+        <img src="{% static 'images/ingredient_plus.svg' %}" alt="추가">
+    </a>
+    {% endblock main_content %}
 
 {% block extra_script %}
 <div data-add-ingredient-url="{% url 'ingredients:add_ingredient' %}" 
