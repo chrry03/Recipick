@@ -137,35 +137,61 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
 
 @login_required
 def my_fridge_view(request):
-    """내 냉장고 페이지"""
+    """
+    내 냉장고 페이지
+    - 정렬: 유통기한 임박(만료 포함) -> 이름순
+    - D-Day 표기: 만료 / D-Day / D-N 로직 적용
+    """
+    # 1. 쿼리 및 정렬
     user_ingredients = UserIngredient.objects.filter(
         user=request.user,
         is_consumed=False
-    ).select_related('ingredient', 'ingredient__category').order_by('expire_at')
+    ).select_related('ingredient', 'ingredient__category').order_by('expire_at', 'ingredient__name_ko')
     
-    # 1. D-Day 및 아이콘 처리
     today = date.today()
+    
+    # 2. 데이터 가공 (D-Day 태그 생성 및 아이콘 매핑)
     for ui in user_ingredients:
-        if ui.expire_at:
-            ui.days_left = (ui.expire_at - today).days
-        else:
-            ui.days_left = 999
-        
+        # 아이콘 설정
         ing_name = ui.ingredient.name_ko
         ui.ingredient.icon_name = ICON_MAP.get(ing_name, None)
+        
+        # 날짜 계산 및 태그 생성
+        if ui.expire_at:
+            delta = (ui.expire_at - today).days
+            
+            if delta < 0:
+                # 유통기한 지남 (예: -2일)
+                ui.d_day_tag = "만료"
+                ui.is_urgent = True # 빨간색 표시
+            elif delta == 0:
+                # 당일
+                ui.d_day_tag = "D-Day"
+                ui.is_urgent = True
+            else:
+                # 미래 (예: 5일 남음) -> "D-5"
+                ui.d_day_tag = f"D-{delta}"
+                
+                # 3일 이내면 긴급 표시
+                if delta <= 3:
+                    ui.is_urgent = True
+                else:
+                    ui.is_urgent = False
+        else:
+            ui.d_day_tag = "-"
+            ui.is_urgent = False
 
-    # 2. [NEW] 카테고리별 개수 세기
+    # 3. 카테고리별 개수 세기
     # 딕셔너리 초기화: {'채소': 0, '육류': 0 ...}
     category_counts = {cat: 0 for cat in CATEGORY_LIST if cat != "전체"}
     
     for ui in user_ingredients:
-        # DB에 저장된 카테고리 이름 가져오기
+        # DB에 저장된 카테고리 이름 가져오기 (없으면 '기타')
         cat_name = ui.ingredient.category.name if ui.ingredient.category else '기타'
         if cat_name in category_counts:
             category_counts[cat_name] += 1
     
-    # 3. 템플릿에 보낼 데이터 구성 (이름, 개수)
-    # "전체"는 따로 계산
+    # 4. 템플릿에 보낼 카테고리 리스트 구성
     final_categories = [{'name': '전체', 'count': len(user_ingredients)}]
     for cat in CATEGORY_LIST:
         if cat == "전체": continue
@@ -176,7 +202,7 @@ def my_fridge_view(request):
 
     context = {
         'ingredients': user_ingredients,
-        'categories': final_categories # 개수 정보가 포함된 카테고리 리스트
+        'categories': final_categories
     }
     return render(request, 'ingredients/my_fridge.html', context)
 
@@ -238,7 +264,7 @@ def add_ingredient_view(request):
         {'id': 28, 'name': '달래', 'category': '채소', 'icon_name': None},
     ]
 
-    # [NEW] 이미 보유한 재료 확인
+    # 이미 보유한 재료 확인
     user_owned_names = set(
         UserIngredient.objects.filter(
             user=request.user, 
@@ -248,7 +274,7 @@ def add_ingredient_view(request):
     for item in master_ingredients:
         item['is_added'] = item['name'] in user_owned_names
 
-    # [NEW] 카테고리별 개수 세기 (Add 페이지용 - 전체 목록 기준)
+    # 카테고리별 개수 세기 (Add 페이지용)
     category_counts = {cat: 0 for cat in CATEGORY_LIST if cat != "전체"}
     for item in master_ingredients:
         c_name = item['category']

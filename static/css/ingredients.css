@@ -226,22 +226,69 @@
     font-weight: 500;
 }
 
-.fab-add {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 56px;
-    height: 56px;
-    background: #E76F51;
+/* [최종 통합] 메인 페이지와 100% 동일한 스타일 적용 */
+.floating-add-btn {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 7.5rem;   /* 메인 페이지와 동일한 높이 */
+    width: 4rem;
+    height: 4rem;
+    background: transparent; /* 이미지가 들어가므로 배경 투명 */
+    border: none;
     border-radius: 50%;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(231, 111, 81, 0.4);
-    font-size: 30px;
-    color: white;
-    text-decoration: none;
-    z-index: 10;
+    transition: all 0.2s;
+    z-index: 9999;    /* 다른 요소에 가리지 않게 최상단 설정 */
+    padding: 0;
+    text-decoration: none; /* a태그 밑줄 제거 */
+    box-shadow: none; /* 이미지 자체 그림자가 있다면 제거 (필요시 추가) */
+}
+
+/* 이미지 크기 꽉 차게 */
+.floating-add-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* 버튼 눌렀을 때 살짝 작아지는 효과 */
+.floating-add-btn:active {
+    transform: scale(0.95);
+}
+
+/* [중요] PC 화면에서 너무 오른쪽으로 가는 것 방지 (중앙 정렬) */
+@media (min-width: 448px) {
+    .floating-add-btn {
+        right: calc(50% - 224px + 1.5rem);
+    }
+}
+
+/* D-Day 뱃지 스타일 */
+.d-day-badge {
+    position: absolute;
+    top: -8px; 
+    left: 50%;
+    transform: translateX(-50%);
+    background: #FFF;
+    border: 1px solid #ddd;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #555;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    white-space: nowrap;
+    z-index: 5;
+}
+
+/* 긴급/만료 재료 빨간색 강조 */
+.urgent .d-day-badge {
+    color: #E76F51;
+    border-color: #E76F51;
+    background: #FFF;
 }
 
 /* =========================================
@@ -452,3 +499,5 @@
     align-items: center;
     justify-content: center;
 }
+
+
