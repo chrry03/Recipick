@@ -1,6 +1,6 @@
 from datetime import date
 from django.shortcuts import render
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import authenticate, get_user_model, login
 from django.db.models import F
 
 # DRF 관련 임포트
@@ -33,11 +33,13 @@ def signup_view(request):
         if serializer.is_valid():
             try:
                 user = User.objects.create_user(
+                    username=request.data['email'], #username을 email과 똑같이 설정해주는 코드 추가
                     email=request.data['email'],
                     password=request.data['password'],
                     nickname=request.data['nickname']
                 )
-                token = RefreshToken.for_user(user)
+                login(request, user) # 세션 로그인
+                token = RefreshToken.for_user(user) # 토큰 발급
                 return Response({
                     "message": "회원가입이 완료되었습니다.",
                     "user": UserSerializer(user).data,
@@ -47,7 +49,11 @@ def signup_view(request):
                     }
                 }, status=201)
             except Exception as e:
+                # 에러 확인을 위해 콘솔에 원인을 출력해두면 좋습니다.
+                print(f"회원가입 에러: {e}")
                 return Response({"message": "회원가입 중 오류가 발생했습니다."}, status=400)
+            
+        # 유효성 검사 실패 시 (이미 있는 이메일 등)
         return Response(serializer.errors, status=400)
 
 # =============================================================
