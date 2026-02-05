@@ -9,7 +9,7 @@ urlpatterns = [
     path('', views.login_view, name='login_root'),           # 기본 경로 -> 로그인
     path('login/', views.login_view, name='login'),          # 로그인 화면
     path('signup/', views.signup_view, name='signup'),       # 회원가입 화면
-    path('main/', views.main_view, name='main'),             # 메인 페이지 (★수정: main -> main_view)
+    #path('main/', views.main_view, name='main'),             # 메인 페이지 (html에서 root로 로드하도록 바꿈)
     path('mypage/', views.mypage_view, name='mypage'),       # 마이 페이지 (내 정보 조회/수정/탈퇴 통합)
     path('notification/', views.notification_view, name='notification'), # 알림 (★수정: notification -> notification_view)
     
