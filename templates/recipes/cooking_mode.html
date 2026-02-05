@@ -8,12 +8,13 @@
 {% endblock extra_css %}
 
 {% block content %}
+{% include 'header.html' %}
 <div class="recipe-container" 
      data-recipe-id="{{ recipe.recipe_id }}" 
      data-total-steps="{{ total_steps }}"
      data-current-step="{{ current_step }}">
     
-    {% include 'header.html' %}
+    
 
     <div class="step-number" aria-label="현재 단계">
         <p>{{ current_step }}</p>
