@@ -7,6 +7,7 @@
     max-width: 385px;
     height: 100%;
     max-height: 844px;
+    margin: 0 auto;
     background: linear-gradient(180deg, #f5ede0 0%, #f6f3ee 100%);
     border-radius: 20px;
     overflow: hidden;
@@ -34,7 +35,7 @@
 /* 단계 번호 */
 .step-number {
     position: absolute;
-    top: 199px;
+    top: 120px;
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
@@ -45,15 +46,15 @@
     font-family: 'MemomentKkukkukk', sans-serif;
     font-size: 100px;
     line-height: 1;
-    color: #000;
-    font-weight: 900;
+    color: rgba(0, 0, 0, 1);
+    font-weight: normal;
     margin: 0;
 }
 
 /* 설명 텍스트 */
 .description {
     position: absolute;
-    top: 285px;
+    top: 180px;
     left: 50%;
     transform: translateX(-50%);
     width: 312px;
@@ -63,10 +64,10 @@
 }
 
 .description p {
-    font-family: 'Gowun Dodum', 'Arial', sans-serif;
+    font-family: 'MemomentKkukkukk', sans-serif;
     font-size: 20px;
     line-height: 1.4;
-    color: #000;
+    color: rgba(85, 85, 85, 1);
     white-space: pre-wrap;
     margin: 0;
 }
@@ -74,7 +75,7 @@
 /* 마스크 그룹 (이미지 컨테이너) */
 .mask-group {
     position: absolute;
-    top: 350px;
+    top: 250px;
     left: 50%;
     transform: translateX(-50%);
     width: 353px;
@@ -109,6 +110,15 @@
 
 .image-placeholder svg {
     opacity: 0.5;
+}
+
+/* 타이머 앱 컨테이너 */
+#timer-app {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
 }
 
 /* 네비게이션 버튼 */
@@ -360,6 +370,7 @@
     position: relative;
     width: 200px;
     height: 200px;
+    margin: 0 auto;
     border-radius: 50%;
     background-color: #f8f5ed;
     border: 8px solid #ff6e40;
@@ -371,27 +382,37 @@
   }
   
   .base-timer__left-label {
-    font-size: 12px;
+    font-size: 20px;
     font-weight: 500;
-    color: #6c6c6c;
+    color: rgba(85, 85, 85, 1);
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 0;
     letter-spacing: 0.5px;
+    font-family: 'MemomentKkukkukk', sans-serif;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: -59px;
   }
   
   .base-timer__time {
-    font-size: 64px;
-    font-weight: 900;
+    font-size: 80px;
+    font-weight: normal;
     color: #000000;
     line-height: 1;
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'MemomentKkukkukk', sans-serif;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     user-select: none;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 4px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
   
   .timer-time-part {
@@ -410,25 +431,26 @@
   .timer-time-separator {
     display: inline-block;
     user-select: none;
+    font-family: 'MemomentKkukkukk', sans-serif;
   }
   
   .timer-time-input {
     width: 120px;
-    font-size: 64px;
-    font-weight: 900;
+    font-size: 80px;
+    font-weight: normal;
     color: #000000;
     background-color: transparent;
     border: 2px solid #ff6e40;
     border-radius: 4px;
     text-align: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'MemomentKkukkukk', sans-serif;
     outline: none;
     padding: 0;
   }
   
   .timer-time-input--small {
     width: 60px;
-    font-size: 64px;
+    font-size: 80px;
   }
   
   /* number input의 스피너 버튼 제거 */
@@ -441,34 +463,44 @@
   .timer-time-input[type="number"] {
     -moz-appearance: textfield;
   }
-  
+  ㅂ
   .timer-time-input::placeholder {
     color: #999;
   }
   
   .base-timer__play-button {
-    margin-top: 12px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 50px;
     width: 0;
     height: 0;
-    border-left: 12px solid #ff6e40;
-    border-top: 8px solid transparent;
-    border-bottom: 8px solid transparent;
+    border-left: 30px solid #ff6e40;
+    border-top: 20px solid transparent;
+    border-bottom: 20px solid transparent;
     cursor: pointer;
     transition: transform 0.2s ease;
   }
   
   .base-timer__play-button:hover {
-    transform: scale(1.1);
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  
+  .base-timer__play-button.paused:hover {
+    transform: translate(-50%, -50%) scale(1.1);
   }
   
   .base-timer__play-button.paused {
     border-left: 0;
     border-top: 0;
     border-bottom: 0;
-    width: 16px;
-    height: 16px;
+    width: 30px;
+    height: 30px;
     background-color: transparent;
-    position: relative;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    margin-top: 50px;
   }
   
   .base-timer__play-button.paused::before,
@@ -476,8 +508,8 @@
     content: '';
     position: absolute;
     top: 0;
-    width: 4px;
-    height: 16px;
+    width: 8px;
+    height: 30px;
     background-color: #ff6e40;
     border-radius: 2px;
   }

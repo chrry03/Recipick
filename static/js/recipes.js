@@ -808,7 +808,7 @@
     // 타이머 모듈
     // ============================================
 
-    let TIME_LIMIT = 20; // 기본값 20초
+    let TIME_LIMIT = 0;
     let timePassed = 0;
     let timeLeft = TIME_LIMIT;
     let timerInterval = null;
@@ -995,6 +995,7 @@
         const input = document.getElementById("timer-minutes-input");
         if (!input) {
             isEditingTime = false;
+            updateTimerDisplay();
             return;
         }
 
@@ -1003,10 +1004,11 @@
         const seconds = parseInt(currentTime.seconds, 10) || 0;
         const totalSeconds = minutes * 60 + seconds;
 
+        isEditingTime = false;
+        
         if (totalSeconds > 0) {
             setTimerTime(totalSeconds);
         } else {
-            isEditingTime = false;
             updateTimerDisplay();
         }
     }
@@ -1015,10 +1017,11 @@
         const input = document.getElementById("timer-seconds-input");
         if (!input) {
             isEditingTime = false;
+            updateTimerDisplay();
             return;
         }
 
-        const seconds = parseInt(input.value, 10) || 0;
+        let seconds = parseInt(input.value, 10) || 0;
         if (seconds > 59) {
             seconds = 59;
         }
@@ -1027,10 +1030,11 @@
         const minutes = parseInt(currentTime.minutes, 10) || 0;
         const totalSeconds = minutes * 60 + seconds;
 
+        isEditingTime = false;
+        
         if (totalSeconds > 0) {
             setTimerTime(totalSeconds);
         } else {
-            isEditingTime = false;
             updateTimerDisplay();
         }
     }
