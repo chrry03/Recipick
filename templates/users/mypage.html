@@ -1,110 +1,39 @@
-{% extends 'base.html' %}
+{% extends 'base_with_navbar.html' %}
 {% load static %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/users.css' %}">
 {% endblock %}
 
+{% block extra_script %}
+    <script src="{% static 'js/users.js' %}"></script>
+{% endblock %}
+
 {% block content %}
-<div class="container-mw">
-    
-    <div id="logged-in-view" style="display: none; flex-direction: column; align-items: center; width:100%;">
-        <div class="mypage-header">
-            <div class="header-logo">Recipick</div>
-            <a href="{% url 'users:notification' %}" class="header-bell">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z" stroke="#555555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </a>
-        </div>
+<div class="scroll-container mypage-wrapper">
+    <div class="container-mw">
         
-        <div class="profile-card-mw">
-            <div class="profile-icon-area"><span style="font-size: 50px;">🍴</span></div>
-            <div class="profile-text-group">
-                <h2 id="display-nickname" class="profile-nickname">닉네임</h2>
-                <a href="{% url 'users:nickname' %}" class="profile-edit-link">닉네임 변경</a>
+        {% include 'header.html' %}
+
+        <div id="logged-in-view" style="display: none; width: 100%; flex-direction: column; align-items: center;">
+            <div class="profile-card-mw">
+                <div style="font-size: 50px;">🍴</div>
+                <div style="text-align: center;">
+                    <h2 id="display-nickname" class="profile-nickname">닉네임</h2>
+                    <a href="{% url 'users:nickname' %}" class="profile-edit-link">닉네임 변경</a>
+                </div>
             </div>
+
+            <a href="{% url 'users:preference' %}" class="btn-mw btn-primary-mw" style="margin-top: 50px;">취향 재설정</a>
+            <button type="button" id="btn-logout" class="btn-mw btn-secondary-mw" style="margin-top: 15px;">로그아웃</button>
         </div>
 
-        <a href="{% url 'users:preference' %}" class="btn-mw btn-primary-mw" style="margin-top: 126px; text-decoration: none;">취향 재설정</a>
-        <button type="button" id="btn-logout" class="btn-mw btn-secondary-mw" style="margin-top: 15px;">로그아웃</button>
-    </div>
-
-    <div id="logged-out-view" style="display: none; flex-direction: column; align-items: center; width:100%;">
-        
-        <div class="mypage-header">
-            <div class="header-logo">Recipick</div>
-            <div class="header-bell">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#555555" stroke-width="2">
-                    <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z"/>
-                </svg>
-            </div>
+        <div id="logged-out-view" style="display: none; width: 100%; flex-direction: column; align-items: center; margin-top: 100px;">
+            <div style="font-size: 60px; margin-bottom: 20px;">🍴</div>
+            <h1 class="title-text" style="margin-bottom: 50px;">Recipick</h1>
+            <a href="{% url 'users:login' %}" class="btn-mw btn-secondary-mw">로그인</a>
         </div>
-
-        <div class="big-logo-area">
-            <div class="big-logo-icon">
-                <svg width="101" height="74" viewBox="0 0 101 74" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 54L40 34" stroke="#888" stroke-width="5" stroke-linecap="round"/>
-                    <text x="10" y="50" font-size="50">🍴</text>
-                </svg>
-            </div>
-            <div class="big-logo-text">Recipick</div>
-        </div>
-
-        <a href="{% url 'users:login' %}" class="btn-mw btn-secondary-mw" style="margin-top: 495px; text-decoration: none;">
-            로그인
-        </a>
 
     </div>
-
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', async function() {
-    const token = localStorage.getItem('access_token');
-    const nicknameDisplay = document.getElementById('display-nickname');
-    const loggedInView = document.getElementById('logged-in-view');
-    const loggedOutView = document.getElementById('logged-out-view');
-
-    if (!token) {
-        loggedOutView.style.display = 'flex';
-        return;
-    }
-
-    // 우선 로컬에 저장된 닉네임을 보여줌 (빠른 응답성)
-    nicknameDisplay.textContent = localStorage.getItem('user_nickname') || '사용자';
-    loggedInView.style.display = 'flex';
-
-    // 서버에서 최신 프로필 정보를 가져와 동기화
-    try {
-        const response = await fetch('/api/users/me/', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        
-        if (response.ok) {
-            const userData = await response.json();
-            // 서버의 최신 닉네임으로 화면과 로컬 스토리지 갱신
-            nicknameDisplay.textContent = userData.nickname;
-            localStorage.setItem('user_nickname', userData.nickname);
-        }
-    } catch (error) {
-        console.error('최신 정보를 불러오는 중 오류 발생:', error);
-    }
-
-const logoutBtn = document.getElementById('btn-logout');
-if(logoutBtn){
-    logoutBtn.addEventListener('click', function(){
-        if(confirm('로그아웃 하시겠습니까?')){
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            localStorage.removeItem('user_nickname');
-            window.location.reload();
-            }
-        });
-    }
-});
-</script>
 {% endblock %}
