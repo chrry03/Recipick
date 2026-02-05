@@ -11,8 +11,8 @@
      */
 class IngredientAdder {
         constructor() {
-            this.selectedItems = {};      // 새로 추가할 목록
-            this.removedItems = new Set(); // 삭제할 목록 (보유 취소)
+            this.selectedItems = {};
+            this.removedItems = new Set();
             this.currentTarget = null;
             this.initElements();
             this.attachEventListeners();
@@ -22,9 +22,13 @@ class IngredientAdder {
             this.searchInput = document.getElementById('searchInput');
             this.categoryPills = document.querySelectorAll('.category-pill');
             this.ingredientItems = document.querySelectorAll('.ingredient-item');
-            this.dateModal = document.getElementById('dateModal');
+            
+            // 모달 관련 요소
+            this.dateModal = document.getElementById('dateModal') || document.getElementById('editModal'); // ID 유동적 대응
             this.modalIngredientName = document.getElementById('modalIngredientName');
             this.expiryInput = document.getElementById('expiryInput');
+            this.noExpiryCheck = document.getElementById('noExpiryCheck'); // [NEW] 체크박스
+            
             this.cancelBtn = document.getElementById('cancelBtn');
             this.confirmBtn = document.getElementById('confirmBtn');
             this.submitBtn = document.getElementById('submitBtn');
@@ -37,15 +41,11 @@ class IngredientAdder {
             }
 
             this.categoryPills.forEach(pill => {
-                pill.addEventListener('click', () => {
-                    this.selectCategory(pill.dataset.category);
-                });
+                pill.addEventListener('click', () => this.selectCategory(pill.dataset.category));
             });
 
             this.ingredientItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    this.toggleIngredient(item);
-                });
+                item.addEventListener('click', () => this.toggleIngredient(item));
             });
 
             if (this.cancelBtn) this.cancelBtn.addEventListener('click', () => this.closeModal());
@@ -57,44 +57,61 @@ class IngredientAdder {
                     if (e.target === this.dateModal) this.closeModal();
                 });
             }
+
+            // [NEW] 체크박스 누르면 날짜 입력칸 끄기/켜기
+            if (this.noExpiryCheck) {
+                this.noExpiryCheck.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        this.expiryInput.value = '';      // 값 비우기
+                        this.expiryInput.disabled = true; // 입력 막기
+                    } else {
+                        this.expiryInput.disabled = false; // 입력 풀기
+                        // 오늘 날짜 + 7일 다시 세팅 (편의성)
+                        const today = new Date();
+                        today.setDate(today.getDate() + 7);
+                        this.expiryInput.valueAsDate = today;
+                    }
+                });
+            }
         }
 
         toggleIngredient(element) {
             const name = element.dataset.name;
-            // [중요] HTML에서 설정한 속성으로 초기 보유 여부 확인
             const isInitiallyOwned = element.dataset.initialOwned === 'true';
 
-            // CASE 1: 원래 보유하고 있던 재료인 경우 (삭제/복구 토글)
+            // 1. 보유중인 재료 -> 삭제 목록 토글
             if (isInitiallyOwned) {
                 if (this.removedItems.has(name)) {
-                    // 이미 삭제하려고 눌러뒀던 걸 다시 누름 -> 삭제 취소 (다시 보유 상태로)
                     this.removedItems.delete(name);
-                    element.classList.add('added'); // UI: 다시 찐하게 표시
+                    element.classList.add('added');
                 } else {
-                    // 보유중인데 누름 -> 삭제 목록에 추가
                     this.removedItems.add(name);
-                    element.classList.remove('added'); // UI: 흐리게(선택 해제된 것처럼)
+                    element.classList.remove('added');
                 }
                 this.updateCount();
                 return;
             }
 
-            // CASE 2: 원래 없던 재료인 경우 (추가/취소 토글)
+            // 2. 추가했던 재료 -> 추가 취소
             if (element.classList.contains('added')) {
-                // 이미 추가하려고 선택했던 걸 다시 누름 -> 추가 취소
                 delete this.selectedItems[name];
                 element.classList.remove('added');
                 this.updateCount();
                 return;
             }
 
-            // 새로 추가 -> 모달 열기
+            // 3. 새로 추가 -> 모달 열기
             this.currentTarget = element;
             this.modalIngredientName.textContent = element.dataset.name;
 
-            const today = new Date();
-            today.setDate(today.getDate() + 7);
-            this.expiryInput.valueAsDate = today;
+            // 날짜 초기화 (체크박스 해제, 날짜는 7일 뒤)
+            if (this.noExpiryCheck) this.noExpiryCheck.checked = false;
+            if (this.expiryInput) {
+                this.expiryInput.disabled = false;
+                const today = new Date();
+                today.setDate(today.getDate() + 7);
+                this.expiryInput.valueAsDate = today;
+            }
 
             this.dateModal.classList.add('open');
         }
@@ -107,16 +124,17 @@ class IngredientAdder {
         confirmIngredient() {
             if (!this.currentTarget) return;
 
-            const dateVal = this.expiryInput.value;
-            if (!dateVal) {
-                alert('날짜를 선택해주세요');
-                return;
-            }
+            // 날짜 값 가져오기
+            // 체크박스가 켜져있거나 값이 없으면 빈 문자열('')이 들어갑니다.
+            const dateVal = this.expiryInput.value; 
+            
+            // [수정됨] 경고창(alert) 로직 삭제!
+            // 날짜가 없어도 그냥 통과시킵니다. (backend가 null로 처리)
 
             this.currentTarget.classList.add('added');
 
             this.selectedItems[this.currentTarget.dataset.name] = {
-                expiry: dateVal,
+                expiry: dateVal, 
                 name: this.currentTarget.dataset.name,
                 category: this.currentTarget.dataset.category
             };
