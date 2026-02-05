@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
         notificationItem.addEventListener('click', function() {
             // 알림 상세 페이지로 이동
             console.log('알림 클릭됨');
-            // window.location.href = '/notification-detail/';
+            // window.location.href = '/users/notification-detail/';
         });
     }
 });
@@ -229,14 +229,14 @@ async function finishPreference(level) {
     const token = localStorage.getItem('access_token');
     if (!token) {
         alert("로그인이 필요합니다.");
-        window.location.href = '/login/';
+        window.location.href = '/users/login/';
         return;
     }
     
     // UI 데모용 (실제 API 연동 시 여기에 fetch 추가)
     console.log("Saving preference:", { level, allergies: [...selectedAllergies], banned: [...bannedIngredients] });
     alert("취향 설정이 완료되었습니다!");
-    window.location.href = "/main/";
+    window.location.href = "/";
 }
 
 
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const csrftoken = getCookie('csrftoken');
 
             try {
-                const response = await fetch('/login/', {
+                const response = await fetch('/users/login/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.setItem('access_token', data.token.access);
                     localStorage.setItem('refresh_token', data.token.refresh);
                     localStorage.setItem('user_nickname', data.user.nickname);
-                    window.location.href = '/main/';
+                    window.location.href = '/';
                 } else {
                     alert(data.message || '로그인 실패');
                 }
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             localStorage.setItem('temp_email', email);
             localStorage.setItem('temp_pw', password);
-            window.location.href = '/nickname/?next=preference';
+            window.location.href = '/users/nickname/?next=preference';
         });
     }
 
@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 // 중복 확인
-                const checkRes = await fetch(`/check-nickname/?nickname=${nickname}`);
+                const checkRes = await fetch(`/users/check-nickname/?nickname=${nickname}`);
                 const checkData = await checkRes.json();
                 if (!checkRes.ok || !checkData.is_available) {
                     alert('이미 사용 중인 닉네임입니다.');
@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (tempEmail && tempPw) {
                     // 신규 가입
-                    const signupRes = await fetch('/signup/', {
+                    const signupRes = await fetch('/users/signup/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
                         body: JSON.stringify({ email: tempEmail, password: tempPw, nickname: nickname })
@@ -349,8 +349,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                         localStorage.setItem('user_nickname', nickname);
                         
-                        if(nextStep === 'preference') window.location.href = '/preference/';
-                        else window.location.href = '/main/';
+                        if(nextStep === 'preference') window.location.href = '/users/preference/';
+                        else window.location.href = '/';
                     } else {
                         alert(signupData.message || '가입 실패');
                     }
@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // 닉네임 변경 (토큰 사용)
                     const token = localStorage.getItem('access_token');
                     if(token) {
-                        const updateRes = await fetch('/me/', {
+                        const updateRes = await fetch('/users/mypage/', {
                             method: 'PATCH',
                             headers: { 
                                 'Content-Type': 'application/json',
@@ -370,11 +370,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         if(updateRes.ok) {
                             alert('변경 완료');
                             localStorage.setItem('user_nickname', nickname);
-                            window.location.href = '/mypage/';
+                            window.location.href = '/users/mypage/';
                         }
                     } else {
                         alert("로그인 정보가 없습니다.");
-                        window.location.href = '/login/';
+                        window.location.href = '/users/login/';
                     }
                 }
             } catch (e) {
@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if(nicknameDisplay) nicknameDisplay.textContent = localStorage.getItem('user_nickname') || '사용자';
             
             // 최신 정보 동기화
-            fetch('/me/', { headers: { 'Authorization': `Bearer ${token}` } })
+            fetch('/users/mypage/', { headers: { 'Authorization': `Bearer ${token}` } })
                 .then(res => {
                     if (!res.ok) throw new Error('Unauthorized');
                     return res.json();
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.removeItem('access_token');
                     localStorage.removeItem('refresh_token');
                     localStorage.removeItem('user_nickname');
-                    window.location.href = '/login/';
+                    window.location.href = '/users/login/';
                 }
             });
         }
