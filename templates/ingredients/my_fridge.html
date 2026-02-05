@@ -20,81 +20,77 @@
     </div>
 
 {% if not ingredients %}
-<div class="promo-card">
-    <div class="card-title">
-        <img src="{% static 'images/icon_register.png' %}" class="register-icon" alt="등록 아이콘">
-        <span class="card-title-text">식재료 등록</span>
-    </div>
-    <div class="card-desc">
-        냉장고에 있는 재료를 등록하고<br>맞춤 레시피를 추천받아보세요
-    </div>
-    <a href="{% url 'ingredients:add_ingredient' %}" class="btn-orange">
-        <span>+ 재료 추가하기</span>
-    </a>
-</div>
 
-<div class="empty-area">
-    <img src="{% static 'images/empty_fridge.png' %}" class="empty-img" alt="빈 냉장고">
+<div class="empty-state-container">
+    <div class="empty-icon-wrapper">
+        <img src="{% static 'images/empty_fridge.png' %}" class="empty-fridge-icon" alt="빈 냉장고">
+    </div>
     <div class="empty-text">
-        냉장고가 텅 비어있어요...<br>'재료 추가 버튼'을 눌러 추가해 주세요!
+        냉장고가 텅 비어있어요...<br>[+] 버튼을 눌러 재료를 추가보세요!
     </div>
 </div>
-
 {% else %}
+
 <div class="filter-bar">
     {% for cat in categories %}
     <div class="filter-chip {% if forloop.first %}active{% endif %}" 
          data-category="{{ cat.name }}">
-        {{ cat.name }}({{ cat.count }})
+        {{ cat.name }} <span class="count">{{ cat.count }}</span>
     </div>
     {% endfor %}
 </div>
 
 <div class="my-fridge-card">
-    <div class="shelf-row">
+    <div class="shelf-container view-grid" id="fridgeShelf">
         {% for ui in ingredients %}
         <div class="fridge-item" 
              data-name="{{ ui.ingredient.name_ko }}"
-             data-category="{{ ui.ingredient.category.name }}" 
+             data-category="{{ ui.category_name }}" 
              data-expiry="{{ ui.expire_at|date:'Y-m-d' }}">
             
-            <div class="item-icon-box {% if ui.is_expired %}urgent{% endif %}">
-                <div class="d-day-badge">{{ ui.d_day_tag }}</div>
-                
-                {% if ui.ingredient.icon_name %}
-                <img src="{% static 'images/ingredients/'|add:ui.ingredient.icon_name %}" 
-                     class="item-img" 
-                     alt="{{ ui.ingredient.name_ko }}">
-                {% else %}
-                <div class="default-icon"></div>
-                {% endif %}
+            <div class="grid-content">
+                <div class="item-icon-box {% if ui.is_urgent %}urgent{% endif %}">
+                    <div class="d-day-badge">{{ ui.d_day_tag }}</div>
+                    <div class="emoji-icon">{{ ui.category_icon }}</div>
+                </div>
+                <div class="shelf-deco"></div>
+                <span class="item-name">{{ ui.ingredient.name_ko }}</span>
             </div>
-            <div class="shelf-deco"></div>
-            <span class="item-name">{{ ui.ingredient.name_ko }}</span>
+
+            <div class="list-content">
+                <div class="list-info-group">
+                    <span class="list-name">{{ ui.ingredient.name_ko }}</span>
+                    <span class="list-d-day {% if ui.is_urgent %}urgent-text{% endif %}">
+                        {{ ui.d_day_tag }}
+                    </span>
+                </div>
+                <div class="list-meta">
+                    <span class="list-date">{{ ui.expire_at|date:'y.m.d'|default:'-' }}</span>
+                </div>
+            </div>
         </div>
         {% endfor %}
     </div>
 </div>
-
 {% endif %}
+
+<a href="{% url 'ingredients:add_ingredient' %}" class="floating-add-btn" aria-label="재료 추가">
+    <img src="{% static 'images/ingredient_plus.svg' %}" alt="추가">
+</a>
 
 <div class="modal-overlay" id="editModal">
     <div class="date-modal">
         <div class="modal-title">
-            <span id="modalIngredientName"></span>의<br>소비기한을 수정할까요?
+            <span id="modalIngredientName"></span> 수정
         </div>
         <input type="date" id="expiryInput" class="date-input">
         <div class="modal-btn-group">
             <button type="button" class="modal-btn btn-cancel" id="cancelBtn">취소</button>
-            <button type="button" class="modal-btn btn-confirm" id="confirmBtn">수정 완료</button>
+            <button type="button" class="modal-btn btn-confirm" id="confirmBtn">수정</button>
         </div>
     </div>
 </div>
-
-<a href="{% url 'ingredients:add_ingredient' %}" class="floating-add-btn" aria-label="재료 추가">
-        <img src="{% static 'images/ingredient_plus.svg' %}" alt="추가">
-    </a>
-    {% endblock main_content %}
+{% endblock main_content %}
 
 {% block extra_script %}
 <div data-add-ingredient-url="{% url 'ingredients:add_ingredient' %}" 

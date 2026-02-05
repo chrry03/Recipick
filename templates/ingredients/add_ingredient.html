@@ -30,25 +30,27 @@
 <div class="fridge-container">
     <div class="ingredient-grid" id="ingredientGrid">
         {% for item in ingredients %}
-        <div class="ingredient-item {% if item.is_added %}added{% endif %}" 
-             data-category="{{ item.category }}"
-             data-name="{{ item.name }}"
-             data-initial-owned="{{ item.is_added|yesno:'true,false' }}">
-             
-            <div class="ingredient-icon-wrapper">
-                <span class="added-badge">보유중</span>
-                {% if item.icon_name %}
-                <img src="{% static 'images/ingredients/'|add:item.icon_name %}" 
-                     class="ingredient-img" 
-                     alt="{{ item.name }}">
-                {% else %}
-                <div class="default-icon"></div>
-                {% endif %}
+            <div class="ingredient-item {% if item.is_added %}added{% endif %}" 
+                data-category="{{ item.category }}"
+                data-name="{{ item.name }}"
+                data-initial-owned="{{ item.is_added|yesno:'true,false' }}">
+                
+                <div class="ingredient-icon-wrapper">
+                    <span class="added-badge">보유중</span>
+                    {% if item.icon_name %}
+                    <img src="{% static 'images/ingredients/'|add:item.icon_name %}" 
+                        class="ingredient-img" 
+                        alt="{{ item.name }}">
+                    {% else %}
+                    <div class="default-icon"></div>
+                    {% endif %}
+                </div>
+
+                <div class="shelf-line"></div>
+
+                <span class="ingredient-name">{{ item.name }}</span>
             </div>
-            <span class="ingredient-name">{{ item.name }}</span>
-            <div class="shelf-line"></div>
-        </div>
-        {% endfor %}
+            {% endfor %}
     </div>
 </div>
 
@@ -63,7 +65,15 @@
         <div class="modal-title">
             <span id="modalIngredientName"></span>의<br>소비기한을 알려주세요!
         </div>
+        
         <input type="date" id="expiryInput" class="date-input">
+        
+        <div class="no-expiry-wrapper">
+            <label class="checkbox-label">
+                <input type="checkbox" id="noExpiryCheck">
+                <span class="checkbox-text">소비기한 없음</span>
+            </label>
+        </div>
         <div class="modal-btn-group">
             <button type="button" class="modal-btn btn-cancel" id="cancelBtn">취소</button>
             <button type="button" class="modal-btn btn-confirm" id="confirmBtn">확인</button>

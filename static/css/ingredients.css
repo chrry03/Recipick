@@ -92,72 +92,51 @@
 }
 
 /* =========================================
-   2. 내 냉장고 (my_fridge.html) - 빈 상태
+   [NEW] 텅 빈 냉장고 (Empty State)
    ========================================= */
-.promo-card {
-    background: #FFFFFF;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.05);
-    border-radius: 18px;
-    padding: 25px 25px 30px 25px; 
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    box-sizing: border-box;
-    flex-shrink: 0;
-    margin-bottom: 30px; 
-}
-
-.card-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.register-icon { 
-    width: 20px; 
-    height: auto; 
-    margin-top: 0; 
-}
-
-.card-title-text {
-    font-family: 'Nanum Gothic', sans-serif;
-    font-weight: 800;
-    font-size: 18px;
-    color: #1A1A1A;
-}
-
-.card-desc {
-    font-family: 'Nanum Gothic', sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
-    color: #666666;
-    margin-bottom: 25px;
-}
-
-.empty-area {
+.empty-state-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; 
-    flex-grow: 1;
-    padding-top: 5vh;
-    padding-bottom: 20px;
-}
-
-.empty-img {
-    width: 130px;
-    height: auto;
-    margin-bottom: 18px;
-    opacity: 0.95;
-}
-
-.empty-text {
-    font-family: 'Gowun Dodum', sans-serif;
-    font-size: 13px;
-    line-height: 1.6;
+    justify-content: center;
+    /* 화면 중앙에 오도록 높이 지정 (헤더/탭바 제외 대략적 높이) */
+    height: 60vh; 
+    position: relative;
     text-align: center;
-    color: #999999;
+}
+
+/* 이미지 아이콘 (Group 19) */
+.empty-icon-wrapper {
+    width: 142.24px;
+    height: 142.24px;
+    margin-bottom: 20px; /* 텍스트와의 간격 */
+    
+    /* [요청하신 반전 효과] transform: matrix(-1, 0, 0, 1, 0, 0); 와 동일 */
+    transform: scaleX(-1); 
+    
+    /* 혹시 이미지가 흐리다면 */
+    image-rendering: -webkit-optimize-contrast;
+}
+
+.empty-fridge-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.8; /* 너무 진하면 살짝 연하게 */
+}
+
+/* 텍스트 설명 */
+.empty-text {
+    font-family: 'Gowun Dodum', sans-serif; /* 폰트 적용 */
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    color: #555555;
+    
+    width: 224px; /* 요청하신 너비 */
+    word-break: keep-all; /* 단어 단위 줄바꿈 */
 }
 
 /* =========================================
@@ -190,19 +169,28 @@
 }
 
 .my-fridge-card {
-    background: #FFF;
+    /* 배경: 완전 흰색보다는 아주 미세한 쿨톤 그라데이션 */
+    background: linear-gradient(180deg, #FFFFFF 0%, #F8FBFF 100%);
     border-radius: 24px;
-    padding: 25px 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    
+    /* 테두리: 냉장고 두께감 표현 */
+    border: 4px solid #EEF2F5; 
+    
+    padding: 30px 20px;
+    
+    /* 그림자: 차가운 푸른빛이 감도는 그림자 */
+    box-shadow: inset 0 0 20px rgba(200, 220, 255, 0.2), 
+                0 4px 20px rgba(0,0,0,0.04);
+    
     min-height: 500px;
     position: relative;
-    /* margin-bottom: 80px; */ /* 필요 시 추가 */
 }
 
 .shelf-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
+    row-gap: 30px;      /* 줄 간격 넓게 (선반 느낌) */
+    column-gap: 15px;
     margin-bottom: 30px;
 }
 
@@ -210,7 +198,23 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    position: relative;
+    z-index: 2;
+}
+
+/* [핵심] 유리 선반 디자인 (shelf-deco) */
+.shelf-deco {
+    width: 100%;        /* 아이템 너비에 맞춤 */
+    height: 8px;        /* 얇은 유리판 두께 */
+    background: rgba(225, 235, 245, 0.8); /* 반투명한 푸른 회색 */
+    border-radius: 4px;
+    margin-top: -12px;  /* 아이콘 발밑에 깔리도록 */
+    margin-bottom: 10px;
+    
+    /* 유리 질감 그림자 */
+    box-shadow: 0 4px 6px rgba(100, 150, 200, 0.1), 
+                inset 0 1px 0 rgba(255,255,255, 0.8);
+    z-index: 1;
 }
 
 .item-icon-box {
@@ -220,8 +224,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #F9F9F9;
-    border-radius: 50%;
+    
+    /* 배경, 테두리, 그림자 모두 제거 */
+    background: transparent;
+    border: none;
+    border-radius: 0; /* 50% 제거 */
+    z-index: 2;
+    box-shadow: none;
 }
 
 .item-img {
@@ -367,11 +376,12 @@
 .ingredient-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    row-gap: 25px;
-    column-gap: 10px;
+    row-gap: 15px;      /* 간격 조정 */
+    column-gap: 15px;
     margin-top: 10px;
 }
 
+/* [수정] 냉장고 아이템과 동일한 구조로 변경 */
 .ingredient-item {
     display: flex;
     flex-direction: column;
@@ -379,34 +389,45 @@
     position: relative;
     cursor: pointer;
     transition: transform 0.1s;
+    gap: 0; /* 간격 제거 (선반 겹침 효과 위해) */
 }
 .ingredient-item:active { transform: scale(0.95); }
 
-.shelf-line {
-    position: absolute;
-    bottom: -10px;
-    width: 80%;
-    height: 1px;
-    background: #EEEEEE;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-
+/* [수정] 아이콘 래퍼 (z-index 추가, 마진 조정) */
 .ingredient-icon-wrapper {
     width: 60px;
     height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 8px;
     position: relative;
+    z-index: 2;            /* 선반보다 위에 오도록 */
+    margin-bottom: -8px;   /* 선반과 살짝 겹치게 */
+}
+
+/* [수정] 단순 선(Line) -> 입체 선반(Shelf)으로 변경 */
+.shelf-line {
+    position: relative;    /* absolute 제거 */
+    bottom: auto;
+    width: 80px;           /* 아이콘보다 약간 넓게 */
+    height: 10px;          /* 두께감 추가 */
+    background: linear-gradient(to bottom, #F0F0F0, #E0E0E0);
+    border-radius: 4px;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.08);
+    z-index: 1;
+    margin-bottom: 6px;    /* 이름과의 간격 */
 }
 
 .default-icon {
     width: 100%;
     height: 100%;
-    background: #F5F5F5;
-    border-radius: 50%;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    /* 배경, 그림자 제거 */
+    background: transparent;
+    border-radius: 50%; /* 혹시 몰라 형태는 유지 */
+    box-shadow: none;
+    /* 이미지가 없을 때 영역 표시를 위해 아주 옅은 테두리만 추가 (선택사항) */
+    border: 2px dashed #E0E0E0;
+    box-sizing: border-box;
 }
 
 .ingredient-img {
@@ -424,7 +445,7 @@
     text-align: center;
 }
 
-/* 추가된 상태 (Dimmed) */
+/* 추가된 상태 스타일 */
 .ingredient-item.added .ingredient-icon-wrapper,
 .ingredient-item.added .ingredient-name {
     opacity: 0.5;
@@ -501,6 +522,33 @@
 }
 .btn-cancel { background: #f0f0f0; color: #666; }
 .btn-confirm { background: #E76F51; color: white; }
+
+/* [추가] 모달 내 체크박스 스타일 */
+.no-expiry-wrapper {
+    margin-bottom: 20px;
+    text-align: left;
+    padding-left: 5px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.checkbox-text {
+    font-size: 14px;
+    color: #555;
+}
+
+/* 체크박스 크기 키우기 (선택사항) */
+input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #E76F51; /* 주황색 포인트 */
+    cursor: pointer;
+}
 
 /* 완료 버튼 플로팅 */
 .complete-btn-wrapper {
