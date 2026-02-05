@@ -1,255 +1,302 @@
-# users/views.py
+from datetime import date
 from django.shortcuts import render
-from django.http import JsonResponse
-from django.contrib.auth import get_user_model, authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.views.decorators.csrf import ensure_csrf_cookie
-import json
+from django.contrib.auth import authenticate, get_user_model, login
+from django.db.models import F
+
+# DRF 관련 임포트
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+
+# ★ 다른 앱의 모델들 가져오기 (Real Data 사용)
+from .models import User, SocialAccount
+from .serializers import UserSerializer
+# (주의: 아래 앱들의 models.py가 작성되어 있어야 에러가 안 납니다)
+from recipes.models import Recipe, FavoriteRecipe
+from ingredients.models import UserIngredient
+from logs.models import RecipeLog
 
 User = get_user_model()
 
+# =============================================================
+# 1. 회원가입 (화면 + 기능)
+# =============================================================
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
 def signup_view(request):
-    """회원가입 처리 API 및 페이지 렌더링"""
     if request.method == 'GET':
         return render(request, 'users/signup.html')
     
     if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            email = data.get('email')
-            password = data.get('password')
-            nickname = data.get('nickname')
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                user = User.objects.create_user(
+                    username=request.data['email'], #username을 email과 똑같이 설정해주는 코드 추가
+                    email=request.data['email'],
+                    password=request.data['password'],
+                    nickname=request.data['nickname']
+                )
+                login(request, user) # 세션 로그인
+                token = RefreshToken.for_user(user) # 토큰 발급
+                return Response({
+                    "message": "회원가입이 완료되었습니다.",
+                    "user": UserSerializer(user).data,
+                    "token": {
+                        "access": str(token.access_token),
+                        "refresh": str(token),
+                    }
+                }, status=201)
+            except Exception as e:
+                # 에러 확인을 위해 콘솔에 원인을 출력해두면 좋습니다.
+                print(f"회원가입 에러: {e}")
+                return Response({"message": "회원가입 중 오류가 발생했습니다."}, status=400)
+            
+        # 유효성 검사 실패 시 (이미 있는 이메일 등)
+        return Response(serializer.errors, status=400)
 
-            if User.objects.filter(email=email).exists():
-                return JsonResponse({'message': '이미 가입된 이메일입니다.'}, status=400)
-
-            # [해결 1] UserManager 에러 해결: username 인자를 명시적으로 전달합니다.
-            # [해결 2] models.py에 정의된 PK 이름인 user_id를 사용해야 합니다.
-            user = User.objects.create_user(
-                username=email, # REQUIRED_FIELDS 대응
-                email=email, 
-                password=password, 
-                nickname=nickname
-            )
-
-            # 성공 응답 데이터 구성
-            response_data = {
-                'message': '회원가입이 완료되었습니다.',
-                'user': {
-                    'id': user.user_id, # .id 대신 .user_id 사용
-                    'email': user.email,
-                    'nickname': user.nickname
-                }
-            }
-
-            # 토큰 발급 로직 (라이브러리 설치 시 작동)
-            if RefreshToken:
-                refresh = RefreshToken.for_user(user)
-                response_data['token'] = {
-                    'access': str(refresh.access_token),
-                    'refresh': str(refresh)
-                }
-
-            return JsonResponse(response_data, status=201)
-        except Exception as e:
-            return JsonResponse({'message': str(e)}, status=500)
-        
-@ensure_csrf_cookie
+# =============================================================
+# 2. 로그인 (화면 + 기능)
+# =============================================================
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
 def login_view(request):
     if request.method == 'GET':
         return render(request, 'users/login.html')
-    
+
     if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            email = data.get('email')
-            password = data.get('password')
+        email = request.data.get('email')
+        password = request.data.get('password')
+        user = authenticate(email=email, password=password)
 
-            user = authenticate(request, email=email, password=password)
+        if user is not None:
+            token = RefreshToken.for_user(user)
+            return Response({
+                "message": "로그인 성공",
+                "user": UserSerializer(user).data,
+                "token": {
+                    "access": str(token.access_token),
+                    "refresh": str(token),
+                }
+            }, status=200)
+        else:
+            return Response({"message": "이메일 또는 비밀번호가 틀렸습니다."}, status=401)
 
-            if user is not None:
-                refresh = RefreshToken.for_user(user)
-                return JsonResponse({
-                    'message': '로그인 성공',
-                    'user': {
-                        'id': user.user_id,
-                        'nickname': user.nickname
-                    },
-                    'token': {
-                        'access': str(refresh.access_token),
-                        'refresh': str(refresh)
-                    }
-                }, status=200)
-            else:
-                return JsonResponse({'message': '이메일 또는 비밀번호가 틀렸습니다.'}, status=401)
-        except Exception as e:
-            # 에러 발생 시 로그를 확인하기 위해 아래처럼 수정
-            print(f"Login Error: {e}") 
-            return JsonResponse({'message': '서버 내부 오류가 발생했습니다.'}, status=500)
+# =============================================================
+# 3. 소셜 로그인 (기능)
+# =============================================================
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def social_login_view(request, provider):
+    # [To Do] 소셜 로그인 구현 시 로직 추가
+    return Response({"message": "소셜 로그인 기능 준비 중입니다."}, status=200)
 
-@api_view(['GET', 'PATCH'])
-@permission_classes([IsAuthenticated]) # 로그인이 되어 있어야만 실행됨
-def me_view(request):
-    """내 정보 조회 및 수정 API"""
+# =============================================================
+# 4. 메인 화면 (★ Real DB 연동 완료)
+# =============================================================
+def main_view(request):
     user = request.user
     
-    # 1. 내 정보 조회 (GET) - 나중에 필요할 때 사용
-    if request.method == 'GET':
-        return Response({
-            'email': user.email,
-            'nickname': user.nickname,
-            'id': user.id
+    # 1. 오늘의 추천 메뉴 (일단 랜덤 or 최신순 6개)
+    # [Logic] 추천 알고리즘이 적용된다면 여기에 로직 추가
+    recommended_qs = Recipe.objects.filter(is_active=True).order_by('?')[:6]
+    recommended_recipes = []
+    for r in recommended_qs:
+        recommended_recipes.append({
+            'id': r.recipe_id,
+            'name': r.title,
+            'difficulty': r.difficulty, # EASY, NORMAL, DIFFICULT
+            'cookingTime': f"{r.ready_minutes}분" if r.ready_minutes else "??분",
+            'image': r.image_url
         })
-    
-    # 2. 내 정보 수정 (PATCH) - 닉네임 변경 시 사용
-    if request.method == 'PATCH':
-        # 닉네임 변경 요청이 들어오면
-        if 'nickname' in request.data:
-            new_nickname = request.data['nickname']
-            
-            # 중복 검사 (내 닉네임과 같으면 패스, 다른데 이미 있으면 에러)
-            if user.nickname != new_nickname and User.objects.filter(nickname=new_nickname).exists():
-                return Response({'message': '이미 사용 중인 닉네임입니다.'}, status=400)
-                
-            user.nickname = new_nickname
-            user.save()
-            
-        return Response({'message': '정보가 수정되었습니다.'}, status=200)
-    
-def check_nickname_view(request):
-    """닉네임 중복 확인 API"""
-    nickname = request.GET.get('nickname')
-    if not nickname:
-        return JsonResponse({'message': '닉네임을 입력해주세요.'}, status=400)
-    
-    exists = User.objects.filter(nickname=nickname).exists()
-    return JsonResponse({'is_available': not exists})
 
-def nickname_view(request): return render(request, 'users/nickname.html')
-def mypage_view(request): return render(request, 'users/mypage.html')
+    # 2. 찜한 레시피 (최신순 3개)
+    favorite_recipes = []
+    if user.is_authenticated:
+        fav_qs = FavoriteRecipe.objects.filter(user=user).select_related('recipe').order_by('-created_at')[:3]
+        for f in fav_qs:
+            favorite_recipes.append({
+                'id': f.recipe.recipe_id,
+                'name': f.recipe.title,
+                'image': f.recipe.image_url,
+                'isFavorite': True
+            })
+
+    # 3. 내 식재료 (소비기한 임박한 순서 8개)
+    ingredients = []
+    if user.is_authenticated:
+        # [Logic] is_consumed=False인 것만, expire_at 오름차순(급한거 먼저)
+        ing_qs = UserIngredient.objects.filter(user=user, is_consumed=False).select_related('ingredient').order_by('expire_at')[:8]
+        today = date.today()
+        
+        for item in ing_qs:
+            # D-Day 계산
+            d_day = None
+            if item.expire_at:
+                delta = (item.expire_at - today).days
+                if delta < 0: d_day = f"D+{abs(delta)}" # 지남
+                elif delta == 0: d_day = "D-Day"
+                else: d_day = f"D-{delta}"
+            
+            # 이미지: IngredientCategory에 아이콘이 있다고 가정 (없으면 기본값)
+            # models.py 구조상 ingredient -> category -> icon_url 접근 필요
+            icon_url = '/static/images/default_ing.png'
+            if item.ingredient.category and item.ingredient.category.icon_url:
+                icon_url = item.ingredient.category.icon_url
+                
+            ingredients.append({
+                'id': item.user_ingredient_id,
+                'name': item.ingredient.name_ko,
+                'daysLeft': d_day,
+                'image': icon_url
+            })
+
+    # 4. 내 일지 (최신순 5개)
+    diary_entries = []
+    if user.is_authenticated:
+        log_qs = RecipeLog.objects.filter(user=user).select_related('recipe').order_by('-cooked_at')[:5]
+        for log in log_qs:
+            # 일지 이미지가 있으면 쓰고, 없으면 레시피 썸네일 사용
+            display_image = log.image.url if log.image else log.recipe.image_url
+            
+            diary_entries.append({
+                'id': log.recipe_log_id,
+                'title': log.recipe.title,
+                'date': log.cooked_at.strftime('%y.%m.%d'), # 26.01.11 형식
+                'image': display_image
+            })
+
+    # Context에 담기
+    context = {
+        'recommended_recipes': recommended_recipes,
+        'favorite_recipes': favorite_recipes,
+        'ingredients': ingredients,
+        'diary_entries': diary_entries,
+    }
+    return render(request, 'main.html', context)
+
+# =============================================================
+# 5. 마이페이지 (화면 + 기능)
+# =============================================================
+@api_view(['GET', 'PATCH', 'DELETE'])
+@permission_classes([AllowAny]) # 누구나 접근 가능
+def mypage_view(request):
+    # [GET] 화면 보여주기
+    if request.method == 'GET':
+        context = {}
+
+        # ★ [수정] 튕겨내는 코드(redirect) 삭제!
+        # 대신, 로그인한 경우에만 데이터를 챙겨줍니다.
+        if request.user.is_authenticated:
+            serializer = UserSerializer(request.user)
+            context['user_data'] = serializer.data
+        
+        # 비로그인 상태면 context가 비어있는 채로 렌더링 됩니다.
+        # (HTML 템플릿에서 {% if user.is_authenticated %} 로 화면을 다르게 그리면 됨)
+        return render(request, 'users/mypage.html', context)
+    
+    # ---------------------------------------------------------
+    # [PATCH] & [DELETE] 기능은 여전히 로그인이 필수입니다.
+    # (로그인 안 한 사람은 어차피 '수정/탈퇴' 버튼이 안 보일 테니까요)
+    # ---------------------------------------------------------
+    
+    # [PATCH] 내 정보 수정
+    if request.method == 'PATCH':
+        if not request.user.is_authenticated:
+            return Response({"message": "로그인이 필요합니다."}, status=401)
+
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
+        return Response(serializer.errors, status=400)
+
+    # [DELETE] 회원 탈퇴
+    if request.method == 'DELETE':
+        if not request.user.is_authenticated:
+            return Response({"message": "로그인이 필요합니다."}, status=401)
+
+        user = request.user
+        password = request.data.get('password')
+        is_social = user.social_accounts.exists()
+        
+        if not is_social:
+            if not password:
+                return Response({"message": "비밀번호를 입력해주세요."}, status=400)
+            if not user.check_password(password):
+                return Response({"message": "비밀번호가 일치하지 않습니다."}, status=403)
+        
+        user.delete()
+        return Response({"message": "탈퇴 완료"}, status=204)
+
+# =============================================================
+# 6. 기타 화면들
+# =============================================================
+def nickname_view(request):
+    return render(request, 'users/nickname.html')
+
 def preference_view(request):
-    """취향 설정(알러지/기피재료/요리실력) 페이지 렌더링"""
     return render(request, 'users/preference_steps.html')
 
-def notification(request):
-    """알림 페이지 뷰"""
-    # 테스트용 알림 데이터
-    notifications = [
-        {
-            'id': 1,
-            'ingredient_name': '당근',
-            'message': '당근 유통기한이 얼마 남지 않았습니다.',
-            'icon_url': 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'29\' height=\'29\' viewBox=\'0 0 29 29\'%3E%3Ctext x=\'0\' y=\'24\' font-size=\'24\'%3E🥕%3C/text%3E%3C/svg%3E'
-        },
-    ]
+def notification_view(request):
+    """
+    [Logic] 유통기한 임박(3일 이내) 식재료 알림
+    """
+    user = request.user
+    notifications = []
     
-    # 알림이 없는 경우 테스트하려면 아래 주석을 해제하세요
-    # notifications = []
-    
+    if user.is_authenticated:
+        # 유통기한 있는 것 중 사용 안 한 것
+        ing_qs = UserIngredient.objects.filter(
+            user=user, 
+            is_consumed=False, 
+            expire_at__isnull=False
+        ).select_related('ingredient')
+        
+        today = date.today()
+        
+        for item in ing_qs:
+            delta = (item.expire_at - today).days
+            
+            # D-3 이내이거나 이미 지난 경우 알림
+            if delta <= 3:
+                msg = ""
+                if delta < 0: msg = f"{item.ingredient.name_ko}의 소비기한이 {abs(delta)}일 지났습니다."
+                elif delta == 0: msg = f"{item.ingredient.name_ko}의 소비기한이 오늘까지입니다."
+                else: msg = f"{item.ingredient.name_ko}의 소비기한이 {delta}일 남았습니다."
+                
+                notifications.append({
+                    'id': item.user_ingredient_id,
+                    'message': msg,
+                    'icon': '🥕' # 아이콘은 일단 고정 or 카테고리별 분기 가능
+                })
+
     context = {
         'notifications': notifications,
     }
     return render(request, 'users/notification.html', context)
 
-def main(request):
-    """메인 페이지 뷰"""
-    # 테스트용 추천 레시피 데이터
-    recommended_recipes = [
-        {
-            'id': 1,
-            'name': '간장 계란 밥',
-            'difficulty': 1,
-            'cookingTime': '10분',
-            'image': '/static/images/ex/gangaebab.png'
-        },
-        {
-            'id': 2,
-            'name': '김치볶음밥',
-            'difficulty': 2,
-            'cookingTime': '15분',
-            'image': 'https://images.unsplash.com/photo-1744870132190-5c02d3f8d9f9?w=400'
-        },
-        {
-            'id': 3,
-            'name': '로제 파스타',
-            'difficulty': 3,
-            'cookingTime': '25분',
-            'image': '/static/images/ex/pasta.png'
-        },
-    ]
+# =============================================================
+# 7. 기능 전용 API
+# =============================================================
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def check_nickname_view(request):
+    nickname = request.query_params.get('nickname')
+    if not nickname:
+        return Response({"message": "닉네임을 입력해주세요."}, status=400)
     
-    # 테스트용 찜한 레시피 데이터
-    favorite_recipes = [
-        {
-            'id': 1,
-            'name': '김치말이국수',
-            'image': '/static/images/ex/gimmalguk.png',
-            'isFavorite': True
-        },
-        {
-            'id': 2,
-            'name': '로제 파스타',
-            'image': '/static/images/ex/pasta.png',
-            'isFavorite': True
-        },
-    ]
-    
-    # 테스트용 식재료 데이터
-    ingredients = [
-        {
-            'id': 1,
-            'name': '당근',
-            'daysLeft': 1,
-            'image': '/static/images/ex/ingre1.png'
-        },
-        {
-            'id': 2,
-            'name': '돼지고기',
-            'daysLeft': 10,
-            'image': '/static/images/ex/ingre2.png'
-        },
-        {
-            'id': 3,
-            'name': '버섯',
-            'daysLeft': 11,
-            'image': '/static/images/ex/ingre3.png'
-        },
-    ]
-    
-    # 테스트용 일지 데이터
-    diary_entries = [
-        {
-            'id': 1,
-            'title': '로제 파스타',
-            'date': '26.01.11',
-            'image': '/static/images/ex/pasta.png'
-        },
-        {
-            'id': 2,
-            'title': '새송이 덮밥',
-            'date': '26.01.11',
-            'image': '/static/images/ex/mushroom,.png'
-        },
-        {
-            'id': 3,
-            'title': '김치 볶음밥',
-            'date': '26.01.11',
-            'image': 'https://images.unsplash.com/photo-1744870132190-5c02d3f8d9f9?w=400'
-        },
-    ]
-    
-    # 빈 상태 테스트를 원하면 아래 주석을 해제하세요
-    # favorite_recipes = []
-    # ingredients = []
-    # diary_entries = []
-    
-    context = {
-        'recommended_recipes': json.dumps(recommended_recipes, ensure_ascii=False),
-        'favorite_recipes': json.dumps(favorite_recipes, ensure_ascii=False),
-        'ingredients': json.dumps(ingredients, ensure_ascii=False),
-        'diary_entries': json.dumps(diary_entries, ensure_ascii=False),
-    }
-    return render(request, 'main.html', context)
+    is_exist = User.objects.filter(nickname=nickname).exists()
+    return Response({'is_available': not is_exist}, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    try:
+        refresh_token = request.data["refresh"]
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        return Response({"message": "로그아웃 성공"}, status=205)
+    except Exception:
+        return Response({"message": "잘못된 토큰입니다."}, status=400)

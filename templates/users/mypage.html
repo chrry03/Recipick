@@ -15,25 +15,32 @@
         
         {% include 'header.html' %}
 
-        <div id="logged-in-view" style="display: none; width: 100%; flex-direction: column; align-items: center;">
-            <div class="profile-card-mw">
-                <div style="font-size: 50px;">🍴</div>
-                <div style="text-align: center;">
-                    <h2 id="display-nickname" class="profile-nickname">닉네임</h2>
-                    <a href="{% url 'users:nickname' %}" class="profile-edit-link">닉네임 변경</a>
+        {% if user.is_authenticated %}
+
+            <div id="logged-in-view" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                <div class="profile-card-mw">
+                    <div style="font-size: 50px;">🍴</div>
+                    <div style="text-align: center;">
+                        <h2 id="display-nickname" class="profile-nickname">{{ user_data.nickname }}</h2>
+                        <a href="{% url 'users:nickname' %}" class="profile-edit-link">닉네임 변경</a>
+                    </div>
                 </div>
+
+                <a href="{% url 'users:preference' %}" class="btn-mw btn-primary-mw" style="margin-top: 50px;">취향 재설정</a>
+                <button type="button" id="btn-logout" class="btn-mw btn-secondary-mw" style="margin-top: 15px;">로그아웃</button>
             </div>
 
-            <a href="{% url 'users:preference' %}" class="btn-mw btn-primary-mw" style="margin-top: 50px;">취향 재설정</a>
-            <button type="button" id="btn-logout" class="btn-mw btn-secondary-mw" style="margin-top: 15px;">로그아웃</button>
-        </div>
+        {% else %}
 
-        <div id="logged-out-view" style="display: none; width: 100%; flex-direction: column; align-items: center; margin-top: 100px;">
-            <div style="font-size: 60px; margin-bottom: 20px;">🍴</div>
-            <h1 class="title-text" style="margin-bottom: 50px;">Recipick</h1>
-            <a href="{% url 'users:login' %}" class="btn-mw btn-secondary-mw">로그인</a>
-        </div>
-
+            <div id="logged-out-view" style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 100px;">
+                <div style="font-size: 60px; margin-bottom: 20px;">🍴</div>
+                <h1 class="title-text" style="margin-bottom: 50px;">Recipick</h1>
+                <a href="{% url 'users:login' %}" class="btn-mw btn-secondary-mw">로그인</a>
+            </div>
+            
+        {% endif %}
     </div>
+    <!-- Bottom Navigation -->
+    {% include 'base_with_navbar.html' %}
 </div>
 {% endblock %}
