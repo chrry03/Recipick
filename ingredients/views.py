@@ -208,12 +208,14 @@ def my_fridge_view(request):
 
 @login_required
 def add_ingredient_view(request):
-    """식재료 추가 페이지"""
+    """식재료 추가 및 삭제 페이지"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            items = data.get('ingredients', [])
-            for item in items:
+            
+            # 1. 추가 및 수정할 재료 처리
+            added_items = data.get('added', [])
+            for item in added_items:
                 name = item.get('name')
                 expiry = item.get('expiry_date')
                 category_name = item.get('category')
@@ -228,6 +230,15 @@ def add_ingredient_view(request):
                     ingredient=ingredient_master,
                     defaults={'expire_at': parse_date(expiry), 'is_consumed': False}
                 )
+
+            # 2. [NEW] 삭제할 재료 처리 (보유 취소)
+            removed_items = data.get('removed', [])
+            if removed_items:
+                UserIngredient.objects.filter(
+                    user=request.user, 
+                    ingredient__name_ko__in=removed_items
+                ).delete()
+
             return JsonResponse({'status': 'success'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
