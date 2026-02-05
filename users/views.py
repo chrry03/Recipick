@@ -174,16 +174,32 @@ def main_view(request):
 # 5. 마이페이지 (화면 + 기능)
 # =============================================================
 @api_view(['GET', 'PATCH', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny]) # 누구나 접근 가능
 def mypage_view(request):
     # [GET] 화면 보여주기
     if request.method == 'GET':
-        serializer = UserSerializer(request.user)
-        context = {'user_data': serializer.data} 
+        context = {}
+
+        # ★ [수정] 튕겨내는 코드(redirect) 삭제!
+        # 대신, 로그인한 경우에만 데이터를 챙겨줍니다.
+        if request.user.is_authenticated:
+            serializer = UserSerializer(request.user)
+            context['user_data'] = serializer.data
+        
+        # 비로그인 상태면 context가 비어있는 채로 렌더링 됩니다.
+        # (HTML 템플릿에서 {% if user.is_authenticated %} 로 화면을 다르게 그리면 됨)
         return render(request, 'users/mypage.html', context)
+    
+    # ---------------------------------------------------------
+    # [PATCH] & [DELETE] 기능은 여전히 로그인이 필수입니다.
+    # (로그인 안 한 사람은 어차피 '수정/탈퇴' 버튼이 안 보일 테니까요)
+    # ---------------------------------------------------------
     
     # [PATCH] 내 정보 수정
     if request.method == 'PATCH':
+        if not request.user.is_authenticated:
+            return Response({"message": "로그인이 필요합니다."}, status=401)
+
         serializer = UserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -192,6 +208,9 @@ def mypage_view(request):
 
     # [DELETE] 회원 탈퇴
     if request.method == 'DELETE':
+        if not request.user.is_authenticated:
+            return Response({"message": "로그인이 필요합니다."}, status=401)
+
         user = request.user
         password = request.data.get('password')
         is_social = user.social_accounts.exists()
