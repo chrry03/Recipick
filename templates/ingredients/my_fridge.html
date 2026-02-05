@@ -10,10 +10,14 @@
 {% endblock header %}
 
 {% block main_content %}
-<div class="search-wrapper">
-    <input type="text" id="searchInput" class="search-input" placeholder="식재료 검색">
-    <img src="{% static 'images/search.png' %}" alt="검색" class="search-icon-img">
-</div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <div class="search-bar">
+            <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색" onerror="console.error('검색 아이콘 로드 실패:', this.src)">
+            <input type="text" placeholder="식재료 검색" class="search-input" id="searchInput">
+        </div>
+    </div>
 
 {% if not ingredients %}
 <div class="promo-card">
