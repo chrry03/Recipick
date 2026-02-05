@@ -354,3 +354,139 @@
 .login-link:hover {
     opacity: 0.8;
 }
+
+
+  .base-timer {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background-color: #f8f5ed;
+    border: 8px solid #ff6e40;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+  
+  .base-timer__left-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6c6c6c;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  
+  .base-timer__time {
+    font-size: 64px;
+    font-weight: 900;
+    color: #000000;
+    line-height: 1;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  
+  .timer-time-part {
+    display: inline-block;
+    min-width: 60px;
+    text-align: center;
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+  
+  .timer-time-part:hover {
+    background-color: rgba(255, 110, 64, 0.1);
+  }
+  
+  .timer-time-separator {
+    display: inline-block;
+    user-select: none;
+  }
+  
+  .timer-time-input {
+    width: 120px;
+    font-size: 64px;
+    font-weight: 900;
+    color: #000000;
+    background-color: transparent;
+    border: 2px solid #ff6e40;
+    border-radius: 4px;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    outline: none;
+    padding: 0;
+  }
+  
+  .timer-time-input--small {
+    width: 60px;
+    font-size: 64px;
+  }
+  
+  /* number input의 스피너 버튼 제거 */
+  .timer-time-input::-webkit-inner-spin-button,
+  .timer-time-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  .timer-time-input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  
+  .timer-time-input::placeholder {
+    color: #999;
+  }
+  
+  .base-timer__play-button {
+    margin-top: 12px;
+    width: 0;
+    height: 0;
+    border-left: 12px solid #ff6e40;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .base-timer__play-button:hover {
+    transform: scale(1.1);
+  }
+  
+  .base-timer__play-button.paused {
+    border-left: 0;
+    border-top: 0;
+    border-bottom: 0;
+    width: 16px;
+    height: 16px;
+    background-color: transparent;
+    position: relative;
+  }
+  
+  .base-timer__play-button.paused::before,
+  .base-timer__play-button.paused::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 4px;
+    height: 16px;
+    background-color: #ff6e40;
+    border-radius: 2px;
+  }
+  
+  .base-timer__play-button.paused::before {
+    left: 0;
+  }
+  
+  .base-timer__play-button.paused::after {
+    right: 0;
+  }
+  

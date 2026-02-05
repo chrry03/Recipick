@@ -580,13 +580,9 @@
     }
 
     // ============================================
-    // 레시피 단계 네비게이션 모듈
+    // 레시피 단계
     // ============================================
 
-    /**
-     * RecipeStepNavigator 클래스
-     * 레시피 단계 네비게이션을 관리하는 클래스
-     */
     class RecipeStepNavigator {
         constructor(options = {}) {
             this.currentStep = this._getCurrentStep();
@@ -783,6 +779,7 @@
         // 요리 단계 페이지
         if (document.querySelector('.recipe-container[data-total-steps]')) {
             initRecipeStepNavigator();
+            initTimer();
         }
 
         // 공통 이미지 에러 핸들러
@@ -803,3 +800,320 @@
     window.attachRecipeCardListeners = attachRecipeCardListeners;
 
 })();
+
+
+
+
+    // ============================================
+    // 타이머 모듈
+    // ============================================
+
+    let TIME_LIMIT = 20; // 기본값 20초
+    let timePassed = 0;
+    let timeLeft = TIME_LIMIT;
+    let timerInterval = null;
+    let isEditingTime = false;
+
+    function formatTime(time) {
+        const minutes = Math.floor(time / 60);
+        let seconds = time % 60;
+
+        if (seconds < 10) {
+            seconds = `0${seconds}`;
+        }
+
+        return {
+            minutes: minutes.toString(),
+            seconds: seconds.toString(),
+            display: `${minutes}:${seconds}`
+        };
+    }
+
+    function parseTimeInput(input) {
+        // "mm:ss" 또는 "m:ss" 형식 파싱
+        const parts = input.split(':');
+        if (parts.length === 2) {
+            const minutes = parseInt(parts[0], 10) || 0;
+            const seconds = parseInt(parts[1], 10) || 0;
+            return minutes * 60 + seconds;
+        }
+        // 숫자만 입력된 경우 초로 간주
+        const totalSeconds = parseInt(input, 10);
+        return isNaN(totalSeconds) ? 0 : totalSeconds;
+    }
+
+    function onTimesUp() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+
+    function startTimer() {
+        if (timerInterval) {
+            return; // 이미 실행 중
+        }
+        
+        timerInterval = setInterval(() => {
+            timePassed += 1;
+            timeLeft = TIME_LIMIT - timePassed;
+            updateTimerDisplay();
+
+            if (timeLeft === 0) {
+                onTimesUp();
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    function resetTimer() {
+        stopTimer();
+        timePassed = 0;
+        timeLeft = TIME_LIMIT;
+        updateTimerDisplay();
+    }
+
+    function setTimerTime(seconds) {
+        if (seconds <= 0) {
+            return;
+        }
+        TIME_LIMIT = seconds;
+        resetTimer();
+    }
+
+    function showMinutesInput() {
+        if (isEditingTime || timerInterval) {
+            return;
+        }
+
+        isEditingTime = true;
+        const minutesLabel = document.getElementById("timer-minutes");
+        if (!minutesLabel) {
+            isEditingTime = false;
+            return;
+        }
+
+        const currentTime = formatTime(timeLeft);
+        minutesLabel.innerHTML = `
+            <input type="number" 
+                   id="timer-minutes-input" 
+                   class="timer-time-input timer-time-input--small" 
+                   value="${currentTime.minutes}" 
+                   min="0"
+                   max="99"
+                   maxlength="2">
+        `;
+
+        const input = document.getElementById("timer-minutes-input");
+        if (input) {
+            input.focus();
+            input.select();
+
+            input.addEventListener("blur", function() {
+                saveMinutesInput();
+            });
+
+            input.addEventListener("keydown", function(e) {
+                if (e.key === "Enter" || e.keyCode === 13) {
+                    e.preventDefault();
+                    saveMinutesInput();
+                } else if (e.key === "Escape" || e.keyCode === 27) {
+                    e.preventDefault();
+                    cancelTimeInput();
+                }
+            });
+        }
+    }
+
+    function showSecondsInput() {
+        if (isEditingTime || timerInterval) {
+            return;
+        }
+
+        isEditingTime = true;
+        const secondsLabel = document.getElementById("timer-seconds");
+        if (!secondsLabel) {
+            isEditingTime = false;
+            return;
+        }
+
+        const currentTime = formatTime(timeLeft);
+        secondsLabel.innerHTML = `
+            <input type="text" 
+                   id="timer-seconds-input" 
+                   class="timer-time-input timer-time-input--small" 
+                   value="${currentTime.seconds}" 
+                   maxlength="2"
+                   inputmode="numeric"
+                   pattern="[0-9]*">
+        `;
+
+        const input = document.getElementById("timer-seconds-input");
+        if (input) {
+            input.focus();
+            input.select();
+
+            // 숫자만 입력 가능하도록 제한
+            input.addEventListener("input", function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (parseInt(this.value, 10) > 59) {
+                    this.value = '59';
+                }
+            });
+
+            // 마우스 휠 이벤트 차단
+            input.addEventListener("wheel", function(e) {
+                e.preventDefault();
+            });
+
+            input.addEventListener("blur", function() {
+                saveSecondsInput();
+            });
+
+            input.addEventListener("keydown", function(e) {
+                if (e.key === "Enter" || e.keyCode === 13) {
+                    e.preventDefault();
+                    saveSecondsInput();
+                } else if (e.key === "Escape" || e.keyCode === 27) {
+                    e.preventDefault();
+                    cancelTimeInput();
+                } else if (!/[0-9]/.test(e.key) && 
+                          !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape'].includes(e.key) &&
+                          e.keyCode !== 8 && e.keyCode !== 46 && e.keyCode !== 9 && 
+                          e.keyCode !== 37 && e.keyCode !== 39 && e.keyCode !== 13 && e.keyCode !== 27) {
+                    e.preventDefault();
+                }
+            });
+        }
+    }
+
+    function saveMinutesInput() {
+        const input = document.getElementById("timer-minutes-input");
+        if (!input) {
+            isEditingTime = false;
+            return;
+        }
+
+        const minutes = parseInt(input.value, 10) || 0;
+        const currentTime = formatTime(timeLeft);
+        const seconds = parseInt(currentTime.seconds, 10) || 0;
+        const totalSeconds = minutes * 60 + seconds;
+
+        if (totalSeconds > 0) {
+            setTimerTime(totalSeconds);
+        } else {
+            isEditingTime = false;
+            updateTimerDisplay();
+        }
+    }
+
+    function saveSecondsInput() {
+        const input = document.getElementById("timer-seconds-input");
+        if (!input) {
+            isEditingTime = false;
+            return;
+        }
+
+        const seconds = parseInt(input.value, 10) || 0;
+        if (seconds > 59) {
+            seconds = 59;
+        }
+        
+        const currentTime = formatTime(timeLeft);
+        const minutes = parseInt(currentTime.minutes, 10) || 0;
+        const totalSeconds = minutes * 60 + seconds;
+
+        if (totalSeconds > 0) {
+            setTimerTime(totalSeconds);
+        } else {
+            isEditingTime = false;
+            updateTimerDisplay();
+        }
+    }
+
+    function cancelTimeInput() {
+        isEditingTime = false;
+        updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+        const minutesLabel = document.getElementById("timer-minutes");
+        const secondsLabel = document.getElementById("timer-seconds");
+        const timeObj = formatTime(timeLeft);
+
+        if (minutesLabel && !isEditingTime) {
+            minutesLabel.textContent = timeObj.minutes;
+        }
+        if (secondsLabel && !isEditingTime) {
+            secondsLabel.textContent = timeObj.seconds;
+        }
+    }
+
+    /**
+     * 타이머 초기화
+     */
+    function initTimer() {
+        const timerApp = document.getElementById("timer-app");
+        if (!timerApp) {
+            return;
+        }
+
+        resetTimer();
+
+        const timeObj = formatTime(timeLeft);
+        timerApp.innerHTML = `
+            <div class="base-timer">
+                <div class="base-timer__left-label">LEFT</div>
+                <div id="base-timer-label" class="base-timer__time">
+                    <span id="timer-minutes" class="timer-time-part">${timeObj.minutes}</span>
+                    <span class="timer-time-separator">:</span>
+                    <span id="timer-seconds" class="timer-time-part">${timeObj.seconds}</span>
+                </div>
+                <div id="base-timer-play-button" class="base-timer__play-button"></div>
+            </div>
+        `;
+
+        // 분 클릭 시 분 입력 모드로 전환
+        const minutesLabel = document.getElementById("timer-minutes");
+        if (minutesLabel) {
+            minutesLabel.addEventListener("click", function(e) {
+                e.stopPropagation();
+                if (!timerInterval && !isEditingTime) {
+                    showMinutesInput();
+                }
+            });
+        }
+
+        // 초 클릭 시 초 입력 모드로 전환
+        const secondsLabel = document.getElementById("timer-seconds");
+        if (secondsLabel) {
+            secondsLabel.addEventListener("click", function(e) {
+                e.stopPropagation();
+                if (!timerInterval && !isEditingTime) {
+                    showSecondsInput();
+                }
+            });
+        }
+
+        // 재생 버튼 이벤트 리스너 추가
+        const playButton = document.getElementById("base-timer-play-button");
+        if (playButton) {
+            playButton.addEventListener("click", function(e) {
+                e.stopPropagation();
+                if (timerInterval) {
+                    stopTimer();
+                    this.classList.add("paused");
+                } else {
+                    if (timeLeft > 0) {
+                        startTimer();
+                        this.classList.remove("paused");
+                    }
+                }
+            });
+        }
+    }
+
