@@ -135,29 +135,32 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// 1) 전역 변수
 // 취향 설정 데이터
+// 알러지는 고정 데이터로 유지 (변동이 적으므로)
 const ALLERGIES_DATA = [
     "난류", "우유", "메밀", "땅콩", "대두", "밀", "고등어", "게", "새우", "돼지고기", 
     "복숭아", "토마토", "아황산류", "호두", "닭고기", "쇠고기", "오징어", "조개류", "잣"
 ];
 
-const INGREDIENTS_DATA = {
-    "육류": ["돼지고기", "소고기", "닭고기", "양고기"],
-    "해산물": ["새우", "게", "고등어", "오징어", "조개"],
-    "채소류": ["오이", "당근", "양파", "파프리카", "버섯", "가지", "고수", "브로콜리", "시금치", "피망", "호박", "무", "배추", "깻잎"],
-    "유제품": ["우유", "치즈", "버터"],
-    "기타": ["땅콩", "호두", "잣"]
-};
+// const INGREDIENTS_DATA = {
+//     "육류": ["돼지고기", "소고기", "닭고기", "양고기"],
+//     "해산물": ["새우", "게", "고등어", "오징어", "조개"],
+//     "채소류": ["오이", "당근", "양파", "파프리카", "버섯", "가지", "고수", "브로콜리", "시금치", "피망", "호박", "무", "배추", "깻잎"],
+//     "유제품": ["우유", "치즈", "버터"],
+//     "기타": ["땅콩", "호두", "잣"]
+// };
 
-let currentCategory = "채소류";
+// ★ [수정] 식재료 데이터는 이제 API로 받아오므로 빈 객체로 시작하지 않고, 로직에서 처리합니다.
+let currentCategoryId = 1; // 기본 카테고리 ID (채소)
 const selectedAllergies = new Set();
-const bannedIngredients = new Set();
+const bannedIngredients = new Set(); // 여기에 "양파", "오이" 같은 이름이 저장됨
 
 
 // ==========================================
 // 2. 전역 함수 (취향 설정 페이지 onclick 대응)
 // ==========================================
-
+// 2) 초기화 및 API 호출 함수
 function renderAllergies() {
     const container = document.getElementById('allergy-list');
     if(!container) return;
@@ -178,32 +181,122 @@ function toggleAllergy(el, name) {
     else selectedAllergies.add(name);
 }
 
-function renderIngredients(category) {
+// ==========================================
+// [신규] API 연동 및 로직 함수들
+// ==========================================
+
+// 1. 카테고리 탭 불러오기 (화면 로드 시 실행)
+async function fetchCategories() {
+    const container = document.getElementById('category-wrapper');
+    if (!container) return;
+
+    try {
+        const res = await fetch('/ingredients/categories/'); 
+        const categories = await res.json();
+        
+        // 카테고리 버튼 생성
+        container.innerHTML = categories.map((cat, index) => `
+            <div class="category-item ${index === 0 ? 'active' : ''}" 
+                 onclick="selectCategory(this, ${cat.id})">
+                ${cat.icon_url || ''} ${cat.name}
+            </div>
+        `).join('');
+
+        // 첫 번째 카테고리가 있으면 바로 해당 재료 불러오기
+        if (categories.length > 0) {
+            currentCategoryId = categories[0].id;
+            fetchIngredients(currentCategoryId);
+        }
+    } catch (err) {
+        console.error("카테고리 로드 실패:", err);
+    }
+}
+
+// 2. 카테고리 클릭 시 동작
+function selectCategory(el, catId) {
+    document.querySelectorAll('.category-item').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    currentCategoryId = catId;
+    fetchIngredients(catId);
+}
+
+// 3. 재료 목록 불러오기 (API 호출)
+async function fetchIngredients(catId) {
     const container = document.getElementById('ingredient-list');
-    if(!container) return;
+    if (!container) return;
+    container.innerHTML = '<div style="padding:20px;">로딩 중...</div>';
+
+    try {
+        const res = await fetch(`/ingredients/?category_id=${catId}`);
+        const ingredients = await res.json();
+        renderIngredientList(ingredients);
+    } catch (err) {
+        console.error("식재료 로드 실패:", err);
+        container.innerHTML = '<div>불러오기 실패</div>';
+    }
+}
+
+// 4. 재료 검색 (엔터 쳤을 때)
+async function searchIngredients(keyword) {
+    if (!keyword.trim()) return;
     
-    const list = INGREDIENTS_DATA[category] || [];
+    const container = document.getElementById('ingredient-list');
+    container.innerHTML = '<div style="padding:20px;">검색 중...</div>';
+
+    try {
+        const res = await fetch(`/ingredients/search/?keyword=${keyword}`);
+        const ingredients = await res.json();
+
+        if (ingredients.length > 0) {
+            renderIngredientList(ingredients);
+        } else {
+            // 검색 결과 없으면 [직접 추가] 버튼 표시
+            container.innerHTML = `
+                <div class="no-result" style="text-align:center; padding:20px; width:100%;">
+                    <p style="margin-bottom:10px;">'${keyword}'에 대한 검색 결과가 없습니다.</p>
+                    <button type="button" class="btn-mw btn-primary-mw" 
+                            onclick="addCustomIngredient('${keyword}')" style="width:auto; padding: 10px 20px;">
+                        '${keyword}' 직접 추가하기
+                    </button>
+                </div>
+            `;
+        }
+    } catch (err) {
+        console.error("검색 실패:", err);
+    }
+}
+
+// 5. 화면에 재료 뿌리기 (공통 함수)
+function renderIngredientList(list) {
+    const container = document.getElementById('ingredient-list');
     container.innerHTML = list.map(ing => {
-        const isChecked = bannedIngredients.has(ing) ? 'checked' : '';
+        // 이미 선택한 재료면 체크 표시 유지
+        const isChecked = bannedIngredients.has(ing.name_ko) ? 'checked' : '';
         return `
             <label class="ing-check-item">
-                <input type="checkbox" value="${ing}" class="ing-checkbox" onchange="updateBanned(this)" ${isChecked}>
-                <span>${ing}</span>
+                <input type="checkbox" value="${ing.name_ko}" class="ing-checkbox" onchange="updateBanned(this)" ${isChecked}>
+                <span>${ing.name_ko}</span>
             </label>
         `;
     }).join('');
 }
 
-function setupCategoryClicks() {
-    const categories = document.querySelectorAll('.category-item');
-    categories.forEach(cat => {
-        cat.addEventListener('click', () => {
-            categories.forEach(c => c.classList.remove('active'));
-            cat.classList.add('active');
-            currentCategory = cat.innerText;
-            renderIngredients(currentCategory);
-        });
-    });
+// 6. 직접 추가하기 기능
+function addCustomIngredient(name) {
+    bannedIngredients.add(name);
+    alert(`'${name}'이(가) 제외 식재료에 추가되었습니다.`);
+    
+    // 리스트 맨 앞에 강제로 추가해서 보여줌
+    const container = document.getElementById('ingredient-list');
+    const newItem = `
+        <label class="ing-check-item">
+            <input type="checkbox" value="${name}" class="ing-checkbox" onchange="updateBanned(this)" checked>
+            <span>${name} (직접 추가)</span>
+        </label>
+    `;
+    // 기존 내용 지우고 추가된 것만 보여주거나, 맨 위에 붙임 (여기선 맨 위 추가)
+    if(container.querySelector('.no-result')) container.innerHTML = ''; // 검색결과 없음 메시지 지우기
+    container.insertAdjacentHTML('afterbegin', newItem);
 }
 
 function updateBanned(checkbox) {
@@ -277,9 +370,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- 취향 설정 페이지 초기화 ---
     const allergyContainer = document.getElementById('allergy-list');
     if (allergyContainer) {
-        renderAllergies();
-        renderIngredients(currentCategory);
-        setupCategoryClicks();
+        renderAllergies(); // 알러지는 그대로
+        fetchCategories(); // ★ [신규] 카테고리 API 호출 시작!
+
+        // ★ [신규] 검색창 이벤트 연결
+        const searchInput = document.getElementById('ingredient-search');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // 폼 제출 방지
+                    searchIngredients(this.value);
+                }
+            });
+        }
     }
 
     // --- 1. 로그인 폼 ---
