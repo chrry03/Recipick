@@ -395,20 +395,6 @@ document.addEventListener('DOMContentLoaded', function() {
             loggedInView.style.display = 'flex';
             if (loggedOutView) loggedOutView.style.display = 'none';
             if(nicknameDisplay) nicknameDisplay.textContent = localStorage.getItem('user_nickname') || '사용자';
-            
-            // 최신 정보 동기화
-            fetch('/users/mypage/', { headers: { 'Authorization': `Bearer ${token}` } })
-                .then(res => {
-                    if (!res.ok) throw new Error('Unauthorized');
-                    return res.json();
-                })
-                .then(data => {
-                    if(data.nickname) {
-                        if(nicknameDisplay) nicknameDisplay.textContent = data.nickname;
-                        localStorage.setItem('user_nickname', data.nickname);
-                    }
-                })
-                .catch(err => console.log("세션 만료 또는 오류:", err));
 
         } else {
             loggedInView.style.display = 'none';

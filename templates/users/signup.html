@@ -13,8 +13,8 @@
 <div class="scroll-container">
     <div class="container-mw">
         
-        <div class="logo-area">
-            <h1 class="title-text">Recipick</h1>
+        <div class="logo-area" style="margin-bottom: 40px; text-align: center;">
+            <img src="{% static 'images/logo.png' %}" alt="Recipick" style="width: 280px; height: auto;" onerror="this.src='https://via.placeholder.com/175x37'">
         </div>
 
         <form id="signup-step1-form" class="form-group-mw">
@@ -27,10 +27,8 @@
             <div class="form-group-mw">
                 <input type="password" id="password_confirm" placeholder="비밀번호 확인" class="input-mw" required>
             </div>
-
-            <button type="submit" class="btn-mw btn-primary-mw" style="margin-top: 20px;">회원가입</button>
+            <button type="submit" class="btn-mw btn-primary-mw" style="margin-top: 20px;">다음</button>
         </form>
-
     </div>
 </div>
 {% endblock %}
