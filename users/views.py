@@ -71,6 +71,7 @@ def login_view(request):
         user = authenticate(email=email, password=password)
 
         if user is not None:
+            login(request, user)
             token = RefreshToken.for_user(user)
             return Response({
                 "message": "로그인 성공",
