@@ -1,6 +1,6 @@
 from datetime import date
 from django.shortcuts import render
-from django.contrib.auth import authenticate, get_user_model, login
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.db.models import F
 
 # DRF 관련 임포트
@@ -291,13 +291,47 @@ def check_nickname_view(request):
     is_exist = User.objects.filter(nickname=nickname).exists()
     return Response({'is_available': not is_exist}, status=200)
 
+@api_view(['POST']) # 이메일은 body에 담아 보내므로 POST 권장
+@permission_classes([AllowAny])
+def check_email_view(request):
+    """
+    이메일 중복 확인 API
+    """
+    email = request.data.get('email')
+    
+    # 이메일 값이 안 넘어왔을 때
+    if not email:
+        return Response({"message": "이메일을 입력해주세요.", "is_available": False}, status=400)
+    
+    # DB에 이미 있는지 확인
+    is_exist = User.objects.filter(email=email).exists()
+    
+    if is_exist:
+        return Response({
+            "message": "이미 가입된 이메일입니다.",
+            "is_available": False
+        }, status=200)
+    else:
+        return Response({
+            "message": "사용 가능한 이메일입니다.",
+            "is_available": True
+        }, status=200)
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout_view(request):
     try:
-        refresh_token = request.data["refresh"]
-        token = RefreshToken(refresh_token)
-        token.blacklist()
+        # 1. JWT 토큰 블랙리스트 처리 (API용 로그아웃)
+        refresh_token = request.data.get("refresh")
+        if refresh_token:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+        # 2. [★ 핵심 추가] 브라우저 세션 삭제 (화면용 로그아웃)
+        logout(request)
+
         return Response({"message": "로그아웃 성공"}, status=205)
-    except Exception:
-        return Response({"message": "잘못된 토큰입니다."}, status=400)
+    except Exception as e:
+        # 토큰이 없거나 만료되어도 세션 로그아웃은 시켜주는 게 안전합니다.
+        logout(request) 
+        return Response({"message": "잘못된 토큰이지만 로그아웃 처리되었습니다."}, status=200)

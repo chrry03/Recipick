@@ -19,6 +19,7 @@ urlpatterns = [
 
     # 3. 기능 전용 API
     path('check-nickname/', views.check_nickname_view, name='check_nickname'), # 닉네임 중복 확인
+    path('check-email/', views.check_email_view, name='check_email'),          # [★ 추가] 이메일 중복 확인 API
     path('logout/', views.logout_view, name='logout'),                         # 로그아웃 (★추가됨)
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # 토큰 재발급 (★추가됨)
 

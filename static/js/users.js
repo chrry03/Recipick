@@ -227,16 +227,45 @@ function goToStep(stepNum) {
 
 async function finishPreference(level) {
     const token = localStorage.getItem('access_token');
+    const csrftoken = getCookie('csrftoken');
+
     if (!token) {
         alert("로그인이 필요합니다.");
         window.location.href = '/users/login/';
         return;
     }
     
-    // UI 데모용 (실제 API 연동 시 여기에 fetch 추가)
-    console.log("Saving preference:", { level, allergies: [...selectedAllergies], banned: [...bannedIngredients] });
-    alert("취향 설정이 완료되었습니다!");
-    window.location.href = "/";
+    // ★ [수정 핵심] Serializer가 Flat 구조(write_only 필드)로 되어 있으므로
+    // 'profile' 껍데기 없이 그냥 보냅니다.
+    const payload = {
+        cooking_level: level,
+        allergies: Array.from(selectedAllergies),      // Set -> Array
+        banned_ingredients: Array.from(bannedIngredients) // Set -> Array
+    };
+
+    try {
+        const response = await fetch('/users/mypage/', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            alert("취향 설정이 완료되었습니다! 메인으로 이동합니다.");
+            window.location.href = "/"; 
+        } else {
+            const errorData = await response.json();
+            console.error("저장 실패:", errorData);
+            alert("저장에 실패했습니다. 다시 시도해주세요.");
+        }
+    } catch (error) {
+        console.error("통신 오류:", error);
+        alert("서버 오류가 발생했습니다.");
+    }
 }
 
 
@@ -290,19 +319,47 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- 2. 회원가입 폼 (Step 1) ---
     const signupForm = document.getElementById('signup-step1-form');
     if (signupForm) {
-        signupForm.addEventListener('submit', function(e) {
+        signupForm.addEventListener('submit', async function(e) { // async 추가 필수!
             e.preventDefault();
+            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const passwordConfirm = document.getElementById('password_confirm').value;
 
+            // 1. 비밀번호 일치 확인
             if (password !== passwordConfirm) {
                 alert('비밀번호가 일치하지 않습니다.');
                 return;
             }
-            localStorage.setItem('temp_email', email);
-            localStorage.setItem('temp_pw', password);
-            window.location.href = '/users/nickname/?next=preference';
+
+            // ★ 2. 이메일 중복 확인 (서버에 물어보기)
+            try {
+                const response = await fetch('/users/check-email/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // CSRF 토큰이 필요하다면 getCookie('csrftoken') 사용
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const data = await response.json();
+
+                // 이미 있는 이메일이면 여기서 멈춤! (다음 페이지로 안 감)
+                if (!data.is_available) {
+                    alert(data.message); // "이미 가입된 이메일입니다." 알림
+                    return; 
+                }
+
+                // 3. 통과했으면 로컬스토리지 저장하고 이동
+                localStorage.setItem('temp_email', email);
+                localStorage.setItem('temp_pw', password);
+                window.location.href = '/users/nickname/?next=preference';
+
+            } catch (error) {
+                console.error('이메일 확인 중 오류:', error);
+                alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            }
         });
     }
 
@@ -401,14 +458,41 @@ document.addEventListener('DOMContentLoaded', function() {
             if (loggedOutView) loggedOutView.style.display = 'flex';
         }
 
+        /* static/js/users.js 의 로그아웃 부분 수정 */
+
         const logoutBtn = document.getElementById('btn-logout');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', function() {
+            logoutBtn.addEventListener('click', async function() { // async 추가
                 if (confirm('로그아웃 하시겠습니까?')) {
-                    localStorage.removeItem('access_token');
-                    localStorage.removeItem('refresh_token');
-                    localStorage.removeItem('user_nickname');
-                    window.location.href = '/users/login/';
+                    try {
+                        const refresh = localStorage.getItem('refresh_token');
+                        const csrftoken = getCookie('csrftoken');
+
+                        // ★ 1. 백엔드에 "로그아웃 할게요" 요청 (세션 삭제 + 토큰 블랙리스트)
+                        // 토큰이 없더라도(이미 만료 등) 세션 로그아웃을 위해 요청은 보냅니다.
+                        await fetch('/users/logout/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrftoken,
+                                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                            },
+                            body: JSON.stringify({ refresh: refresh })
+                        });
+
+                    } catch (error) {
+                        console.error("로그아웃 요청 중 오류:", error);
+                        // 오류가 나도 클라이언트 로그아웃은 진행
+                    } finally {
+                        // ★ 2. 브라우저 청소 (토큰 삭제)
+                        localStorage.removeItem('access_token');
+                        localStorage.removeItem('refresh_token');
+                        localStorage.removeItem('user_nickname');
+
+                        // ★ 3. 로그인 화면으로 이동
+                        alert("로그아웃 되었습니다.");
+                        window.location.href = '/users/login/';
+                    }
                 }
             });
         }
