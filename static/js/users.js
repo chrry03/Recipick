@@ -1,119 +1,4 @@
-// 알림 페이지
-document.addEventListener('DOMContentLoaded', function() {
-    // 뒤로가기 버튼 이벤트
-    const backButton = document.querySelector('.back-button');
-    if (backButton) {
-        backButton.addEventListener('click', function() {
-            // Django에서 뒤로가기 처리
-            window.history.back();
-        });
-    }
-
-    // 더보기 버튼 이벤트 (모든 버튼에 적용)
-    const moreButtons = document.querySelectorAll('.more-button');
-    moreButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            showOptionsMenu(e, this);
-        });
-    });
-
-    // 알림 아이템 클릭 이벤트
-    const notificationItem = document.querySelector('.notification-item-container');
-    if (notificationItem) {
-        notificationItem.addEventListener('click', function() {
-            // 알림 상세 페이지로 이동
-            console.log('알림 클릭됨');
-            // window.location.href = '/users/notification-detail/';
-        });
-    }
-});
-
-// 옵션 메뉴 표시 함수
-function showOptionsMenu(event, buttonElement) {
-    // 기존 메뉴가 있으면 제거
-    const existingMenu = document.querySelector('.options-menu');
-    if (existingMenu) {
-        existingMenu.remove();
-        return;
-    }
-
-    // 버튼이 속한 알림 아이템 컨테이너 찾기
-    const notificationItem = buttonElement.closest('.notification-item-container');
-    if (!notificationItem) return;
-
-    // 새 메뉴 생성
-    const menu = document.createElement('div');
-    menu.className = 'options-menu';
-    const notificationId = buttonElement.getAttribute('data-notification-id');
-    menu.setAttribute('data-notification-id', notificationId);
-    menu.innerHTML = `
-        <div class="option-item" onclick="markAsRead(${notificationId})">읽음으로 표시</div>
-        <div class="option-item" onclick="deleteNotification(${notificationId})">삭제</div>
-    `;
-
-    // 메뉴를 알림 아이템 컨테이너 내부에 추가 (relative positioning을 위해)
-    notificationItem.appendChild(menu);
-
-    // 위치 계산 (버튼 바로 아래)
-    const buttonRect = buttonElement.getBoundingClientRect();
-    const itemRect = notificationItem.getBoundingClientRect();
-    
-    // 버튼의 오른쪽 끝에서 메뉴의 오른쪽 끝까지의 거리
-    const rightOffset = itemRect.right - buttonRect.right;
-
-    // 스타일 추가
-    menu.style.position = 'absolute';
-    menu.style.right = rightOffset + 'px';
-    menu.style.top = '100%';
-    menu.style.marginTop = '5px';
-
-    // 외부 클릭시 메뉴 닫기
-    setTimeout(() => {
-        document.addEventListener('click', closeMenu);
-    }, 0);
-}
-
-// 메뉴 닫기 함수
-function closeMenu() {
-    const menu = document.querySelector('.options-menu');
-    if (menu) {
-        menu.remove();
-    }
-    document.removeEventListener('click', closeMenu);
-}
-
-// 알림 삭제 함수
-function deleteNotification(notificationId) {
-    if (confirm('알림을 삭제하시겠습니까?')) {
-        console.log('알림 삭제:', notificationId);
-    }
-    closeMenu();
-}
-
-// 읽음으로 표시 함수
-function markAsRead(notificationId) {
-    console.log('읽음으로 표시:', notificationId);
-    closeMenu();
-}
-
-// CSRF 토큰 가져오기 함수
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-/* static/js/users.js */
+/* static/js/users.js - 최종 수정본 (API 연동 포함) */
 
 // ==========================================
 // 1. 전역 유틸리티 함수 & 데이터
@@ -135,29 +20,23 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// 취향 설정 데이터
+// 알러지 데이터 (고정)
 const ALLERGIES_DATA = [
     "난류", "우유", "메밀", "땅콩", "대두", "밀", "고등어", "게", "새우", "돼지고기", 
     "복숭아", "토마토", "아황산류", "호두", "닭고기", "쇠고기", "오징어", "조개류", "잣"
 ];
 
-const INGREDIENTS_DATA = {
-    "육류": ["돼지고기", "소고기", "닭고기", "양고기"],
-    "해산물": ["새우", "게", "고등어", "오징어", "조개"],
-    "채소류": ["오이", "당근", "양파", "파프리카", "버섯", "가지", "고수", "브로콜리", "시금치", "피망", "호박", "무", "배추", "깻잎"],
-    "유제품": ["우유", "치즈", "버터"],
-    "기타": ["땅콩", "호두", "잣"]
-};
-
-let currentCategory = "채소류";
+// 식재료 데이터 관리 변수
+let currentCategoryId = 1; 
 const selectedAllergies = new Set();
-const bannedIngredients = new Set();
+const bannedIngredients = new Set(); 
 
 
 // ==========================================
-// 2. 전역 함수 (취향 설정 페이지 onclick 대응)
+// 2. 전역 함수 (렌더링 및 로직)
 // ==========================================
 
+// 2-1. 알러지 렌더링 (고정 데이터 사용)
 function renderAllergies() {
     const container = document.getElementById('allergy-list');
     if(!container) return;
@@ -178,39 +57,121 @@ function toggleAllergy(el, name) {
     else selectedAllergies.add(name);
 }
 
-function renderIngredients(category) {
+// 2-2. [신규] 카테고리 API 호출 및 렌더링
+async function fetchCategories() {
+    const container = document.getElementById('category-wrapper');
+    if (!container) return;
+
+    try {
+        const res = await fetch('/ingredients/categories/'); 
+        const categories = await res.json();
+        
+        container.innerHTML = categories.map((cat, index) => `
+            <div class="category-item ${index === 0 ? 'active' : ''}" 
+                 onclick="selectCategory(this, ${cat.id})">
+                ${cat.icon_url || ''} ${cat.name}
+            </div>
+        `).join('');
+
+        if (categories.length > 0) {
+            currentCategoryId = categories[0].id;
+            fetchIngredients(currentCategoryId);
+        }
+    } catch (err) {
+        console.error("카테고리 로드 실패:", err);
+    }
+}
+
+// 2-3. [신규] 카테고리 선택
+function selectCategory(el, catId) {
+    document.querySelectorAll('.category-item').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    currentCategoryId = catId;
+    fetchIngredients(catId);
+}
+
+// 2-4. [신규] 식재료 목록 API 호출
+async function fetchIngredients(catId) {
     const container = document.getElementById('ingredient-list');
-    if(!container) return;
+    if (!container) return;
+    container.innerHTML = '<div style="padding:20px; width:100%; text-align:center;">로딩 중...</div>';
+
+    try {
+        const res = await fetch(`/ingredients/?category_id=${catId}`);
+        const ingredients = await res.json();
+        renderIngredientList(ingredients);
+    } catch (err) {
+        console.error("식재료 로드 실패:", err);
+        container.innerHTML = '<div style="padding:20px;">불러오기 실패</div>';
+    }
+}
+
+// 2-5. [신규] 검색 기능
+async function searchIngredients(keyword) {
+    if (!keyword.trim()) return;
     
-    const list = INGREDIENTS_DATA[category] || [];
+    const container = document.getElementById('ingredient-list');
+    container.innerHTML = '<div style="padding:20px; width:100%; text-align:center;">검색 중...</div>';
+
+    try {
+        const res = await fetch(`/ingredients/search/?keyword=${keyword}`);
+        const ingredients = await res.json();
+
+        if (ingredients.length > 0) {
+            renderIngredientList(ingredients);
+        } else {
+            container.innerHTML = `
+                <div class="no-result" style="text-align:center; padding:20px; width:100%;">
+                    <p style="margin-bottom:10px; color:#666;">'${keyword}'에 대한 검색 결과가 없습니다.</p>
+                    <button type="button" class="btn-mw btn-primary-mw" 
+                            onclick="addCustomIngredient('${keyword}')" style="width:auto; padding: 10px 20px;">
+                        '${keyword}' 직접 추가하기
+                    </button>
+                </div>
+            `;
+        }
+    } catch (err) {
+        console.error("검색 실패:", err);
+    }
+}
+
+// 2-6. [신규] 리스트 렌더링 (공통)
+function renderIngredientList(list) {
+    const container = document.getElementById('ingredient-list');
     container.innerHTML = list.map(ing => {
-        const isChecked = bannedIngredients.has(ing) ? 'checked' : '';
+        const isChecked = bannedIngredients.has(ing.name_ko) ? 'checked' : '';
         return `
             <label class="ing-check-item">
-                <input type="checkbox" value="${ing}" class="ing-checkbox" onchange="updateBanned(this)" ${isChecked}>
-                <span>${ing}</span>
+                <input type="checkbox" value="${ing.name_ko}" class="ing-checkbox" onchange="updateBanned(this)" ${isChecked}>
+                <span>${ing.name_ko}</span>
             </label>
         `;
     }).join('');
 }
 
-function setupCategoryClicks() {
-    const categories = document.querySelectorAll('.category-item');
-    categories.forEach(cat => {
-        cat.addEventListener('click', () => {
-            categories.forEach(c => c.classList.remove('active'));
-            cat.classList.add('active');
-            currentCategory = cat.innerText;
-            renderIngredients(currentCategory);
-        });
-    });
+// 2-7. [신규] 직접 추가
+function addCustomIngredient(name) {
+    bannedIngredients.add(name);
+    alert(`'${name}'이(가) 제외 식재료에 추가되었습니다.`);
+    
+    const container = document.getElementById('ingredient-list');
+    const newItem = `
+        <label class="ing-check-item">
+            <input type="checkbox" value="${name}" class="ing-checkbox" onchange="updateBanned(this)" checked>
+            <span>${name} (직접 추가)</span>
+        </label>
+    `;
+    if(container.querySelector('.no-result')) container.innerHTML = ''; 
+    container.insertAdjacentHTML('afterbegin', newItem);
 }
 
+// 2-8. 체크박스 상태 업데이트
 function updateBanned(checkbox) {
     if (checkbox.checked) bannedIngredients.add(checkbox.value);
     else bannedIngredients.delete(checkbox.value);
 }
 
+// 2-9. 전체 선택/해제
 function toggleSelectAll() {
     const checkboxes = document.querySelectorAll('.ing-checkbox');
     const allChecked = Array.from(checkboxes).every(cb => cb.checked);
@@ -220,37 +181,76 @@ function toggleSelectAll() {
     });
 }
 
+// 2-10. 단계 이동
 function goToStep(stepNum) {
     document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
     document.getElementById(`step-${stepNum}`).classList.add('active');
 }
 
+// 2-11. 설정 완료 및 저장 (Flat 구조)
 async function finishPreference(level) {
     const token = localStorage.getItem('access_token');
+    const csrftoken = getCookie('csrftoken');
+
     if (!token) {
         alert("로그인이 필요합니다.");
         window.location.href = '/users/login/';
         return;
     }
     
-    // UI 데모용 (실제 API 연동 시 여기에 fetch 추가)
-    console.log("Saving preference:", { level, allergies: [...selectedAllergies], banned: [...bannedIngredients] });
-    alert("취향 설정이 완료되었습니다!");
-    window.location.href = "/";
+    const payload = {
+        cooking_level: level,
+        allergies: Array.from(selectedAllergies),
+        banned_ingredients: Array.from(bannedIngredients)
+    };
+
+    try {
+        const response = await fetch('/users/mypage/', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            alert("취향 설정이 완료되었습니다! 메인으로 이동합니다.");
+            window.location.href = "/"; 
+        } else {
+            const errorData = await response.json();
+            console.error("저장 실패:", errorData);
+            alert("저장에 실패했습니다. 다시 시도해주세요.");
+        }
+    } catch (error) {
+        console.error("통신 오류:", error);
+        alert("서버 오류가 발생했습니다.");
+    }
 }
 
 
 // ==========================================
-// 3. DOMContentLoaded 이벤트 (페이지 로드 후 실행)
+// 3. DOMContentLoaded 이벤트
 // ==========================================
 document.addEventListener('DOMContentLoaded', function() {
 
-    // --- 취향 설정 페이지 초기화 ---
+    // --- [수정됨] 취향 설정 페이지 초기화 ---
     const allergyContainer = document.getElementById('allergy-list');
     if (allergyContainer) {
         renderAllergies();
-        renderIngredients(currentCategory);
-        setupCategoryClicks();
+        fetchCategories(); // ★ API 카테고리 로드
+
+        // ★ 검색창 엔터키 이벤트 연결
+        const searchInput = document.getElementById('ingredient-search');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchIngredients(this.value);
+                }
+            });
+        }
     }
 
     // --- 1. 로그인 폼 ---
@@ -290,8 +290,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- 2. 회원가입 폼 (Step 1) ---
     const signupForm = document.getElementById('signup-step1-form');
     if (signupForm) {
-        signupForm.addEventListener('submit', function(e) {
+        signupForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const passwordConfirm = document.getElementById('password_confirm').value;
@@ -300,9 +301,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('비밀번호가 일치하지 않습니다.');
                 return;
             }
-            localStorage.setItem('temp_email', email);
-            localStorage.setItem('temp_pw', password);
-            window.location.href = '/users/nickname/?next=preference';
+
+            try {
+                const response = await fetch('/users/check-email/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const data = await response.json();
+
+                if (!data.is_available) {
+                    alert(data.message);
+                    return; 
+                }
+
+                localStorage.setItem('temp_email', email);
+                localStorage.setItem('temp_pw', password);
+                window.location.href = '/users/nickname/?next=preference';
+
+            } catch (error) {
+                console.error('이메일 확인 중 오류:', error);
+                alert('서버 오류가 발생했습니다.');
+            }
         });
     }
 
@@ -316,15 +337,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!nickname) return alert('닉네임을 입력해주세요.');
 
             try {
-                // 중복 확인
                 const checkRes = await fetch(`/users/check-nickname/?nickname=${nickname}`);
                 const checkData = await checkRes.json();
                 if (!checkRes.ok || !checkData.is_available) {
-                    alert('이미 사용 중인 닉네임입니다.');
-                    return;
+                    return alert('이미 사용 중인 닉네임입니다.');
                 }
 
-                // 가입 또는 수정 진행
                 const tempEmail = localStorage.getItem('temp_email');
                 const tempPw = localStorage.getItem('temp_pw');
                 const urlParams = new URLSearchParams(window.location.search);
@@ -395,7 +413,6 @@ document.addEventListener('DOMContentLoaded', function() {
             loggedInView.style.display = 'flex';
             if (loggedOutView) loggedOutView.style.display = 'none';
             if(nicknameDisplay) nicknameDisplay.textContent = localStorage.getItem('user_nickname') || '사용자';
-
         } else {
             loggedInView.style.display = 'none';
             if (loggedOutView) loggedOutView.style.display = 'flex';
@@ -403,12 +420,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const logoutBtn = document.getElementById('btn-logout');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', function() {
+            logoutBtn.addEventListener('click', async function() {
                 if (confirm('로그아웃 하시겠습니까?')) {
-                    localStorage.removeItem('access_token');
-                    localStorage.removeItem('refresh_token');
-                    localStorage.removeItem('user_nickname');
-                    window.location.href = '/users/login/';
+                    try {
+                        const refresh = localStorage.getItem('refresh_token');
+                        const csrftoken = getCookie('csrftoken');
+
+                        await fetch('/users/logout/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrftoken,
+                                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                            },
+                            body: JSON.stringify({ refresh: refresh })
+                        });
+
+                    } catch (error) {
+                        console.error("로그아웃 요청 중 오류:", error);
+                    } finally {
+                        localStorage.removeItem('access_token');
+                        localStorage.removeItem('refresh_token');
+                        localStorage.removeItem('user_nickname');
+                        alert("로그아웃 되었습니다.");
+                        window.location.href = '/users/login/';
+                    }
                 }
             });
         }

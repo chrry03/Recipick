@@ -27,26 +27,32 @@
 
             <div id="step-2" class="step-section">
                 <h2 class="step-title">제외할 식재료</h2>
-                
+                <p class="step-desc" style="text-align:center; color:#666; margin-bottom: 20px;">
+                    못 먹거나 싫어하는 재료를 선택해주세요.
+                </p>
+
                 <div class="exclude-layout">
-                    <div class="exclude-sidebar">
-                        <div class="category-item">육류</div>
-                        <div class="category-item">해산물</div>
-                        <div class="category-item active">채소류</div>
-                        <div class="category-item">유제품</div>
-                        <div class="category-item">기타</div>
-                    </div>
+                    <div class="exclude-sidebar" id="category-wrapper">
+                        </div>
 
                     <div class="exclude-content-box">
+                        <div style="padding: 15px 15px 5px 15px;">
+                            <input type="text" id="ingredient-search" 
+                                   placeholder="식재료 검색 (예: 오이, 당근)" 
+                                   class="input-mw" 
+                                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                        </div>
+
                         <div class="box-header">
                             <button type="button" class="btn-select-all" onclick="toggleSelectAll()">전체 선택</button>
                         </div>
+
                         <div class="ingredient-list" id="ingredient-list">
                             </div>
                     </div>
                 </div>
 
-                <button class="btn-mw btn-primary-mw" onclick="goToStep(3)">선택 완료</button>
+                <button type="button" class="btn-mw btn-primary-mw" onclick="goToStep(3)" style="margin-top: 20px;">선택 완료</button>
             </div>
 
             <div id="step-3" class="step-section">

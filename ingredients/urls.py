@@ -17,4 +17,14 @@ urlpatterns = [
     
     # API 라우터
     path('api/', include(router.urls)),
+
+    # 아래 3가지는 users앱의 취향설정 페이지에서 사용하기 위해 추가함.
+    # fixtures의 식재료,카테고리 json 파일 데이터를 불러오고,
+    # 식재료를 검색하기 위함임.
+    # 1. 카테고리 목록 조회 (/ingredients/categories/)
+    path('categories/', views.category_list_view, name='category_list'),
+    # 2. 식재료 목록 조회 (/ingredients/?category_id=1)
+    path('', views.ingredient_list_view, name='ingredient_list'),
+    # 3. 검색 (/ingredients/search/?keyword=양파)
+    path('search/', views.search_ingredient_view, name='search_ingredient'),
 ]
