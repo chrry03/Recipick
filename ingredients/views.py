@@ -8,7 +8,7 @@ from django.db.models import Q
 
 # DRF 관련 임포트
 from rest_framework import viewsets, status, filters
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -305,3 +305,55 @@ def add_ingredient_view(request):
         'ingredients': master_ingredients
     }
     return render(request, 'ingredients/add_ingredient.html', context)
+
+# 아래 3가지는 users앱의 취향설정 페이지에서 사용하기 위해 추가함.
+# fixtures의 식재료,카테고리 json 파일 데이터를 불러오고,
+# 식재료를 검색하기 위함임.
+
+# 1. 카테고리 목록 API
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def category_list_view(request):
+    categories = IngredientCategory.objects.all().order_by('pk')
+    data = []
+    for cat in categories:
+        data.append({
+            "id": cat.pk,
+            "name": cat.name,
+            "icon_url": cat.icon_url
+        })
+    return Response(data)
+
+# 2. 식재료 목록 API (카테고리별)
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def ingredient_list_view(request):
+    category_id = request.GET.get('category_id')
+    if category_id:
+        ingredients = IngredientMaster.objects.filter(category_id=category_id)
+    else:
+        ingredients = IngredientMaster.objects.all()
+    
+    data = []
+    for ing in ingredients:
+        data.append({
+            "id": ing.pk,
+            "name_ko": ing.name_ko,
+            "category_id": ing.category.pk if ing.category else None
+        })
+    return Response(data)
+
+# 3. 검색 API
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def search_ingredient_view(request):
+    keyword = request.GET.get('keyword', '')
+    if keyword:
+        # 이름이나 별명(aliases)에 키워드가 포함된 것 찾기
+        # (간단하게 이름만 검색하거나, icontains 사용)
+        ingredients = IngredientMaster.objects.filter(name_ko__icontains=keyword)
+    else:
+        ingredients = []
+
+    data = [{"name_ko": ing.name_ko} for ing in ingredients]
+    return Response(data)
