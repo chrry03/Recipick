@@ -357,138 +357,207 @@
     // ============================================
     // 레시피 목록 페이지 모듈
     // ============================================
+// ============================================
+    // [수정] 레시피 카드 생성 함수 (Figma 디자인 반영)
+    // ============================================
+    function createRecipeCard(recipe) {
+        const difficultyMap = { 'EASY': '쉬움', 'NORMAL': '보통', 'DIFFICULT': '어려움' };
+        const difficultyText = difficultyMap[recipe.difficulty] || '보통';
+        
+        // 추천 점수 데이터가 있으면 활용
+        const scoreData = recipe.recommendation_score || {};
+        const missingCount = scoreData.missing_ingredients_count || 0;
+        
+        // 재료 상태 텍스트 생성
+        let ownedText = "정보 없음";
+        let missingText = "-";
 
-    /**
-     * 레시피 목록 페이지 초기화
-     */
+        // API 응답 구조에 따라 재료 텍스트 처리
+        if (recipe.ingredients_status) {
+            // 상세 상태가 있는 경우
+            const status = recipe.ingredients_status;
+            const owned = Object.keys(status).filter(k => status[k] !== 'missing');
+            const missing = Object.keys(status).filter(k => status[k] === 'missing');
+            
+            ownedText = owned.length > 0 ? owned.join(', ') : '없음';
+            missingText = missing.length > 0 ? missing.join(', ') : '없음';
+        } else {
+            // 기본 정보만 있는 경우
+            ownedText = "보유 재료 포함";
+            missingText = missingCount > 0 ? `${missingCount}개 부족` : '없음';
+        }
+
+        const imageUrl = recipe.image_url || '/static/images/default-recipe.jpg';
+        const isFavorited = recipe.is_favorited; 
+
+        return `
+            <div class="recipe-card" onclick="location.href='/recipes/${recipe.recipe_id}/'">
+                <button class="favorite-btn ${isFavorited ? '' : 'inactive'}" 
+                        onclick="event.stopPropagation(); toggleLike(${recipe.recipe_id}, this)">
+                    ★
+                </button>
+                
+                <h3 class="recipe-title">${escapeHtml(recipe.title)}</h3>
+                
+                <div class="recipe-image-wrapper">
+                    <img src="${imageUrl}" alt="${escapeHtml(recipe.title)}" class="recipe-image" 
+                         onerror="this.src='/static/images/default-recipe.jpg'">
+                </div>
+                
+                <div class="info-rows">
+                    <div class="info-row">
+                        <span class="info-label">예상 조리시간</span>
+                        <span class="info-value">${recipe.ready_minutes}분</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">난이도</span>
+                        <span class="info-value">${difficultyText}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">보유 재료</span>
+                        <span class="info-value">${ownedText}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">없는 재료</span>
+                        <span class="info-value" style="color: #999;">${missingText}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // ============================================
+    // [수정] 레시피 목록 페이지 초기화 (전면 수정)
+    // ============================================
     function initRecipeList() {
-        const recommendBtn = document.getElementById('get-recommendations-btn');
         const searchInput = document.getElementById('recipe-search-input');
-        const searchBtn = document.getElementById('search-btn');
         const spinner = document.getElementById('loading-spinner');
         const resultsContainer = document.getElementById('recipe-recommendations');
+        const filterChips = document.querySelectorAll('.filter-chip');
         
-        if (!resultsContainer) {
-            return;
-        }
+        // 컨테이너가 없으면 실행 중지 (다른 페이지임)
+        if (!resultsContainer) return;
+
+        // 현재 활성화된 필터 ('all', 'favorites', 'my-ingredients')
+        let currentFilter = 'all'; 
 
         /**
-         * 검색 수행
+         * 레시피 데이터 로드 및 렌더링
+         * @param {String} type - 'recommend' | 'search'
+         * @param {String} query - 검색어 (type이 search일 때)
          */
-        async function performSearch() {
-            const query = searchInput.value.trim();
-            if (!query) {
-                return;
-            }
-            
+        async function loadRecipes(type, query = '') {
             spinner.classList.add('show');
             resultsContainer.innerHTML = '';
-            
+
             try {
-                const data = await searchRecipes(query);
-                renderSearchResults(data);
+                let data;
+                
+                if (type === 'search') {
+                    // 검색 API 호출
+                    data = await searchRecipes(query);
+                } else {
+                    // 필터에 따른 API 호출 분기
+                    if (currentFilter === 'favorites') {
+                        // [TODO] 찜한 레시피 API 호출 (현재는 임시 처리)
+                        // data = await getFavoriteRecipes(); 
+                        alert("찜한 레시피 기능은 준비 중입니다.");
+                        spinner.classList.remove('show');
+                        updateFilterCounts(0);
+                        return;
+                    } else {
+                        // 'all' 또는 'my-ingredients'는 추천 API 사용
+                        // (ingredient_ids가 비어있으면 전체 보유 재료 기반 추천)
+                        data = await getRecipeRecommendations([], true, true);
+                    }
+                }
+                
+                // 데이터 구조 표준화 (검색 결과 vs 추천 결과)
+                let recipes = [];
+                if (data.recipes) {
+                    recipes = data.recipes;
+                } else if (data.categories) {
+                    // 추천 API는 카테고리별로 오므로 합쳐서 보여줌
+                    // (Figma 디자인은 통짜 리스트이므로 병합)
+                    recipes = [
+                        ...data.categories.urgent_ready.recipes,
+                        ...data.categories.ready.recipes,
+                        ...data.categories.almost_ready.recipes
+                    ];
+                }
+
+                // 결과 렌더링
+                if (recipes.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <img src="/static/images/empty_fridge.png" alt="결과 없음" style="width: 80px; opacity: 0.5;">
+                            <p>${type === 'search' ? '검색 결과가 없습니다.' : '추천할 레시피가 없습니다.'}</p>
+                        </div>`;
+                } else {
+                    let html = '';
+                    recipes.forEach(recipe => {
+                        html += createRecipeCard(recipe);
+                    });
+                    resultsContainer.innerHTML = html;
+                }
+                
+                // 필터 칩의 숫자(Count) 업데이트
+                updateFilterCounts(recipes.length);
+
             } catch (error) {
-                console.error('검색 실패:', error);
-                showErrorMessage('검색에 실패했습니다.');
+                console.error('레시피 로드 실패:', error);
+                resultsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <p>레시피를 불러오지 못했습니다.<br>잠시 후 다시 시도해주세요.</p>
+                    </div>`;
             } finally {
                 spinner.classList.remove('show');
             }
         }
 
         /**
-         * 검색 결과 렌더링
+         * 필터 칩의 카운트 숫자 업데이트
          */
-        function renderSearchResults(data) {
-            if (!data.recipes || data.recipes.length === 0) {
-                resultsContainer.innerHTML = '<div class="empty-state"><p>검색 결과가 없습니다.</p></div>';
-                return;
-            }
-            
-            let html = '<div class="recommendation-section">';
-            html += `<h2 class="section-title">검색 결과 (${data.count}개)</h2>`;
-            html += '<div class="recipe-grid">';
-            
-            data.recipes.forEach(recipe => {
-                html += createRecipeCard(recipe);
-            });
-            
-            html += '</div></div>';
-            resultsContainer.innerHTML = html;
-            
-            attachRecipeCardListeners();
-            attachImageErrorHandlers();
-        }
-
-        /**
-         * 에러 메시지 표시
-         */
-        function showErrorMessage(message) {
-            resultsContainer.innerHTML = `<div class="empty-state"><p>${message}</p></div>`;
-        }
-
-        /**
-         * 추천 버튼 클릭 핸들러
-         */
-        async function handleRecommendClick() {
-            recommendBtn.disabled = true;
-            spinner.classList.add('show');
-            resultsContainer.innerHTML = '';
-            
-            try {
-                const data = await getRecipeRecommendations([], true, true);
-                renderRecipeRecommendations(data);
-                attachRecipeCardListeners();
-                attachImageErrorHandlers();
-            } catch (error) {
-                console.error('추천 실패:', error);
-                showErrorMessage('레시피 추천에 실패했습니다.<br>식재료를 등록했는지 확인해주세요.');
-            } finally {
-                spinner.classList.remove('show');
-                recommendBtn.disabled = false;
+        function updateFilterCounts(count) {
+            const activeChip = document.querySelector(`.filter-chip[data-filter="${currentFilter}"]`);
+            if (activeChip) {
+                const countSpan = activeChip.querySelector('.count');
+                if (countSpan) countSpan.textContent = `(${count})`;
             }
         }
 
-        /**
-         * 검색 버튼 클릭 핸들러
-         */
-        function handleSearchClick() {
-            performSearch();
-        }
+        // 1. 초기 로드: 페이지 열리면 바로 추천 레시피 가져오기
+        loadRecipes('recommend');
 
-        /**
-         * 검색 입력 키보드 핸들러
-         */
-        function handleSearchKeypress(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                performSearch();
-            }
-        }
-
-        /**
-         * 검색 버튼 키보드 핸들러
-         */
-        function handleSearchBtnKeypress(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                performSearch();
-            }
-        }
-
-        // 이벤트 리스너 등록
-        if (recommendBtn) {
-            recommendBtn.addEventListener('click', handleRecommendClick);
-        }
-        
-        if (searchBtn) {
-            searchBtn.addEventListener('click', handleSearchClick);
-            searchBtn.addEventListener('keypress', handleSearchBtnKeypress);
-        }
-        
+        // 2. 검색 이벤트 (Enter 키)
         if (searchInput) {
-            searchInput.addEventListener('keypress', handleSearchKeypress);
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const query = this.value.trim();
+                    if (query) {
+                        // 검색 시 필터 해제 UI 처리 (선택사항)
+                        loadRecipes('search', query);
+                    } else {
+                        loadRecipes('recommend'); // 검색어 없으면 다시 추천 목록
+                    }
+                }
+            });
         }
+
+        // 3. 필터 칩 클릭 이벤트
+        filterChips.forEach(chip => {
+            chip.addEventListener('click', function() {
+                // UI 활성화 변경
+                filterChips.forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 필터 상태 변경 및 데이터 로드
+                currentFilter = this.dataset.filter;
+                loadRecipes('recommend');
+            });
+        });
         
+        // 이미지 로딩 에러 핸들러 연결
         attachImageErrorHandlers();
     }
 
@@ -497,7 +566,7 @@
     // ============================================
 
     /**
-     * 레시피 상세 페이지 초기화
+     * 레시피 상세 페이지 초기화    
      */
     function initRecipeDetail() {
         const backBtn = document.getElementById('backBtn');

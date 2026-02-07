@@ -1,6 +1,21 @@
-/* 요리 모드 페이지 스타일 */
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Gothic&display=swap');
 
-/* 메인 컨테이너 */
+@font-face {
+    font-family: 'MemomentKkukkukk';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2205@1.0/MemomentKkukkukk.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --primary-color: #FF7043;
+    --text-color: #555555;
+}
+
+/* ==========================================================================
+   1. 요리 모드 페이지 스타일 (기존 코드 유지)
+   ========================================================================== */
 .recipe-container {
     position: relative;
     width: 100%;
@@ -13,7 +28,6 @@
     overflow: hidden;
 }
 
-/* 로고 (header.html 사용 시 - 요리 모드 페이지 전용) */
 .recipe-container .app-header {
     position: absolute;
     top: 12px;
@@ -32,7 +46,6 @@
     object-fit: cover;
 }
 
-/* 단계 번호 */
 .step-number {
     position: absolute;
     top: 120px;
@@ -51,7 +64,6 @@
     margin: 0;
 }
 
-/* 설명 텍스트 */
 .description {
     position: absolute;
     top: 180px;
@@ -72,7 +84,6 @@
     margin: 0;
 }
 
-/* 마스크 그룹 (이미지 컨테이너) */
 .mask-group {
     position: absolute;
     top: 250px;
@@ -112,7 +123,6 @@
     opacity: 0.5;
 }
 
-/* 타이머 앱 컨테이너 */
 #timer-app {
     display: flex;
     justify-content: center;
@@ -121,7 +131,6 @@
     margin-top: 20px;
 }
 
-/* 네비게이션 버튼 */
 .nav-buttons {
     position: absolute;
     bottom: 41px;
@@ -183,7 +192,6 @@
     transform: scale(0.95);
 }
 
-/* 반응형 디자인 */
 @media (max-width: 385px) {
     .recipe-container {
         border-radius: 0;
@@ -192,181 +200,220 @@
 }
 
 
+/* ==========================================================================
+   2. [수정됨] 레시피 리스트 스타일 (Figma 디자인 + 반응형 적용)
+   ========================================================================== */
 .recipe-list-container {
-    padding: 20px;
-    padding-bottom: 100px;
+    padding: 96px 20px 100px 20px; /* 헤더 높이 확보 */
+    width: 100%;
+    max-width: 377px;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
+/* 검색창 */
 .search-wrapper {
     position: relative;
+    width: 100%;
+    height: 30px;
     margin-bottom: 20px;
 }
 
 .search-input {
     width: 100%;
-    padding: 12px 40px 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    font-size: 14px;
+    height: 100%;
+    background: #F5F0E7;
+    border: none;
+    border-radius: 15px;
+    /* Neumorphism 스타일 유지 */
+    box-shadow: -1px 1px 2px rgba(255, 255, 255, 0.3), 
+                1px -1px 2px rgba(216, 211, 203, 0.5), 
+                inset 1px 1px 2px rgba(216, 211, 203, 0.2), 
+                inset -1px -1px 2px rgba(216, 211, 203, 0.2), 
+                inset 1px -1px 2px rgba(255, 255, 255, 0.9), 
+                inset -1px 1px 3px rgba(216, 211, 203, 0.9);
+    padding-left: 40px;
+    padding-right: 15px;
+    font-family: 'Gowun Dodum';
+    font-size: 12px;
+    color: #666;
+    outline: none;
+    box-sizing: border-box;
 }
 
 .search-icon {
     position: absolute;
-    right: 16px;
+    left: 15px;
     top: 50%;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     cursor: pointer;
+    opacity: 0.6;
 }
 
-.recommendation-section {
-    margin-bottom: 30px;
+/* 필터 칩 */
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+    flex: 0 0 auto;
+    height: 27px;
+    padding: 0 12px;
+    border-radius: 16px;
+    border: none;
+    background: #D9D9D9;
+    color: #555;
+    font-family: 'Gowun Dodum';
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.section-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 15px;
-    color: #333;
+.filter-chip.active {
+    background: #FF7043;
+    color: #FFFFFF;
+    font-weight: bold;
 }
 
-.recipe-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+.filter-chip .count {
+    font-size: 10px;
+    margin-left: 4px;
+    opacity: 0.8;
+}
+
+/* 레시피 카드 (Figma 디자인) */
+#recipe-recommendations {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .recipe-card {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: #FFFFFF;
+    border-radius: 18px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    position: relative;
     cursor: pointer;
     transition: transform 0.2s;
 }
 
 .recipe-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
+}
+
+.favorite-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #FFD983;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    z-index: 2;
+}
+.favorite-btn.inactive {
+    color: #E0E0E0;
+    -webkit-text-stroke: 1px #888;
+}
+
+.recipe-title {
+    font-family: 'MemomentKkukkukk', sans-serif;
+    font-size: 24px;
+    color: #555555;
+    text-align: center;
+    margin: 5px 0 15px 0;
+}
+
+.recipe-image-wrapper {
+    width: 100%;
+    height: 150px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    background: #D9D9D9;
+    box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.1);
 }
 
 .recipe-image {
     width: 100%;
-    height: 150px;
+    height: 100%;
     object-fit: cover;
-    background: #f5f5f5;
 }
 
-.recipe-info {
-    padding: 12px;
-}
-
-.recipe-name {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.recipe-meta {
+/* 정보 행 (회색 박스) */
+.info-rows {
     display: flex;
-    gap: 10px;
-    font-size: 12px;
-    color: #666;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.recipe-time,
-.recipe-difficulty {
+.info-row {
+    background: #EFEFEF;
+    border-radius: 7px;
+    padding: 6px 12px;
     display: flex;
     align-items: center;
-    gap: 4px;
+    box-shadow: inset 1px -1px 2px rgba(233, 233, 233, 0.2), 
+                inset -1px 1px 2px rgba(233, 233, 233, 0.2), 
+                inset 1px 1px 2px rgba(255, 255, 255, 0.9), 
+                inset -1px -1px 3px rgba(233, 233, 233, 0.9);
 }
 
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #999;
+.info-label {
+    font-size: 12px;
+    color: #555;
+    width: 80px;
+    flex-shrink: 0;
+    font-weight: bold;
 }
 
-.empty-state img {
-    width: 120px;
-    margin-bottom: 20px;
-    opacity: 0.5;
+.info-value {
+    font-size: 13px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.btn-recommend {
-    display: block;
-    width: 100%;
-    max-width: 300px;
-    margin: 20px auto;
-    padding: 14px;
-    background: #FF7043;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-recommend:hover {
-    background: #FF5722;
-}
-
-.btn-recommend:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
+/* 로딩 & 빈 상태 */
 .loading-spinner {
     display: none;
     text-align: center;
     padding: 40px;
+    color: #888;
 }
+.loading-spinner.show { display: block; }
 
-.loading-spinner.show {
-    display: block;
+.empty-state {
+    text-align: center;
+    padding: 50px 0;
+    color: #999;
 }
-
-.score-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    margin-top: 4px;
-}
-
-.score-urgent {
-    background: #ffebee;
-    color: #c62828;
-}
-
-.score-ready {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
-.score-almost {
-    background: #fff3e0;
-    color: #ef6c00;
-}
-
-.login-link {
-    color: #FF7043;
-    text-decoration: underline;
-    transition: opacity 0.2s;
-}
-
-.login-link:hover {
-    opacity: 0.8;
+.empty-state p {
+    font-size: 14px;
+    margin-top: 10px;
 }
 
 
-  .base-timer {
+/* ==========================================================================
+   3. 타이머 스타일 (기존 코드 유지)
+   ========================================================================== */
+.base-timer {
     position: relative;
     width: 200px;
     height: 200px;
@@ -379,9 +426,9 @@
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-  }
-  
-  .base-timer__left-label {
+}
+
+.base-timer__left-label {
     font-size: 20px;
     font-weight: 500;
     color: rgba(85, 85, 85, 1);
@@ -394,9 +441,9 @@
     left: 50%;
     transform: translate(-50%, -50%);
     margin-top: -59px;
-  }
-  
-  .base-timer__time {
+}
+
+.base-timer__time {
     font-size: 80px;
     font-weight: normal;
     color: #000000;
@@ -413,28 +460,28 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-  }
-  
-  .timer-time-part {
+}
+
+.timer-time-part {
     display: inline-block;
     min-width: 60px;
     text-align: center;
     transition: background-color 0.2s ease;
     border-radius: 4px;
     padding: 0 4px;
-  }
-  
-  .timer-time-part:hover {
+}
+
+.timer-time-part:hover {
     background-color: rgba(255, 110, 64, 0.1);
-  }
-  
-  .timer-time-separator {
+}
+
+.timer-time-separator {
     display: inline-block;
     user-select: none;
     font-family: 'MemomentKkukkukk', sans-serif;
-  }
-  
-  .timer-time-input {
+}
+
+.timer-time-input {
     width: 120px;
     font-size: 80px;
     font-weight: normal;
@@ -446,29 +493,28 @@
     font-family: 'MemomentKkukkukk', sans-serif;
     outline: none;
     padding: 0;
-  }
-  
-  .timer-time-input--small {
+}
+
+.timer-time-input--small {
     width: 60px;
     font-size: 80px;
-  }
-  
-  /* number input의 스피너 버튼 제거 */
-  .timer-time-input::-webkit-inner-spin-button,
-  .timer-time-input::-webkit-outer-spin-button {
+}
+
+.timer-time-input::-webkit-inner-spin-button,
+.timer-time-input::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
-  }
-  
-  .timer-time-input[type="number"] {
+}
+
+.timer-time-input[type="number"] {
     -moz-appearance: textfield;
-  }
-  ㅂ
-  .timer-time-input::placeholder {
+}
+
+.timer-time-input::placeholder {
     color: #999;
-  }
-  
-  .base-timer__play-button {
+}
+
+.base-timer__play-button {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -481,17 +527,17 @@
     border-bottom: 20px solid transparent;
     cursor: pointer;
     transition: transform 0.2s ease;
-  }
-  
-  .base-timer__play-button:hover {
+}
+
+.base-timer__play-button:hover {
     transform: translate(-50%, -50%) scale(1.1);
-  }
-  
-  .base-timer__play-button.paused:hover {
+}
+
+.base-timer__play-button.paused:hover {
     transform: translate(-50%, -50%) scale(1.1);
-  }
-  
-  .base-timer__play-button.paused {
+}
+
+.base-timer__play-button.paused {
     border-left: 0;
     border-top: 0;
     border-bottom: 0;
@@ -501,10 +547,10 @@
     position: absolute;
     transform: translate(-50%, -50%);
     margin-top: 50px;
-  }
-  
-  .base-timer__play-button.paused::before,
-  .base-timer__play-button.paused::after {
+}
+
+.base-timer__play-button.paused::before,
+.base-timer__play-button.paused::after {
     content: '';
     position: absolute;
     top: 0;
@@ -512,13 +558,12 @@
     height: 30px;
     background-color: #ff6e40;
     border-radius: 2px;
-  }
-  
-  .base-timer__play-button.paused::before {
+}
+
+.base-timer__play-button.paused::before {
     left: 0;
-  }
-  
-  .base-timer__play-button.paused::after {
+}
+
+.base-timer__play-button.paused::after {
     right: 0;
-  }
-  
+}
