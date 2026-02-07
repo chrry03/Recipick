@@ -1,3 +1,11 @@
+/* 폰트 정의 */
+@font-face {
+    font-family: 'MemomentKkukkukk';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2205@1.0/MemomentKkukkukk.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* 공통 스타일 */
 * {
     margin: 0;
@@ -12,7 +20,7 @@ html, body {
 }
 
 body {
-    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Gowun Dodum', 'Nanum Gothic', 'MemomentKkukkukk', sans-serif;
     background: linear-gradient(to bottom, #f5ede0, #f6f3ee);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -84,9 +92,10 @@ body {
 .nav-item .nav-label {
     font-size: 0.75rem;
     white-space: nowrap;
+    color: rgba(85, 85, 85, 0.76);
 }
 
-.nav-item.active .nav-label {
+.nav-item.active .nav-label.active {
     color: #ff7043;
 }
 
