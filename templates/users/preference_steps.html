@@ -9,39 +9,39 @@
     <script src="{% static 'js/users.js' %}"></script>
 {% endblock %}
 
-{% block content %}
-<div class="scroll-container">
+{% block header %}
+    {% include 'header.html' %}
+{% endblock header %}
+
+{% block main_content %}
+<div class="scroll-container" style="padding-top: 60px;">
     <div class="container-mw">
         
-        {% include 'header.html' %}
-
         <div class="pref-container">
 
             <div id="step-1" class="step-section active">
                 <h2 class="step-title">알러지 선택</h2>
-                
                 <div class="allergy-grid" id="allergy-list"></div>
-                
-                <button class="btn-mw btn-primary-mw" onclick="goToStep(2)">선택 완료</button>
+                <div class="fixed-bottom-btn-area">
+                    <button class="btn-floating-mw" onclick="goToStep(2)">선택 완료</button>
+                </div>
             </div>
 
             <div id="step-2" class="step-section">
                 <h2 class="step-title">제외할 식재료</h2>
-                <p class="step-desc" style="text-align:center; color:#666; margin-bottom: 20px;">
-                    못 먹거나 싫어하는 재료를 선택해주세요.
-                </p>
+                <div class="search-wrapper-step2">
+                    <img src="{% static 'images/search.png' %}" class="search-icon-step2" alt="검색">
+                    <input type="text" id="ingredient-search" placeholder="식재료 검색">
+                </div>
 
                 <div class="exclude-layout">
                     <div class="exclude-sidebar" id="category-wrapper">
                         </div>
 
+                    <div class="vertical-dashed-line"></div>
+
                     <div class="exclude-content-box">
-                        <div style="padding: 15px 15px 5px 15px;">
-                            <input type="text" id="ingredient-search" 
-                                   placeholder="식재료 검색 (예: 오이, 당근)" 
-                                   class="input-mw" 
-                                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
-                        </div>
+                        <div class="orange-bookmark"></div>
 
                         <div class="box-header">
                             <button type="button" class="btn-select-all" onclick="toggleSelectAll()">전체 선택</button>
@@ -52,7 +52,9 @@
                     </div>
                 </div>
 
-                <button type="button" class="btn-mw btn-primary-mw" onclick="goToStep(3)" style="margin-top: 20px;">선택 완료</button>
+                <div class="fixed-bottom-btn-area">
+                    <button type="button" class="btn-floating-mw" onclick="goToStep(3)">선택 완료</button>
+                </div>
             </div>
 
             <div id="step-3" class="step-section">
@@ -62,16 +64,15 @@
                     <button class="btn-level beginner" onclick="finishPreference('BEGINNER')">
                         무명요리사
                     </button>
-                    
                     <button class="btn-level intermediate" onclick="finishPreference('INTERMEDIATE')">
                         흑요리사
                     </button>
-                    
                     <button class="btn-level expert" onclick="finishPreference('EXPERT')">
                         백요리사
                     </button>
                 </div>
             </div>
+
         </div> 
     </div> 
 </div> 
