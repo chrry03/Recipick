@@ -10,76 +10,83 @@
 {% endblock header %}
 
 {% block main_content %}
-    <!-- Search Bar -->
-    <div class="search-container">
-        <div class="search-bar">
-            <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색" onerror="console.error('검색 아이콘 로드 실패:', this.src)">
-            <input type="text" placeholder="식재료 검색" class="search-input" id="searchInput">
-        </div>
-    </div>
 
-<div class="category-scroll-area">
-    {% for cat in categories %}
-    <div class="category-pill {% if forloop.first %}active{% endif %}" 
-         data-category="{{ cat.name }}">
-        {{ cat.name }}({{ cat.count }})
-    </div>
-    {% endfor %}
-</div>
+    <div class="add-ingredient-container">
+        
+        <aside class="category-sidebar" id="categoryListContainer">
+            <div class="category-item active">전체</div>
+        </aside>
 
-<div class="fridge-container">
-    <div class="ingredient-grid" id="ingredientGrid">
-        {% for item in ingredients %}
-            <div class="ingredient-item {% if item.is_added %}added{% endif %}" 
-                data-category="{{ item.category }}"
-                data-name="{{ item.name }}"
-                data-initial-owned="{{ item.is_added|yesno:'true,false' }}">
-                
-                <div class="ingredient-icon-wrapper">
-                    <span class="added-badge">보유중</span>
-                    {% if item.icon_name %}
-                    <img src="{% static 'images/ingredients/'|add:item.icon_name %}" 
-                        class="ingredient-img" 
-                        alt="{{ item.name }}">
-                    {% else %}
-                    <div class="default-icon"></div>
-                    {% endif %}
+        <main class="ingredient-content">
+            
+            <div class="search-container">
+                <div class="search-bar">
+                    <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색" onerror="this.style.display='none'">
+                    <input type="text" placeholder="식재료 검색" class="search-input" id="searchInput">
                 </div>
-
-                <div class="shelf-line"></div>
-
-                <span class="ingredient-name">{{ item.name }}</span>
             </div>
-            {% endfor %}
+
+            <div class="ingredient-list-area" id="ingredientGrid">
+                <div class="loading-msg" style="padding: 20px; text-align: center; color: #888; font-size: 13px;">
+                    식재료 목록을 불러오는 중...
+                </div>
+            </div>
+            
+            <div class="floating-bottom-btn">
+                <button type="button" class="btn-submit" id="submitBtn">
+                    등록 완료 <span id="countBadge"></span>
+                </button>
+            </div>
+        </main>
     </div>
-</div>
 
-<div class="complete-btn-wrapper">
-    <button type="button" class="btn-complete" id="submitBtn">
-        식재료 추가 완료 <span id="countBadge">(0)</span>
-    </button>
-</div>
-
-<div class="modal-overlay" id="dateModal">
-    <div class="date-modal">
-        <div class="modal-title">
-            <span id="modalIngredientName"></span>의<br>소비기한을 알려주세요!
-        </div>
-        
-        <input type="date" id="expiryInput" class="date-input">
-        
-        <div class="no-expiry-wrapper">
-            <label class="checkbox-label">
+    <div class="modal-overlay" id="dateModal">
+        <div class="custom-modal date-modal">
+            
+            <h3 class="modal-title">
+                <span id="modalIngredientName" class="highlight-text"></span>의<br>소비기한을 알려주세요!
+            </h3>
+            
+            <div class="date-input-wrapper">
+                <input type="date" id="expiryInput" class="date-picker">
+            </div>
+            
+            <label class="checkbox-wrapper">
                 <input type="checkbox" id="noExpiryCheck">
-                <span class="checkbox-text">소비기한 없음</span>
+                <span style="margin-left: 8px;" class="checkbox-text">소비기한 미입력</span>
             </label>
-        </div>
-        <div class="modal-btn-group">
-            <button type="button" class="modal-btn btn-cancel" id="cancelBtn">취소</button>
-            <button type="button" class="modal-btn btn-confirm" id="confirmBtn">확인</button>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" id="cancelBtn">취소</button>
+                <button type="button" class="btn-confirm" id="confirmBtn">완료</button>
+            </div>
         </div>
     </div>
-</div>
+
+    <div class="modal-overlay" id="directAddModal">
+        <div class="custom-modal input-modal">
+            
+            <h3 class="modal-title">추가할 재료의 이름을 정해주세요!</h3>
+            
+            <div class="date-input-wrapper" style="margin-top: 10px;">
+                <input type="text" id="customIngredientInput" class="date-picker" placeholder="예: 홍합" style="text-align: left; padding-left: 5px;">
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button type="button" class="btn-cancel" id="directAddCancelBtn">취소</button>
+                <button type="button" class="btn-confirm" id="directAddConfirmBtn">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="successModal">
+        <div class="custom-modal success-modal" style="height: 180px;"> <h3 class="modal-title" style="margin-bottom: 30px;">등록이 완료되었습니다!</h3>
+            
+            <div class="modal-actions center" style="width: 100%; justify-content: center;">
+                <button type="button" class="btn-confirm" id="successConfirmBtn" style="width: 100px;">확인</button>
+            </div>
+        </div>
+    </div>
 
 {% endblock main_content %}
 
