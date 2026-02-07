@@ -11,47 +11,42 @@
 
 {% block main_content %}
 <div class="recipe-list-container">
+    
     <div class="search-wrapper">
+        <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색">
         <input type="text" 
                id="recipe-search-input" 
                class="search-input" 
-               placeholder="레시피 검색 (예: 김치볶음밥)"
+               placeholder="레시피 검색"
                aria-label="레시피 검색">
-        <img src="{% static 'images/search.png' %}" 
-             alt="검색" 
-             class="search-icon" 
-             id="search-btn"
-             role="button"
-             tabindex="0"
-             aria-label="검색 실행">
     </div>
     
-    {% if user.is_authenticated %}
-    <button type="button" 
-            class="btn-recommend" 
-            id="get-recommendations-btn"
-            aria-label="내 식재료로 레시피 추천받기">
-        🎯 내 식재료로 레시피 추천받기
-    </button>
-    {% else %}
-    <div class="empty-state">
-        <p>로그인 후 식재료를 등록하고<br>레시피 추천을 받아보세요!</p>
-        <a href="{% url 'users:login' %}" class="login-link">로그인하기</a>
-    </div>
-    {% endif %}
-    
-    <div class="loading-spinner" id="loading-spinner" role="status" aria-live="polite">
-        <p>레시피를 불러오는 중...</p>
+    <div class="filter-bar">
+        <button class="filter-chip active" data-filter="all">
+            전체<span class="count">(0)</span>
+        </button>
+        <button class="filter-chip" data-filter="favorites">
+            찜한 레시피<span class="count">(0)</span>
+        </button>
+        <button class="filter-chip" data-filter="my-ingredients">
+            내 재료만<span class="count">(0)</span>
+        </button>
     </div>
     
-    <div id="recipe-recommendations" role="region" aria-label="레시피 목록">
-        {% if user.is_authenticated %}
+    <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner-icon">⏳</div>
+        <p>맛있는 레시피를 찾고 있어요...</p>
+    </div>
+    
+    <div id="recipe-recommendations" class="recipe-grid-area">
+        {% if not user.is_authenticated %}
         <div class="empty-state">
-            <img src="{% static 'images/empty_fridge.png' %}" alt="빈 상태">
-            <p>식재료를 등록하고<br>레시피 추천을 받아보세요!</p>
+            <p>로그인 후 맞춤 레시피를 추천받아보세요!</p>
+            <a href="{% url 'users:login' %}" class="login-link">로그인하기</a>
         </div>
         {% endif %}
     </div>
+
 </div>
 {% endblock main_content %}
 
