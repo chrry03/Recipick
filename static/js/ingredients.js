@@ -1,385 +1,567 @@
 /**
- * Ingredients Page JavaScript
- * 식재료 관련 페이지의 공통 기능을 관리하는 모듈
+ * Ingredients API Client
+ * - Pagination(results) 대응 추가
+ * - Serializer 필드명 매칭 (user_ingredient_id, ingredient_name 등)
  */
 
 (function() {
     'use strict';
 
-    /**
-     * 식재료 추가 페이지 관리 클래스
-     */
-class IngredientAdder {
+    // ==========================================
+    // 공통 유틸리티
+    // ==========================================
+    const Utils = {
+        getCsrfToken() {
+            const el = document.querySelector('[data-csrf-token]');
+            return el ? el.dataset.csrfToken : this.getCookie('csrftoken');
+        },
+        getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        },
+        // [수정] D-Day 계산 함수 (Utils)
+        calculateDday(expiryDateStr) {
+            // 날짜가 없으면 (소비기한 미입력)
+            if (!expiryDateStr) return { label: '-', isUrgent: false, text: '' };
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const expiry = new Date(expiryDateStr);
+            expiry.setHours(0, 0, 0, 0);
+
+            const diffTime = expiry - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) return { label: '만료', isUrgent: true, text: '만료' }; 
+            if (diffDays === 0) return { label: 'D-Day', isUrgent: true, text: '오늘' };
+            
+            const isUrgent = diffDays <= 3;
+            return { label: `D-${diffDays}`, isUrgent: isUrgent, text: `${diffDays}일 전` };
+        },
+        debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+    };
+
+    // ==========================================
+    // 1. 식재료 등록 화면 (IngredientAdder)
+    // ==========================================
+    class IngredientAdder {
         constructor() {
-            this.selectedItems = {};
-            this.removedItems = new Set();
-            this.currentTarget = null;
+            this.selectedItems = {}; 
+            this.ownedMap = {};      
+            this.currentCategory = '';
+            
             this.initElements();
-            this.attachEventListeners();
+            if (this.container) {
+                this.init();
+            }
         }
 
         initElements() {
+            this.container = document.getElementById('ingredientGrid'); 
+            this.categorySidebar = document.getElementById('categoryListContainer');
             this.searchInput = document.getElementById('searchInput');
-            this.categoryPills = document.querySelectorAll('.category-pill');
-            this.ingredientItems = document.querySelectorAll('.ingredient-item');
-            
-            // 모달 관련 요소
-            this.dateModal = document.getElementById('dateModal') || document.getElementById('editModal'); // ID 유동적 대응
-            this.modalIngredientName = document.getElementById('modalIngredientName');
-            this.expiryInput = document.getElementById('expiryInput');
-            this.noExpiryCheck = document.getElementById('noExpiryCheck'); // [NEW] 체크박스
-            
-            this.cancelBtn = document.getElementById('cancelBtn');
-            this.confirmBtn = document.getElementById('confirmBtn');
             this.submitBtn = document.getElementById('submitBtn');
             this.countBadge = document.getElementById('countBadge');
+
+            this.dateModal = document.getElementById('dateModal');
+            this.modalIngredientName = document.getElementById('modalIngredientName');
+            this.expiryInput = document.getElementById('expiryInput');
+            this.noExpiryCheck = document.getElementById('noExpiryCheck');
+            this.modalConfirmBtn = document.getElementById('confirmBtn');
+            this.modalCancelBtn = document.getElementById('cancelBtn');
+
+            this.directAddModal = document.getElementById('directAddModal');
+            this.customInput = document.getElementById('customIngredientInput');
+            this.directAddConfirmBtn = document.getElementById('directAddConfirmBtn');
+            this.directAddCancelBtn = document.getElementById('directAddCancelBtn');
+
+            this.successModal = document.getElementById('successModal');
+            this.successConfirmBtn = document.getElementById('successConfirmBtn');
+        }
+
+        async init() {
+            this.attachEventListeners();
+            await this.fetchOwnedIngredients(); 
+            await this.fetchCategories();       
+            await this.fetchIngredients();      
         }
 
         attachEventListeners() {
-            if (this.searchInput) {
-                this.searchInput.addEventListener('input', () => this.filterIngredients());
-            }
+            this.searchInput.addEventListener('input', Utils.debounce((e) => {
+                this.fetchIngredients(this.currentCategory, e.target.value);
+            }, 300));
 
-            this.categoryPills.forEach(pill => {
-                pill.addEventListener('click', () => this.selectCategory(pill.dataset.category));
-            });
-
-            this.ingredientItems.forEach(item => {
-                item.addEventListener('click', () => this.toggleIngredient(item));
-            });
-
-            if (this.cancelBtn) this.cancelBtn.addEventListener('click', () => this.closeModal());
-            if (this.confirmBtn) this.confirmBtn.addEventListener('click', () => this.confirmIngredient());
-            if (this.submitBtn) this.submitBtn.addEventListener('click', () => this.submitIngredients());
-            
-            if (this.dateModal) {
-                this.dateModal.addEventListener('click', (e) => {
-                    if (e.target === this.dateModal) this.closeModal();
-                });
-            }
-
-            // [NEW] 체크박스 누르면 날짜 입력칸 끄기/켜기
+            this.modalCancelBtn.addEventListener('click', () => this.closeModal(this.dateModal));
+            this.modalConfirmBtn.addEventListener('click', () => this.confirmSelection());
             if (this.noExpiryCheck) {
                 this.noExpiryCheck.addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        this.expiryInput.value = '';      // 값 비우기
-                        this.expiryInput.disabled = true; // 입력 막기
-                    } else {
-                        this.expiryInput.disabled = false; // 입력 풀기
-                        // 오늘 날짜 + 7일 다시 세팅 (편의성)
-                        const today = new Date();
-                        today.setDate(today.getDate() + 7);
-                        this.expiryInput.valueAsDate = today;
-                    }
+                    this.expiryInput.disabled = e.target.checked;
+                    if(e.target.checked) this.expiryInput.value = '';
                 });
+            }
+
+            this.directAddCancelBtn.addEventListener('click', () => this.closeModal(this.directAddModal));
+            this.directAddConfirmBtn.addEventListener('click', () => this.confirmDirectAdd());
+
+            this.successConfirmBtn.addEventListener('click', () => {
+                window.location.href = '/ingredients/my-fridge/';
+            });
+
+            this.submitBtn.addEventListener('click', () => this.submitAll());
+        }
+
+        // --- API Calls ---
+        async fetchOwnedIngredients() {
+            try {
+                const res = await fetch('/ingredients/api/user-ingredients/?include_expired=true');
+                if (res.ok) {
+                    const data = await res.json();
+                    // [핵심 수정] DRF Pagination 대응 (results 키 확인)
+                    const results = Array.isArray(data) ? data : (data.results || []);
+                    
+                    this.ownedMap = {};
+                    results.forEach(ui => { 
+                        // ui.ingredient는 ID(int)입니다.
+                        this.ownedMap[ui.ingredient] = ui.user_ingredient_id; 
+                    });
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async fetchCategories() {
+            try {
+                const res = await fetch('/ingredients/categories/'); 
+                const data = await res.json();
+                this.renderCategories(Array.isArray(data) ? data : (data.results || []));
+            } catch (err) { console.error(err); }
+        }
+
+        async fetchIngredients(categoryId = '', keyword = '') {
+            this.container.innerHTML = '<div class="loading-msg">로딩 중...</div>';
+            try {
+                let url = `/ingredients/?`;
+                if (categoryId) url += `category_id=${categoryId}&`;
+                if (keyword) url += `keyword=${encodeURIComponent(keyword)}`;
+
+                const res = await fetch(url);
+                const data = await res.json();
+                this.renderIngredients(Array.isArray(data) ? data : (data.results || []));
+            } catch (err) {
+                this.container.innerHTML = '<div class="loading-msg">목록 로드 실패</div>';
             }
         }
 
-        toggleIngredient(element) {
-            const name = element.dataset.name;
-            const isInitiallyOwned = element.dataset.initialOwned === 'true';
+        // ... (fetchIngredients 메서드 뒤에 이어서 붙여넣기) ...
 
-            // 1. 보유중인 재료 -> 삭제 목록 토글
-            if (isInitiallyOwned) {
-                if (this.removedItems.has(name)) {
-                    this.removedItems.delete(name);
-                    element.classList.add('added');
-                } else {
-                    this.removedItems.add(name);
-                    element.classList.remove('added');
+        // --- Render ---
+        renderCategories(categories) {
+            let html = `<div class="category-item active" data-id="">전체</div>`;
+            categories.forEach(cat => {
+                html += `<div class="category-item" data-id="${cat.id}">${cat.name}</div>`;
+            });
+            html += `<div class="category-item direct-add-btn" style="color: #FF7043; font-weight:bold;">
+                        <span style="margin-right:5px;">+</span> 직접 추가
+                     </div>`;
+            this.categorySidebar.innerHTML = html;
+
+            this.categorySidebar.querySelectorAll('.category-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    if (item.classList.contains('direct-add-btn')) {
+                        this.openDirectAddModal();
+                        return;
+                    }
+                    this.categorySidebar.querySelector('.active').classList.remove('active');
+                    item.classList.add('active');
+                    this.currentCategory = item.dataset.id;
+                    this.fetchIngredients(this.currentCategory, this.searchInput.value);
+                });
+            });
+        }
+
+        renderIngredients(ingredients) {
+            this.container.innerHTML = '';
+            if (!ingredients || ingredients.length === 0) {
+                this.container.innerHTML = '<div class="loading-msg">검색 결과가 없습니다.</div>';
+                return;
+            }
+
+            ingredients.forEach(ing => {
+                const masterId = ing.id;
+                const isOwned = this.ownedMap.hasOwnProperty(masterId);
+                const isSelected = this.selectedItems.hasOwnProperty(masterId);
+
+                const card = document.createElement('div');
+                card.className = `ingredient-item ${isOwned || isSelected ? 'added' : ''}`;
+                
+                // 아이콘 처리 (없으면 기본값)
+                const iconHtml = ing.icon_name 
+                    ? `<img src="/static/images/ingredients/${ing.icon_name}" class="ingredient-img" onerror="this.style.display='none'">` 
+                    : '';
+
+                card.innerHTML = `
+                    <div class="checkbox-icon"></div>
+                    ${iconHtml}
+                    <span class="ingredient-name">${ing.name_ko}</span>
+                `;
+
+                card.addEventListener('click', () => this.handleItemClick(ing, card));
+                this.container.appendChild(card);
+            });
+        }
+
+        // --- Logic ---
+        handleItemClick(ingredient, cardElement) {
+            const masterId = ingredient.id;
+            
+            // 1. 이미 보유중 (삭제 요청)
+            if (this.ownedMap[masterId]) {
+                if (confirm('냉장고에서 삭제하시겠습니까?')) {
+                    this.deleteUserIngredient(this.ownedMap[masterId]).then(ok => {
+                        if (ok) { delete this.ownedMap[masterId]; cardElement.classList.remove('added'); }
+                    });
                 }
+                return;
+            }
+            // 2. 선택 취소
+            if (this.selectedItems[masterId]) {
+                delete this.selectedItems[masterId];
+                cardElement.classList.remove('added');
                 this.updateCount();
                 return;
             }
+            // 3. 선택 (모달 열기)
+            this.openDateModal(ingredient, cardElement);
+        }
 
-            // 2. 추가했던 재료 -> 추가 취소
-            if (element.classList.contains('added')) {
-                delete this.selectedItems[name];
-                element.classList.remove('added');
-                this.updateCount();
-                return;
-            }
-
-            // 3. 새로 추가 -> 모달 열기
-            this.currentTarget = element;
-            this.modalIngredientName.textContent = element.dataset.name;
-
-            // 날짜 초기화 (체크박스 해제, 날짜는 7일 뒤)
-            if (this.noExpiryCheck) this.noExpiryCheck.checked = false;
-            if (this.expiryInput) {
-                this.expiryInput.disabled = false;
-                const today = new Date();
-                today.setDate(today.getDate() + 7);
-                this.expiryInput.valueAsDate = today;
-            }
-
+        openDateModal(ingredient, cardElement) {
+            this.currentTarget = { ingredient, cardElement };
+            this.modalIngredientName.textContent = ingredient.name_ko;
+            
+            // 날짜 초기화 (오늘 + 7일)
+            const date = new Date();
+            date.setDate(date.getDate() + 7);
+            this.expiryInput.valueAsDate = date;
+            this.expiryInput.disabled = false;
+            
+            if(this.noExpiryCheck) this.noExpiryCheck.checked = false;
+            
+            // 모달 열기 (editModal 대신 dateModal 사용 확인)
             this.dateModal.classList.add('open');
         }
 
-        closeModal() {
-            this.dateModal.classList.remove('open');
+        openDirectAddModal() {
+            this.customInput.value = '';
+            this.directAddModal.classList.add('open');
+            this.customInput.focus();
+        }
+
+        closeModal(modal) {
+            // 인자가 없으면 dateModal 닫기
+            const target = modal || this.dateModal;
+            target.classList.remove('open');
             this.currentTarget = null;
         }
 
-        confirmIngredient() {
+        // [중요] 소비기한 입력 확인 및 데이터 저장
+        confirmSelection() {
             if (!this.currentTarget) return;
-
-            // 날짜 값 가져오기
-            // 체크박스가 켜져있거나 값이 없으면 빈 문자열('')이 들어갑니다.
-            const dateVal = this.expiryInput.value; 
+            const { ingredient, cardElement } = this.currentTarget;
             
-            // [수정됨] 경고창(alert) 로직 삭제!
-            // 날짜가 없어도 그냥 통과시킵니다. (backend가 null로 처리)
+            // 날짜 값 처리 (체크박스 체크 시 또는 값 없을 시 null)
+            let dateVal = this.expiryInput.value;
+            if (this.noExpiryCheck.checked || !dateVal) {
+                dateVal = null;
+            }
 
-            this.currentTarget.classList.add('added');
-
-            this.selectedItems[this.currentTarget.dataset.name] = {
-                expiry: dateVal, 
-                name: this.currentTarget.dataset.name,
-                category: this.currentTarget.dataset.category
+            // 데이터 저장
+            this.selectedItems[ingredient.id] = {
+                name: ingredient.name_ko,
+                // category는 ID 또는 이름일 수 있음. 안전하게 문자열 변환
+                category: ingredient.category ? ingredient.category.name : '기타',
+                expiry_date: dateVal
             };
 
+            cardElement.classList.add('added');
             this.updateCount();
-            this.closeModal();
+            this.closeModal(this.dateModal);
         }
 
-        async submitIngredients() {
-            const addedNames = Object.keys(this.selectedItems);
-            const removedNames = Array.from(this.removedItems);
-
-            // Payload 구성: 추가할 것(added) + 삭제할 것(removed)
-            const payload = {
-                added: addedNames.map(name => ({
-                    name: this.selectedItems[name].name,
-                    category: this.selectedItems[name].category,
-                    expiry_date: this.selectedItems[name].expiry
-                })),
-                removed: removedNames
+        // 직접 추가 확인
+        confirmDirectAdd() {
+            const name = this.customInput.value.trim();
+            if (!name) return;
+            
+            // 임시 ID 생성
+            const tempId = `custom_${Date.now()}`;
+            this.selectedItems[tempId] = { 
+                name: name, 
+                category: '기타', 
+                expiry_date: null 
             };
-
-            try {
-                const response = await fetch(this.getAddIngredientUrl(), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': this.getCsrfToken()
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const data = await response.json();
-                if (data.status === 'success') {
-                    // 성공 시 이동
-                    window.location.href = this.getMyFridgeUrl();
-                } else {
-                    alert('저장 실패: ' + (data.message || ''));
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('저장 중 오류가 발생했습니다');
-            }
+            
+            this.updateCount();
+            this.closeModal(this.directAddModal);
+            alert(`'${name}'이(가) 선택 목록에 추가되었습니다.`);
         }
 
         updateCount() {
-            // "새로 추가 예정인" 개수만 배지에 표시 (기획에 따라 변경 가능)
             const count = Object.keys(this.selectedItems).length;
-            if (this.countBadge) {
-                this.countBadge.textContent = count > 0 ? `(${count})` : '';
+            this.countBadge.innerText = count > 0 ? `(${count})` : '';
+        }
+
+        async deleteUserIngredient(id) {
+            try {
+                await fetch(`/ingredients/api/user-ingredients/${id}/`, { 
+                    method: 'DELETE', 
+                    headers: { 'X-CSRFToken': Utils.getCsrfToken() } 
+                });
+                return true;
+            } catch (e) { return false; }
+        }
+
+        async submitAll() {
+            const items = Object.values(this.selectedItems);
+            if (items.length === 0) { 
+                alert('추가할 식재료가 없습니다.'); 
+                return; 
             }
-        }
-
-        selectCategory(category) {
-            this.categoryPills.forEach(pill => {
-                pill.classList.toggle('active', pill.dataset.category === category);
-            });
-
-            this.ingredientItems.forEach(item => {
-                const shouldShow = category === '전체' || item.dataset.category === category;
-                item.style.display = shouldShow ? 'flex' : 'none';
-            });
-        }
-
-        filterIngredients() {
-            const filter = this.searchInput.value.toLowerCase().trim();
-
-            this.ingredientItems.forEach(item => {
-                const name = item.dataset.name.toLowerCase();
-                const isVisible = name.includes(filter);
-                item.style.display = isVisible ? 'flex' : 'none';
-            });
-        }
-
-        getAddIngredientUrl() {
-            return document.querySelector('[data-add-ingredient-url]')?.dataset.addIngredientUrl || '';
-        }
-
-        getMyFridgeUrl() {
-            return document.querySelector('[data-my-fridge-url]')?.dataset.myFridgeUrl || '';
-        }
-
-        getCsrfToken() {
-            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-                   document.querySelector('[data-csrf-token]')?.dataset.csrfToken || '';
+            try {
+                // views.py의 add_ingredient_view로 POST 전송
+                // 구조: { added: [ ... ] }
+                const promises = items.map(item => 
+                    fetch('/ingredients/add/', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'X-CSRFToken': Utils.getCsrfToken() 
+                        },
+                        body: JSON.stringify({ added: [item] })
+                    })
+                );
+                await Promise.all(promises);
+                this.successModal.classList.add('open');
+            } catch (err) { 
+                console.error(err);
+                alert('등록 중 오류가 발생했습니다.'); 
+            }
         }
     }
 
-    /**
-     * 내 냉장고 페이지 관리 클래스
-     */
+    // ==========================================
+    // 2. 내 냉장고 화면 (MyFridgeManager)
+    // ==========================================
     class MyFridgeManager {
         constructor() {
-            this.currentEditItem = null;
+            this.ingredients = []; 
+            this.currentFilter = '전체';
             this.initElements();
-            this.attachEventListeners();
+            if (this.mainContainer) {
+                this.init();
+            }
         }
 
         initElements() {
-            this.searchInput = document.getElementById('searchInput');
-            this.filterChips = document.querySelectorAll('.filter-chip');
-            this.fridgeItems = document.querySelectorAll('.fridge-item');
+            this.mainContainer = document.querySelector('.my-fridge-card'); 
+            this.shelfContainer = document.getElementById('fridgeShelf');   
+            this.emptyState = document.querySelector('.empty-state-container');
+            this.filterBar = document.querySelector('.filter-bar');
+
             this.editModal = document.getElementById('editModal');
-            this.modalIngredientName = document.getElementById('modalIngredientName');
+            this.modalTitle = document.getElementById('modalIngredientName');
             this.expiryInput = document.getElementById('expiryInput');
             this.cancelBtn = document.getElementById('cancelBtn');
             this.confirmBtn = document.getElementById('confirmBtn');
         }
 
+        async init() {
+            this.attachEventListeners();
+            await this.fetchMyIngredients();
+        }
+
         attachEventListeners() {
-            if (this.searchInput) {
-                this.searchInput.addEventListener('input', () => this.filterSearch());
+            if (this.cancelBtn) this.cancelBtn.addEventListener('click', () => this.closeModal());
+            if (this.confirmBtn) this.confirmBtn.addEventListener('click', () => this.updateIngredient());
+        }
+
+        async fetchMyIngredients() {
+            // 로딩 중 표시 (CSS로 중앙 정렬됨)
+            if(this.shelfContainer) this.shelfContainer.innerHTML = '<div class="loading-msg">냉장고를 여는 중...</div>';
+            
+            try {
+                const res = await fetch('/ingredients/api/user-ingredients/');
+                if (res.ok) {
+                    const data = await res.json();
+                    // [핵심 수정] DRF Pagination 대응: results가 있으면 그것을, 없으면 data 자체를 사용
+                    this.ingredients = Array.isArray(data) ? data : (data.results || []);
+                    this.render();
+                } else {
+                    console.error('불러오기 실패:', res.status);
+                    this.shelfContainer.innerHTML = '<div class="loading-msg">데이터를 불러오지 못했습니다.</div>';
+                }
+            } catch (err) {
+                console.error(err);
+                this.shelfContainer.innerHTML = '<div class="loading-msg">오류가 발생했습니다.</div>';
+            }
+        }
+
+        render() {
+            // 1. 빈 냉장고 체크
+            if (!this.ingredients || this.ingredients.length === 0) {
+                if (this.emptyState) this.emptyState.style.display = 'flex';
+                if (this.mainContainer) this.mainContainer.style.display = 'none';
+                if (this.filterBar) this.filterBar.style.display = 'none';
+                return;
             }
 
-            this.filterChips.forEach(chip => {
+            // 2. 데이터 있음
+            if (this.emptyState) this.emptyState.style.display = 'none';
+            if (this.mainContainer) this.mainContainer.style.display = 'block';
+            if (this.filterBar) this.filterBar.style.display = 'flex';
+
+            this.renderFilterBar();
+            this.renderShelf(this.currentFilter);
+        }
+
+        renderFilterBar() {
+            const counts = { '전체': this.ingredients.length };
+            this.ingredients.forEach(item => {
+                const cat = item.category_name || '기타'; // Serializer field name
+                counts[cat] = (counts[cat] || 0) + 1;
+            });
+
+            const categories = Object.keys(counts).sort((a, b) => a === '전체' ? -1 : 1);
+            
+            let html = '';
+            categories.forEach(cat => {
+                const isActive = this.currentFilter === cat ? 'active' : '';
+                html += `
+                    <div class="filter-chip ${isActive}" data-category="${cat}">
+                        ${cat}<span class="count">(${counts[cat]})</span>
+                    </div>
+                `;
+            });
+            
+            this.filterBar.innerHTML = html;
+
+            this.filterBar.querySelectorAll('.filter-chip').forEach(chip => {
                 chip.addEventListener('click', () => {
-                    this.filterCategory(chip.dataset.category);
+                    this.currentFilter = chip.dataset.category;
+                    this.renderFilterBar(); 
+                    this.renderShelf(this.currentFilter);
                 });
-            });
-
-            this.fridgeItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    this.openEditModal(item);
-                });
-            });
-
-            if (this.cancelBtn) {
-                this.cancelBtn.addEventListener('click', () => this.closeModal());
-            }
-
-            if (this.confirmBtn) {
-                this.confirmBtn.addEventListener('click', () => this.updateIngredient());
-            }
-
-            if (this.editModal) {
-                this.editModal.addEventListener('click', (e) => {
-                    if (e.target === this.editModal) {
-                        this.closeModal();
-                    }
-                });
-            }
-        }
-
-        filterCategory(categoryName) {
-            this.filterChips.forEach(chip => {
-                chip.classList.toggle('active', chip.dataset.category === categoryName);
-            });
-
-            this.fridgeItems.forEach(item => {
-                const itemCat = item.dataset.category;
-                const shouldShow = categoryName === '전체' || itemCat === categoryName;
-                item.style.display = shouldShow ? 'flex' : 'none';
             });
         }
 
-        filterSearch() {
-            const searchTerm = this.searchInput.value.toLowerCase().trim();
+        renderShelf(filterCategory) {
+            const filtered = filterCategory === '전체' 
+                ? this.ingredients 
+                : this.ingredients.filter(item => {
+                    const cat = item.category_name || '기타';
+                    return cat === filterCategory;
+                });
 
-            this.fridgeItems.forEach(item => {
-                const name = item.dataset.name.toLowerCase();
-                const isVisible = name.includes(searchTerm);
-                item.style.display = isVisible ? 'flex' : 'none';
+            this.shelfContainer.innerHTML = '';
+            
+            filtered.forEach(ui => {
+                const dDay = Utils.calculateDday(ui.expire_at);
+                const isUrgent = dDay.isUrgent; 
+                const badgeStyle = isUrgent ? 'color:#D32F2F; font-weight:bold;' : 'color:#555;';
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'fridge-item';
+                
+                // 아이콘 처리: DB에 icon URL이 있으면 사용, 없으면 기본 이모지
+                const iconContent = ui.icon 
+                    ? `<img src="${ui.icon}" class="ingredient-img" alt="${ui.ingredient_name}" style="width:100%;height:100%;object-fit:contain;">` 
+                    : '🍽️';
+
+                itemDiv.innerHTML = `
+                    <div class="grid-content">
+                        <div class="item-icon-box ${isUrgent ? 'urgent' : ''}">
+                            <div class="d-day-badge" style="${badgeStyle}">
+                                ${dDay.label}
+                            </div>
+                            <div class="emoji-icon" style="font-size:30px; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+                                ${iconContent}
+                            </div>
+                        </div>
+                        <div class="shelf-deco"></div>
+                        <span class="item-name">${ui.ingredient_name}</span>
+                    </div>
+                `;
+
+                itemDiv.addEventListener('click', () => this.openEditModal(ui));
+                this.shelfContainer.appendChild(itemDiv);
             });
         }
 
-        openEditModal(element) {
-            this.currentEditItem = {
-                name: element.dataset.name,
-                category: element.dataset.category
-            };
-
-            this.modalIngredientName.textContent = element.dataset.name;
-            this.expiryInput.value = element.dataset.expiry;
+        openEditModal(userIngredient) {
+            // [중요] Serializer의 PK 필드명: user_ingredient_id
+            this.currentTargetId = userIngredient.user_ingredient_id;
+            this.modalTitle.textContent = userIngredient.ingredient_name; 
+            this.expiryInput.value = userIngredient.expire_at || ''; 
             this.editModal.classList.add('open');
         }
 
         closeModal() {
             this.editModal.classList.remove('open');
-            this.currentEditItem = null;
+            this.currentTargetId = null;
         }
 
         async updateIngredient() {
-            if (!this.currentEditItem) return;
-
-            const newExpiry = this.expiryInput.value;
-            if (!newExpiry) {
-                alert('날짜를 선택해주세요');
-                return;
-            }
-
-            const payload = [{
-                name: this.currentEditItem.name,
-                category: this.currentEditItem.category,
-                expiry_date: newExpiry
-            }];
-
+            if (!this.currentTargetId) return;
+            const newDate = this.expiryInput.value;
+            
             try {
-                const response = await fetch(this.getAddIngredientUrl(), {
-                    method: 'POST',
+                const res = await fetch(`/ingredients/api/user-ingredients/${this.currentTargetId}/`, {
+                    method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': this.getCsrfToken()
+                        'X-CSRFToken': Utils.getCsrfToken()
                     },
-                    body: JSON.stringify({ ingredients: payload })
+                    body: JSON.stringify({ expire_at: newDate || null })
                 });
 
-                const data = await response.json();
-                if (data.status === 'success') {
-                    location.reload();
+                if (res.ok) {
+                    this.closeModal();
+                    await this.fetchMyIngredients(); // 목록 갱신
                 } else {
                     alert('수정 실패');
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('수정 중 오류가 발생했습니다');
+            } catch (err) {
+                console.error(err);
+                alert('오류 발생');
             }
         }
-
-        getAddIngredientUrl() {
-            return document.querySelector('[data-add-ingredient-url]')?.dataset.addIngredientUrl || '';
-        }
-
-        getCsrfToken() {
-            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-                   document.querySelector('[data-csrf-token]')?.dataset.csrfToken || '';
-        }
     }
 
-    // 페이지 초기화
-    function init() {
-        // 식재료 추가 페이지인지 확인
-        if (document.getElementById('ingredientGrid') && document.getElementById('dateModal')) {
+    // ==========================================
+    // 초기화
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.getElementById('ingredientGrid')) {
             new IngredientAdder();
         }
-
-        // 내 냉장고 페이지인지 확인
-        if (document.getElementById('editModal') && document.querySelectorAll('.fridge-item').length > 0) {
+        if (document.querySelector('.my-fridge-card') || document.querySelector('.empty-state-container')) {
             new MyFridgeManager();
         }
-    }
+    });
 
-    // DOMContentLoaded 또는 즉시 실행
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
 })();

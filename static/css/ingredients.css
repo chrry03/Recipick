@@ -1,582 +1,530 @@
-/* static/css/ingredients.css */
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Inter:wght@400&family=Nanum+Gothic&display=swap');
 
-/* =========================================
-   1. 공통 요소 (검색창, 기본 버튼 등)
-   ========================================= */
-.search-wrapper {
-    position: relative;
-    width: 100%;
-    height: 45px;
-    margin-top: 10px;
-    margin-bottom: 20px;
-    flex-shrink: 0;
+:root {
+    --primary-color: #FF7043;
+    --bg-gradient-start: #F5EDE0;
+    --bg-gradient-end: #F6F3EE;
+    --text-color: #555555;
+    --shadow-light: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
-/* Search Bar */
+body {
+    font-family: 'Gowun Dodum', sans-serif;
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    min-height: 100vh;
+}
+
+/* 레이아웃 구조 */
+.add-ingredient-container {
+    display: flex;
+    width: 100%;
+    max-width: 377px;
+    height: 100vh;
+    margin: 0 auto;
+    position: relative;
+    background: inherit;
+    overflow: hidden;
+}
+
+/* 1. 왼쪽 사이드바 (카테고리) */
+.category-sidebar {
+    width: 110px; /* 사이드바 폭 살짝 조정 */
+    height: calc(100vh - 160px);
+    overflow-y: auto;
+    padding: 20px 0 80px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 60px; /* 검색창 높이 고려 */
+}
+
+.category-item {
+    width: 101px;
+    height: 31px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555555;
+    background-color: #F5EFE5;
+    transition: all 0.2s;
+    flex-shrink: 0; /* 찌그러짐 방지 */
+}
+
+.category-item.active {
+    border: 1px solid var(--primary-color);
+    font-weight: bold;
+    background-color: #FFFFFF;
+}
+
+/* 카테고리 아이콘 (JS에서 이미지 태그로 삽입됨) */
+.category-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    object-fit: contain;
+}
+
+/* 2. 오른쪽 콘텐츠 영역 */
+.ingredient-content {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 점선 구분선 */
+.ingredient-content::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 173px;
+    bottom: 80px;
+    width: 1px;
+    border-left: 1px dashed #555555;
+    opacity: 0.5;
+}
+
+/* 검색창 (사용자 HTML class: search-container) */
 .search-container {
-  padding: 0 3rem 2rem;
+    position: absolute;
+    top: 96px;
+    left: 15px;
+    right: 15px;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
 }
 
 .search-bar {
-  position: relative;
-  background-color: #f5f0e7;
-  border-radius: 1rem;
-  box-shadow: inset 1px 1px 2px 0px rgba(216, 211, 203, 0.2),
-              inset -1px -1px 2px 0px rgba(216, 211, 203, 0.2),
-              inset 1px -1px 2px 0px rgba(255, 255, 255, 0.9),
-              inset -1px 1px 3px 0px rgba(216, 211, 203, 0.9);
+    width: 100%;
+    max-width: 314px;
+    height: 30px;
+    background: #F5F0E7;
+    box-shadow: -1px 1px 2px rgba(255, 255, 255, 0.3), 
+                1px -1px 2px rgba(216, 211, 203, 0.5), 
+                inset 1px 1px 2px rgba(216, 211, 203, 0.2), 
+                inset -1px -1px 2px rgba(216, 211, 203, 0.2), 
+                inset 1px -1px 2px rgba(255, 255, 255, 0.9), 
+                inset -1px 1px 3px rgba(216, 211, 203, 0.9);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
 }
 
 .search-icon {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  min-height: 20px;
-  z-index: 2;
-  pointer-events: none;
-  object-fit: contain;
-  object-position: left center;
-  display: block;
-  opacity: 1;
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+    opacity: 0.7;
 }
 
 .search-input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  padding: 0.5rem 1rem 0.5rem 3.5rem;
-  font-size: 0.875rem;
-  color: #555;
-  outline: none;
-}
-
-.search-input::placeholder {
-  color: #999;
-}
-
-/* static/css/ingredients.css */
-
-.btn-orange {
-    width: 100%;
-    height: 50px;
-    background: #FF7043; 
-    border-radius: 25px;
     border: none;
+    background: transparent;
+    font-family: 'Gowun Dodum';
+    font-size: 12px;
+    color: #666666;
+    width: 100%;
+    outline: none;
+}
+
+/* 식재료 리스트 영역 (class: ingredient-list-area) */
+.ingredient-list-area {
+    position: absolute;
+    top: 174px;
+    left: 10px;
+    right: 20px;
+    bottom: 100px;
+    background: #F9F9F9;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    overflow-y: auto;
+    padding: 10px 0;
+}
+
+.ingredient-list-area::-webkit-scrollbar {
+    width: 6px;
+}
+.ingredient-list-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 112, 67, 0.5);
+    border-radius: 10px;
+}
+
+.ingredient-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 0.25px solid rgba(85, 85, 85, 0.2);
+    cursor: pointer;
+}
+
+/* 체크박스 디자인 */
+.checkbox-icon {
+    width: 12px;
+    height: 11px;
+    background: #FFFFFF;
+    border: 0.5px solid rgba(85, 85, 85, 0.33);
+    border-radius: 2px;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ingredient-item.added .checkbox-icon::after {
+    content: "✔";
+    font-size: 10px;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.ingredient-name {
+    font-size: 13px;
+    color: #555555;
+}
+
+/* 등록 완료 버튼 */
+.floating-bottom-btn {
+    position: absolute;
+    bottom: 100px;
+    right: 30px;
+    z-index: 20;
+}
+
+.btn-submit {
+    width: 93px;
+    height: 31px;
+    background: #FF7043;
+    border-radius: 8px;
+    border: none;
+    color: #F9F9F9;
+    font-family: 'NanumGothic';
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow-light);
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    text-decoration: none;
-    box-shadow: 0 3px 8px rgba(231, 111, 81, 0.2);
-    
-    /* [추가] 색상이 부드럽게 변하도록 전환 효과 추가 */
-    transition: background-color 0.2s ease;
 }
 
-/* [추가] 마우스를 올렸을 때(Hover) 스타일 */
-.btn-orange:hover {
-    background: #ff5722;
+/* 모달 스타일 (동일 유지) */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+.modal-overlay.open { display: flex; }
+
+.custom-modal {
+    width: 253px; height: 243px;
+    background: #FFFFFF; border-radius: 25px;
+    padding: 20px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+}
+.modal-title { font-size: 18px; text-align: center; margin-bottom: 20px; color: #000; line-height: 1.2; }
+.highlight-text { color: var(--primary-color); font-weight: bold; }
+.date-input-wrapper {
+    width: 189px; height: 31px;
+    background: #FFF; box-shadow: 0 4px 4px rgba(0,0,0,0.25);
+    border-radius: 6px; display: flex; align-items: center; padding: 0 10px; margin-bottom: 15px;
+}
+.date-picker { width: 100%; border: none; outline: none; background: transparent; }
+.checkbox-wrapper { display: flex; align-items: center; margin-bottom: 20px; font-size: 12px; }
+.modal-actions { display: flex; gap: 10px; }
+.btn-cancel, .btn-confirm {
+    width: 93px; height: 31px; border-radius: 8px; font-size: 12px; cursor: pointer; border: none;
+}
+.btn-cancel { background: #F9F9F9; color: #555; border: 1px solid #ddd; }
+.btn-confirm { background: #FF7043; color: #FFF; }
+
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Gothic&display=swap');
+
+/* 폰트 정의 (D-Day용 폰트가 없다면 고운돋움으로 대체됩니다) */
+@font-face {
+    font-family: 'MemomentKkukkukk';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2205@1.0/MemomentKkukkukk.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
 }
 
-/* 텍스트 스타일 (기존 유지) */
-.btn-orange span {
-    font-family: 'Nanum Gothic', sans-serif;
-    font-size: 16px;
-    color: #FFFFFF;
-    font-weight: 600;
+:root {
+    --primary-color: #FF7043;
+    --bg-gradient-start: #F5EDE0;
+    --bg-gradient-end: #F6F3EE;
+    --text-color: #555555;
+    --card-bg: #F9F9F9;
+}
+
+body {
+    font-family: 'Gowun Dodum', sans-serif;
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    min-height: 100vh;
 }
 
 /* =========================================
-   [NEW] 텅 빈 냉장고 (Empty State)
+   공통 레이아웃 & 검색창
    ========================================= */
-.empty-state-container {
+.search-container {
+    position: absolute;
+    top: 96px;
+    left: 29px; /* Figma: 29px */
+    right: 29px;
+    z-index: 10;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    /* 화면 중앙에 오도록 높이 지정 (헤더/탭바 제외 대략적 높이) */
-    height: 60vh; 
-    position: relative;
-    text-align: center;
 }
 
-/* 이미지 아이콘 (Group 19) */
+.search-bar {
+    width: 100%;
+    height: 30px;
+    background: #F5F0E7;
+    /* Neumorphism Shadow (Figma 그대로) */
+    box-shadow: -1px 1px 2px rgba(255, 255, 255, 0.3), 
+                1px -1px 2px rgba(216, 211, 203, 0.5), 
+                inset 1px 1px 2px rgba(216, 211, 203, 0.2), 
+                inset -1px -1px 2px rgba(216, 211, 203, 0.2), 
+                inset 1px -1px 2px rgba(255, 255, 255, 0.9), 
+                inset -1px 1px 3px rgba(216, 211, 203, 0.9);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+}
+
+.search-icon {
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+    opacity: 0.7;
+}
+
+.search-input {
+    border: none;
+    background: transparent;
+    font-family: 'Gowun Dodum';
+    font-size: 12px;
+    color: #666666;
+    width: 100%;
+    outline: none;
+}
+
+/* =========================================
+   빈 냉장고 상태 (Empty State)
+   ========================================= */
+.empty-state-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 100%;
+}
+
 .empty-icon-wrapper {
-    width: 142.24px;
-    height: 142.24px;
-    margin-bottom: 20px; /* 텍스트와의 간격 */
-    
-    /* [요청하신 반전 효과] transform: matrix(-1, 0, 0, 1, 0, 0); 와 동일 */
-    transform: scaleX(-1); 
-    
-    /* 혹시 이미지가 흐리다면 */
-    image-rendering: -webkit-optimize-contrast;
+    margin-bottom: 20px;
 }
 
 .empty-fridge-icon {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    opacity: 0.8; /* 너무 진하면 살짝 연하게 */
+    width: 80px;
+    opacity: 0.5;
 }
 
-/* 텍스트 설명 */
 .empty-text {
-    font-family: 'Gowun Dodum', sans-serif; /* 폰트 적용 */
-    font-style: normal;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 20px;
-    text-align: center;
-    color: #555555;
-    
-    width: 224px; /* 요청하신 너비 */
-    word-break: keep-all; /* 단어 단위 줄바꿈 */
+    font-size: 12px;
+    color: #888;
+    line-height: 1.6;
 }
 
 /* =========================================
-   3. 내 냉장고 (my_fridge.html) - 채워진 상태
+   필터 바 (Figma: Group 44)
    ========================================= */
 .filter-bar {
+    position: absolute;
+    top: 161px;
+    left: 24px;
+    right: 24px;
     display: flex;
     gap: 8px;
-    margin-bottom: 20px;
     overflow-x: auto;
-    padding-bottom: 5px;
+    padding-bottom: 5px; /* 스크롤 공간 */
     scrollbar-width: none;
+    z-index: 5;
 }
 .filter-bar::-webkit-scrollbar { display: none; }
 
 .filter-chip {
-    padding: 6px 14px;
-    background: #EEE;
-    border-radius: 20px;
-    font-size: 13px;
-    color: #777;
-    white-space: nowrap;
+    flex: 0 0 auto;
+    height: 27px;
+    padding: 0 15px;
+    border-radius: 16px;
+    background: #D9D9D9; /* 비활성 배경 */
+    color: #555555;
+    font-family: 'NanumGothic';
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .filter-chip.active {
-    background: #ff5722;
-    color: white;
+    background: #FF7043; /* 활성 배경 */
+    color: #F9F9F9;
+    font-weight: bold;
 }
 
+.filter-chip .count {
+    margin-left: 3px;
+    font-size: 10px;
+}
+
+/* =========================================
+   내 냉장고 카드 (Figma: Rectangle 31)
+   ========================================= */
 .my-fridge-card {
-    /* 배경: 완전 흰색보다는 아주 미세한 쿨톤 그라데이션 */
-    background: linear-gradient(180deg, #FFFFFF 0%, #F8FBFF 100%);
-    border-radius: 24px;
-    
-    /* 테두리: 냉장고 두께감 표현 */
-    border: 4px solid #EEF2F5; 
-    
-    padding: 30px 20px;
-    
-    /* 그림자: 차가운 푸른빛이 감도는 그림자 */
-    box-shadow: inset 0 0 20px rgba(200, 220, 255, 0.2), 
-                0 4px 20px rgba(0,0,0,0.04);
-    
-    min-height: 500px;
-    position: relative;
+    position: absolute;
+    top: 223px;
+    left: 24px;
+    width: calc(100% - 48px); /* 좌우 24px 여백 */
+    height: 509px; /* 고정 높이 or calc(100vh - 350px) */
+    background: #F9F9F9;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 22px;
+    overflow-y: auto; /* 내부 스크롤 */
+    padding: 30px 20px; /* 내부 여백 */
+    box-sizing: border-box;
 }
 
-.shelf-row {
+/* 그리드 레이아웃 (3열) */
+.shelf-container.view-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    row-gap: 30px;      /* 줄 간격 넓게 (선반 느낌) */
-    column-gap: 15px;
-    margin-bottom: 30px;
+    row-gap: 30px;
+    column-gap: 10px;
 }
 
 .fridge-item {
     display: flex;
     flex-direction: column;
     align-items: center;
+    cursor: pointer;
     position: relative;
+}
+
+/* 아이콘 박스 */
+.item-icon-box {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* 이미지를 바닥에 맞춤 */
+}
+
+/* D-Day 뱃지 (Figma: D-1, MemomentKkukkukk) */
+.d-day-badge {
+    position: absolute;
+    top: -10px;
+    font-family: 'MemomentKkukkukk', 'Gowun Dodum', sans-serif;
+    font-size: 12px;
+    color: #555555;
     z-index: 2;
 }
 
-/* [핵심] 유리 선반 디자인 (shelf-deco) */
-.shelf-deco {
-    width: 100%;        /* 아이템 너비에 맞춤 */
-    height: 8px;        /* 얇은 유리판 두께 */
-    background: rgba(225, 235, 245, 0.8); /* 반투명한 푸른 회색 */
-    border-radius: 4px;
-    margin-top: -12px;  /* 아이콘 발밑에 깔리도록 */
-    margin-bottom: 10px;
-    
-    /* 유리 질감 그림자 */
-    box-shadow: 0 4px 6px rgba(100, 150, 200, 0.1), 
-                inset 0 1px 0 rgba(255,255,255, 0.8);
-    z-index: 1;
+.item-icon-box.urgent .d-day-badge {
+    color: #EE0000; /* 긴급 시 빨간색 */
 }
 
-.item-icon-box {
-    position: relative;
-    width: 70px;
-    height: 70px;
+/* 식재료 이미지/이모지 */
+.emoji-icon {
+    font-size: 32px;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    
-    /* 배경, 테두리, 그림자 모두 제거 */
-    background: transparent;
-    border: none;
-    border-radius: 0; /* 50% 제거 */
-    z-index: 2;
-    box-shadow: none;
 }
 
-.item-img {
-    width: 80%;
-    height: 80%;
+.emoji-icon img {
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
-.d-day-badge {
-    position: absolute;
-    top: -5px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #FFF;
-    border: 1px solid #ddd;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 800;
-    color: #333;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    white-space: nowrap;
-}
-
-.urgent .d-day-badge {
-    color: #E76F51;
-    border-color: #E76F51;
+/* 밑줄 장식 (Figma: Line 8 느낌의 개별 선반) */
+.shelf-deco {
+    width: 80%;
+    height: 2px;
+    background: #E0E0E0; /* 연한 회색 선 */
+    margin: 5px 0;
 }
 
 .item-name {
-    font-size: 14px;
-    color: #333;
-    font-weight: 500;
-}
-
-/* [최종 통합] 메인 페이지와 100% 동일한 스타일 적용 */
-.floating-add-btn {
-    position: fixed;
-    right: 1.5rem;
-    bottom: 7.5rem;   /* 메인 페이지와 동일한 높이 */
-    width: 4rem;
-    height: 4rem;
-    background: transparent; /* 이미지가 들어가므로 배경 투명 */
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    z-index: 9999;    /* 다른 요소에 가리지 않게 최상단 설정 */
-    padding: 0;
-    text-decoration: none; /* a태그 밑줄 제거 */
-    box-shadow: none; /* 이미지 자체 그림자가 있다면 제거 (필요시 추가) */
-}
-
-/* 이미지 크기 꽉 차게 */
-.floating-add-btn img {
+    font-family: 'Gowun Dodum';
+    font-size: 12px;
+    color: #555555;
+    text-align: center;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     width: 100%;
-    height: 100%;
-    object-fit: contain;
 }
 
-/* 버튼 눌렀을 때 살짝 작아지는 효과 */
+/* =========================================
+   플로팅 버튼 (Figma: Frame 2 + Rectangle 7)
+   ========================================= */
+.floating-add-btn {
+    position: absolute;
+    right: 20px; /* 원래 300px 위치 고려 */
+    bottom: 100px;
+    width: 68px;
+    height: 68px;
+    background: #FF7043;
+    box-shadow: 1px 3px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 24.5px; /* 특이한 라운드 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
 .floating-add-btn:active {
     transform: scale(0.95);
 }
 
-/* [중요] PC 화면에서 너무 오른쪽으로 가는 것 방지 (중앙 정렬) */
-@media (min-width: 448px) {
-    .floating-add-btn {
-        right: calc(50% - 224px + 1.5rem);
-    }
-}
-
-/* D-Day 뱃지 스타일 */
-.d-day-badge {
-    position: absolute;
-    top: -8px; 
-    left: 50%;
-    transform: translateX(-50%);
-    background: #FFF;
-    border: 1px solid #ddd;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 800;
-    color: #555;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    white-space: nowrap;
-    z-index: 5;
-}
-
-/* 긴급/만료 재료 빨간색 강조 */
-.urgent .d-day-badge {
-    color: #E76F51;
-    border-color: #E76F51;
-    background: #FFF;
+.floating-add-btn img {
+    width: 30px;
+    height: 30px;
 }
 
 /* =========================================
-   4. 재료 추가 (add_ingredient.html)
+   로딩 메시지 중앙 정렬
    ========================================= */
-.category-scroll-area {
-    width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
-    padding-bottom: 5px;
-    margin-bottom: 15px;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-.category-scroll-area::-webkit-scrollbar { display: none; }
-
-.category-pill {
-    display: inline-block;
-    padding: 6px 16px;
-    margin-right: 8px;
-    border-radius: 20px;
-    background: #E0E0E0;
-    color: #555555;
-    font-family: 'Nanum Gothic', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.category-pill.active { background: #E76F51; color: #FFFFFF; }
-
-.add-container {
-    background: #FFFFFF;
-    border-radius: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-    padding: 20px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 80px;
-    position: relative;
-    min-height: 400px;
-}
-
-.ingredient-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    row-gap: 15px;      /* 간격 조정 */
-    column-gap: 15px;
-    margin-top: 10px;
-}
-
-/* [수정] 냉장고 아이템과 동일한 구조로 변경 */
-.ingredient-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    cursor: pointer;
-    transition: transform 0.1s;
-    gap: 0; /* 간격 제거 (선반 겹침 효과 위해) */
-}
-.ingredient-item:active { transform: scale(0.95); }
-
-/* [수정] 아이콘 래퍼 (z-index 추가, 마진 조정) */
-.ingredient-icon-wrapper {
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 2;            /* 선반보다 위에 오도록 */
-    margin-bottom: -8px;   /* 선반과 살짝 겹치게 */
-}
-
-/* [수정] 단순 선(Line) -> 입체 선반(Shelf)으로 변경 */
-.shelf-line {
-    position: relative;    /* absolute 제거 */
-    bottom: auto;
-    width: 80px;           /* 아이콘보다 약간 넓게 */
-    height: 10px;          /* 두께감 추가 */
-    background: linear-gradient(to bottom, #F0F0F0, #E0E0E0);
-    border-radius: 4px;
-    box-shadow: 0 3px 5px rgba(0,0,0,0.08);
-    z-index: 1;
-    margin-bottom: 6px;    /* 이름과의 간격 */
-}
-
-.default-icon {
-    width: 100%;
-    height: 100%;
-    /* 배경, 그림자 제거 */
-    background: transparent;
-    border-radius: 50%; /* 혹시 몰라 형태는 유지 */
-    box-shadow: none;
-    /* 이미지가 없을 때 영역 표시를 위해 아주 옅은 테두리만 추가 (선택사항) */
-    border: 2px dashed #E0E0E0;
-    box-sizing: border-box;
-}
-
-.ingredient-img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));
-}
-
-.ingredient-name {
-    font-family: 'Nanum Gothic', sans-serif;
-    font-size: 13px;
-    color: #333333;
-    font-weight: 600;
+.loading-msg {
+    grid-column: 1 / -1; /* 그리드 전체 차지 */
     text-align: center;
-}
-
-/* 추가된 상태 스타일 */
-.ingredient-item.added .ingredient-icon-wrapper,
-.ingredient-item.added .ingredient-name {
-    opacity: 0.5;
-}
-
-.added-badge {
-    display: none;
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #E76F51;
-    color: white;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-weight: bold;
-    z-index: 10;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-.ingredient-item.added .added-badge { display: block; }
-
-/* 모달 */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-}
-.modal-overlay.open { display: flex; }
-
-.date-modal {
-    background: white;
-    width: 80%;
-    max-width: 320px;
-    border-radius: 20px;
-    padding: 25px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-.modal-title {
-    font-size: 18px;
-    font-weight: 800;
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.date-input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    font-size: 16px;
-    margin-bottom: 20px;
-    box-sizing: border-box;
-    font-family: inherit;
-}
-
-.modal-btn-group { display: flex; gap: 10px; }
-.modal-btn {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
+    color: #888;
     font-size: 14px;
+    padding-top: 50px;
 }
-.btn-cancel { background: #f0f0f0; color: #666; }
-.btn-confirm { background: #E76F51; color: white; }
-
-/* [추가] 모달 내 체크박스 스타일 */
-.no-expiry-wrapper {
-    margin-bottom: 20px;
-    text-align: left;
-    padding-left: 5px;
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-}
-
-.checkbox-text {
-    font-size: 14px;
-    color: #555;
-}
-
-/* 체크박스 크기 키우기 (선택사항) */
-input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: #E76F51; /* 주황색 포인트 */
-    cursor: pointer;
-}
-
-/* 완료 버튼 플로팅 */
-.complete-btn-wrapper {
-    position: fixed;
-    bottom: 80px;
-    left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    z-index: 100;
-    pointer-events: none;
-}
-.btn-complete {
-    pointer-events: auto;
-    background: #E76F51;
-    color: white;
-    width: 90%;
-    max-width: 400px;
-    height: 50px;
-    border-radius: 25px;
-    border: none;
-    font-size: 16px;
-    font-weight: 700;
-    box-shadow: 0 4px 12px rgba(231, 111, 81, 0.3);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-

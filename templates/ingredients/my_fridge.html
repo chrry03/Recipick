@@ -11,90 +11,59 @@
 
 {% block main_content %}
 
-    <!-- Search Bar -->
     <div class="search-container">
         <div class="search-bar">
-            <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색" onerror="console.error('검색 아이콘 로드 실패:', this.src)">
+            <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색" onerror="this.style.display='none'">
             <input type="text" placeholder="식재료 검색" class="search-input" id="searchInput">
         </div>
     </div>
 
-{% if not ingredients %}
-
-<div class="empty-state-container">
-    <div class="empty-icon-wrapper">
-        <img src="{% static 'images/empty_fridge.png' %}" class="empty-fridge-icon" alt="빈 냉장고">
+    <div class="empty-state-container">
+        <div class="empty-icon-wrapper">
+            <img src="{% static 'images/empty_fridge.png' %}" class="empty-fridge-icon" alt="빈 냉장고">
+        </div>
+        <div class="empty-text">
+            냉장고가 텅 비어있어요...<br>[+] 버튼을 눌러 재료를 추가보세요!
+        </div>
     </div>
-    <div class="empty-text">
-        냉장고가 텅 비어있어요...<br>[+] 버튼을 눌러 재료를 추가보세요!
-    </div>
-</div>
-{% else %}
 
-<div class="filter-bar">
-    {% for cat in categories %}
-    <div class="filter-chip {% if forloop.first %}active{% endif %}" 
-         data-category="{{ cat.name }}">
-        {{ cat.name }} <span class="count">{{ cat.count }}</span>
-    </div>
-    {% endfor %}
-</div>
+    <div class="filter-bar" style="display: none;">
+        </div>
 
-<div class="my-fridge-card">
-    <div class="shelf-container view-grid" id="fridgeShelf">
-        {% for ui in ingredients %}
-        <div class="fridge-item" 
-             data-name="{{ ui.ingredient.name_ko }}"
-             data-category="{{ ui.category_name }}" 
-             data-expiry="{{ ui.expire_at|date:'Y-m-d' }}">
+    <div class="my-fridge-card" style="display: none;">
+        <div class="shelf-container view-grid" id="fridgeShelf">
+            <div class="loading-msg" style="padding: 20px; text-align: center; color: #888; font-size: 13px;">
+                냉장고를 여는 중...
+            </div>
+        </div>
+    </div>
+
+    <a href="{% url 'ingredients:add_ingredient' %}" class="floating-add-btn" aria-label="재료 추가">
+        <img src="{% static 'images/ingredient_plus.svg' %}" alt="추가">
+    </a>
+
+    <div class="modal-overlay" id="editModal">
+        <div class="custom-modal date-modal">
             
-            <div class="grid-content">
-                <div class="item-icon-box {% if ui.is_urgent %}urgent{% endif %}">
-                    <div class="d-day-badge">{{ ui.d_day_tag }}</div>
-                    <div class="emoji-icon">{{ ui.category_icon }}</div>
-                </div>
-                <div class="shelf-deco"></div>
-                <span class="item-name">{{ ui.ingredient.name_ko }}</span>
+            <h3 class="modal-title">
+                <span id="modalIngredientName" class="highlight-text"></span> 수정
+            </h3>
+            
+            <div class="date-input-wrapper">
+                <input type="date" id="expiryInput" class="date-picker">
             </div>
 
-            <div class="list-content">
-                <div class="list-info-group">
-                    <span class="list-name">{{ ui.ingredient.name_ko }}</span>
-                    <span class="list-d-day {% if ui.is_urgent %}urgent-text{% endif %}">
-                        {{ ui.d_day_tag }}
-                    </span>
-                </div>
-                <div class="list-meta">
-                    <span class="list-date">{{ ui.expire_at|date:'y.m.d'|default:'-' }}</span>
-                </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" id="cancelBtn">취소</button>
+                <button type="button" class="btn-confirm" id="confirmBtn">수정</button>
             </div>
         </div>
-        {% endfor %}
     </div>
-</div>
-{% endif %}
 
-<a href="{% url 'ingredients:add_ingredient' %}" class="floating-add-btn" aria-label="재료 추가">
-    <img src="{% static 'images/ingredient_plus.svg' %}" alt="추가">
-</a>
-
-<div class="modal-overlay" id="editModal">
-    <div class="date-modal">
-        <div class="modal-title">
-            <span id="modalIngredientName"></span> 수정
-        </div>
-        <input type="date" id="expiryInput" class="date-input">
-        <div class="modal-btn-group">
-            <button type="button" class="modal-btn btn-cancel" id="cancelBtn">취소</button>
-            <button type="button" class="modal-btn btn-confirm" id="confirmBtn">수정</button>
-        </div>
-    </div>
-</div>
 {% endblock main_content %}
 
 {% block extra_script %}
-<div data-add-ingredient-url="{% url 'ingredients:add_ingredient' %}" 
-     data-csrf-token="{{ csrf_token }}" 
-     style="display: none;"></div>
+<div id="csrf-token" style="display:none;" data-token="{{ csrf_token }}"></div>
+
 <script src="{% static 'js/ingredients.js' %}"></script>
 {% endblock %}
