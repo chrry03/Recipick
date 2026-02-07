@@ -25,6 +25,7 @@ body {
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color: #555555;
 }
 
 /* 하단 네비게이션 스타일 */

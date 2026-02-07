@@ -1,6 +1,3 @@
-@charset "UTF-8";
-@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Inter:wght@400&family=Nanum+Gothic&display=swap');
-
 :root {
     --primary-color: #FF7043;
     --bg-gradient-start: #F5EDE0;
@@ -9,14 +6,6 @@
     --shadow-light: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
-body {
-    font-family: 'Gowun Dodum', sans-serif;
-    color: var(--text-color);
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-    min-height: 100vh;
-}
 
 /* 레이아웃 구조 */
 .add-ingredient-container {
@@ -249,34 +238,6 @@ body {
 }
 .btn-cancel { background: #F9F9F9; color: #555; border: 1px solid #ddd; }
 .btn-confirm { background: #FF7043; color: #FFF; }
-
-@charset "UTF-8";
-@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Gothic&display=swap');
-
-/* 폰트 정의 (D-Day용 폰트가 없다면 고운돋움으로 대체됩니다) */
-@font-face {
-    font-family: 'MemomentKkukkukk';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2205@1.0/MemomentKkukkukk.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
-}
-
-:root {
-    --primary-color: #FF7043;
-    --bg-gradient-start: #F5EDE0;
-    --bg-gradient-end: #F6F3EE;
-    --text-color: #555555;
-    --card-bg: #F9F9F9;
-}
-
-body {
-    font-family: 'Gowun Dodum', sans-serif;
-    color: var(--text-color);
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-    min-height: 100vh;
-}
 
 /* =========================================
    공통 레이아웃 & 검색창
