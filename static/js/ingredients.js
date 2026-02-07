@@ -363,14 +363,17 @@
             }
         }
     }
+// ... (상단의 IngredientAdder 클래스까지는 그대로 두세요) ...
 
     // ==========================================
-    // 2. 내 냉장고 화면 (MyFridgeManager)
+    // 2. 내 냉장고 화면 (MyFridgeManager) - 수정완료
     // ==========================================
     class MyFridgeManager {
         constructor() {
             this.ingredients = []; 
             this.currentFilter = '전체';
+            this.currentKeyword = ''; // 검색어 상태 저장
+            
             this.initElements();
             if (this.mainContainer) {
                 this.init();
@@ -382,6 +385,7 @@
             this.shelfContainer = document.getElementById('fridgeShelf');   
             this.emptyState = document.querySelector('.empty-state-container');
             this.filterBar = document.querySelector('.filter-bar');
+            this.searchInput = document.getElementById('searchInput'); // 검색창
 
             this.editModal = document.getElementById('editModal');
             this.modalTitle = document.getElementById('modalIngredientName');
@@ -396,33 +400,64 @@
         }
 
         attachEventListeners() {
+            // [검색 수정] 입력할 때마다 필터링 실행
+            if (this.searchInput) {
+                this.searchInput.addEventListener('input', (e) => {
+                    this.currentKeyword = e.target.value.trim().toLowerCase();
+                    this.renderShelf(); // 다시 그리기
+                });
+            }
+
             if (this.cancelBtn) this.cancelBtn.addEventListener('click', () => this.closeModal());
             if (this.confirmBtn) this.confirmBtn.addEventListener('click', () => this.updateIngredient());
         }
 
         async fetchMyIngredients() {
-            // 로딩 중 표시 (CSS로 중앙 정렬됨)
             if(this.shelfContainer) this.shelfContainer.innerHTML = '<div class="loading-msg">냉장고를 여는 중...</div>';
             
             try {
-                const res = await fetch('/ingredients/api/user-ingredients/');
+                const res = await fetch('/ingredients/api/user-ingredients/?include_expired=true'); // 만료된 것도 가져옴
                 if (res.ok) {
                     const data = await res.json();
-                    // [핵심 수정] DRF Pagination 대응: results가 있으면 그것을, 없으면 data 자체를 사용
                     this.ingredients = Array.isArray(data) ? data : (data.results || []);
+                    
+                    // [정렬 수정] 1순위: 날짜(임박순), 2순위: 이름(가나다순)
+                    this.sortIngredients();
+                    
                     this.render();
                 } else {
-                    console.error('불러오기 실패:', res.status);
-                    this.shelfContainer.innerHTML = '<div class="loading-msg">데이터를 불러오지 못했습니다.</div>';
+                    console.error('불러오기 실패');
+                    this.shelfContainer.innerHTML = '<div class="loading-msg">데이터 로드 실패</div>';
                 }
             } catch (err) {
                 console.error(err);
-                this.shelfContainer.innerHTML = '<div class="loading-msg">오류가 발생했습니다.</div>';
             }
         }
 
+        // [NEW] 정렬 함수
+        sortIngredients() {
+            this.ingredients.sort((a, b) => {
+                // 1. 소비기한 비교 (없는 것은 맨 뒤로)
+                const dateA = a.expire_at ? new Date(a.expire_at) : null;
+                const dateB = b.expire_at ? new Date(b.expire_at) : null;
+
+                if (dateA && !dateB) return -1; // A는 있고 B는 없음 -> A가 앞
+                if (!dateA && dateB) return 1;  // A는 없고 B는 있음 -> B가 앞
+                
+                if (dateA && dateB) {
+                    if (dateA < dateB) return -1; // 날짜 빠른 순 (임박순)
+                    if (dateA > dateB) return 1;
+                }
+
+                // 2. 날짜가 같거나 둘 다 없으면 -> 이름 가나다순
+                const nameA = a.ingredient_name || '';
+                const nameB = b.ingredient_name || '';
+                return nameA.localeCompare(nameB, 'ko'); 
+            });
+        }
+
         render() {
-            // 1. 빈 냉장고 체크
+            // 데이터가 아예 없을 때만 빈 화면 표시 (검색 결과 없음과는 다름)
             if (!this.ingredients || this.ingredients.length === 0) {
                 if (this.emptyState) this.emptyState.style.display = 'flex';
                 if (this.mainContainer) this.mainContainer.style.display = 'none';
@@ -430,19 +465,18 @@
                 return;
             }
 
-            // 2. 데이터 있음
             if (this.emptyState) this.emptyState.style.display = 'none';
             if (this.mainContainer) this.mainContainer.style.display = 'block';
             if (this.filterBar) this.filterBar.style.display = 'flex';
 
             this.renderFilterBar();
-            this.renderShelf(this.currentFilter);
+            this.renderShelf(); // 필터 적용하여 그리기
         }
 
         renderFilterBar() {
             const counts = { '전체': this.ingredients.length };
             this.ingredients.forEach(item => {
-                const cat = item.category_name || '기타'; // Serializer field name
+                const cat = item.category_name || '기타';
                 counts[cat] = (counts[cat] || 0) + 1;
             });
 
@@ -457,39 +491,51 @@
                     </div>
                 `;
             });
-            
             this.filterBar.innerHTML = html;
 
             this.filterBar.querySelectorAll('.filter-chip').forEach(chip => {
                 chip.addEventListener('click', () => {
                     this.currentFilter = chip.dataset.category;
                     this.renderFilterBar(); 
-                    this.renderShelf(this.currentFilter);
+                    this.renderShelf();
                 });
             });
         }
 
-        renderShelf(filterCategory) {
-            const filtered = filterCategory === '전체' 
-                ? this.ingredients 
-                : this.ingredients.filter(item => {
-                    const cat = item.category_name || '기타';
-                    return cat === filterCategory;
-                });
+        // [핵심] 필터링 + 검색 + 미입력 표시 로직
+        renderShelf() {
+            const filtered = this.ingredients.filter(item => {
+                const cat = item.category_name || '기타';
+                const name = item.ingredient_name || '';
+                
+                // 1. 카테고리 일치 여부
+                const matchCat = this.currentFilter === '전체' || cat === this.currentFilter;
+                
+                // 2. 검색어 포함 여부 (한글 검색 지원)
+                const matchKey = this.currentKeyword === '' || name.toLowerCase().includes(this.currentKeyword);
+
+                return matchCat && matchKey;
+            });
 
             this.shelfContainer.innerHTML = '';
             
+            // 검색 결과가 없을 때
+            if (filtered.length === 0) {
+                this.shelfContainer.innerHTML = '<div class="loading-msg">검색 결과가 없습니다.</div>';
+                return;
+            }
+
             filtered.forEach(ui => {
-                const dDay = Utils.calculateDday(ui.expire_at);
+                // [미입력 처리] expire_at이 null이면 calculateDday가 처리함
+                const dDay = Utils.calculateDday(ui.expire_at); 
                 const isUrgent = dDay.isUrgent; 
-                const badgeStyle = isUrgent ? 'color:#D32F2F; font-weight:bold;' : 'color:#555;';
+                const badgeStyle = isUrgent ? 'color:#EE0000; font-weight:bold;' : 'color:#555;';
                 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'fridge-item';
                 
-                // 아이콘 처리: DB에 icon URL이 있으면 사용, 없으면 기본 이모지
                 const iconContent = ui.icon 
-                    ? `<img src="${ui.icon}" class="ingredient-img" alt="${ui.ingredient_name}" style="width:100%;height:100%;object-fit:contain;">` 
+                    ? `<img src="${ui.icon}" style="width:100%;height:100%;object-fit:contain;">` 
                     : '🍽️';
 
                 itemDiv.innerHTML = `
@@ -513,7 +559,6 @@
         }
 
         openEditModal(userIngredient) {
-            // [중요] Serializer의 PK 필드명: user_ingredient_id
             this.currentTargetId = userIngredient.user_ingredient_id;
             this.modalTitle.textContent = userIngredient.ingredient_name; 
             this.expiryInput.value = userIngredient.expire_at || ''; 
@@ -541,7 +586,7 @@
 
                 if (res.ok) {
                     this.closeModal();
-                    await this.fetchMyIngredients(); // 목록 갱신
+                    await this.fetchMyIngredients(); 
                 } else {
                     alert('수정 실패');
                 }
