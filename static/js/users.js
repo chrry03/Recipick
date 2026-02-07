@@ -57,7 +57,6 @@ function toggleAllergy(el, name) {
     else selectedAllergies.add(name);
 }
 
-// 2-2. [신규] 카테고리 API 호출 및 렌더링
 async function fetchCategories() {
     const container = document.getElementById('category-wrapper');
     if (!container) return;
@@ -68,11 +67,12 @@ async function fetchCategories() {
         
         container.innerHTML = categories.map((cat, index) => `
             <div class="category-item ${index === 0 ? 'active' : ''}" 
-                 onclick="selectCategory(this, ${cat.id})">
-                ${cat.icon_url || ''} ${cat.name}
+                onclick="selectCategory(this, ${cat.id})"
+                data-id="${cat.id}">  ${cat.icon_url || ''} ${cat.name}
             </div>
         `).join('');
 
+        // 초기 로딩 시 첫 번째 카테고리 로드
         if (categories.length > 0) {
             currentCategoryId = categories[0].id;
             fetchIngredients(currentCategoryId);
@@ -106,7 +106,7 @@ async function fetchIngredients(catId) {
     }
 }
 
-// 2-5. [신규] 검색 기능
+// 2-5. 검색 기능
 async function searchIngredients(keyword) {
     if (!keyword.trim()) return;
     
@@ -119,19 +119,32 @@ async function searchIngredients(keyword) {
 
         if (ingredients.length > 0) {
             renderIngredientList(ingredients);
+
+            // 검색된 첫 번째 재료의 카테고리로 사이드바 하이라이트 변경
+            if (ingredients[0].category_id) {
+                const targetId = ingredients[0].category_id;
+                
+                document.querySelectorAll('.category-item').forEach(el => el.classList.remove('active'));
+                
+                const targetEl = document.querySelector(`.category-item[data-id="${targetId}"]`);
+                if (targetEl) {
+                    targetEl.classList.add('active');
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
         } else {
+            // [수정] 결과 없음 -> Alert 띄우고 텍스트 표시
+            alert('검색하신 재료가 없습니다');
             container.innerHTML = `
-                <div class="no-result" style="text-align:center; padding:20px; width:100%;">
-                    <p style="margin-bottom:10px; color:#666;">'${keyword}'에 대한 검색 결과가 없습니다.</p>
-                    <button type="button" class="btn-mw btn-primary-mw" 
-                            onclick="addCustomIngredient('${keyword}')" style="width:auto; padding: 10px 20px;">
-                        '${keyword}' 직접 추가하기
-                    </button>
+                <div style="padding:20px; width:100%; text-align:center; color:#999; font-size:14px;">
+                    검색 결과가 없습니다.
                 </div>
             `;
         }
     } catch (err) {
         console.error("검색 실패:", err);
+        container.innerHTML = '<div style="padding:20px; text-align:center;">오류가 발생했습니다.</div>';
     }
 }
 
@@ -187,7 +200,7 @@ function goToStep(stepNum) {
     document.getElementById(`step-${stepNum}`).classList.add('active');
 }
 
-// 2-11. 설정 완료 및 저장 (Flat 구조)
+// 2-11. 설정 완료 및 저장 (401 에러 핸들링 추가)
 async function finishPreference(level) {
     const token = localStorage.getItem('access_token');
     const csrftoken = getCookie('csrftoken');
@@ -219,16 +232,23 @@ async function finishPreference(level) {
             alert("취향 설정이 완료되었습니다! 메인으로 이동합니다.");
             window.location.href = "/"; 
         } else {
-            const errorData = await response.json();
-            console.error("저장 실패:", errorData);
-            alert("저장에 실패했습니다. 다시 시도해주세요.");
+            // [수정됨] 401 에러(토큰 만료) 등 실패 처리 강화
+            if (response.status === 401) {
+                alert("로그인 정보가 만료되었습니다. 다시 로그인해주세요.");
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.location.href = '/users/login/';
+            } else {
+                const errorData = await response.json();
+                console.error("저장 실패:", errorData);
+                alert("저장에 실패했습니다. (" + response.status + ")");
+            }
         }
     } catch (error) {
         console.error("통신 오류:", error);
         alert("서버 오류가 발생했습니다.");
     }
 }
-
 
 // ==========================================
 // 3. DOMContentLoaded 이벤트

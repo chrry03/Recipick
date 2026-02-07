@@ -12,9 +12,9 @@
 {% block content %}
 <div class="scroll-container">
     <div class="container-mw">
-        
-        <div class="logo-area" style="margin-bottom: 40px; text-align: center;">
-            <img src="{% static 'images/logo.png' %}" alt="Recipick" style="width: 280px; height: auto;" onerror="this.src='https://via.placeholder.com/175x37'">
+        <div class="logo-area">
+            <img src="{% static 'images/Recipick_logo.png' %}" class="logo-img-top" alt="Recipick Top">
+            <img src="{% static 'images/Recipick_logo_text.png' %}" class="logo-img-bottom" alt="Recipick Bottom">
         </div>
 
         <form id="login-form" class="form-group-mw">
@@ -30,14 +30,14 @@
         <a href="{% url 'users:signup' %}" class="btn-mw link-btn-mw">회원가입</a>
 
         <div class="social-container-mw">
-            <button type="button" class="btn-mw btn-social-mw google-mw">
-                <img src="{% static 'images/icon_google.png' %}" class="social-icon"> 구글로 로그인
+            <button type="button" class="btn-social-custom google-mw">
+                <img src="{% static 'images/btn_google.png' %}" alt="구글 로그인">
             </button>
-            <button type="button" class="btn-mw btn-social-mw naver-mw">
-                <img src="{% static 'images/icon_naver.png' %}" class="social-icon"> 네이버로 로그인
+            <button type="button" class="btn-social-custom naver-mw">
+                <img src="{% static 'images/btn_naver.png' %}" alt="네이버 로그인">
             </button>
-            <button type="button" class="btn-mw btn-social-mw kakao-mw">
-                <img src="{% static 'images/icon_kakao.png' %}" class="social-icon"> 카카오로 로그인
+            <button type="button" class="btn-social-custom kakao-mw">
+                <img src="{% static 'images/btn_kakao.png' %}" alt="카카오 로그인">
             </button>
         </div>
 
