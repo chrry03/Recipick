@@ -17,6 +17,8 @@ from recipes.models import Recipe, FavoriteRecipe
 from ingredients.models import UserIngredient
 from logs.models import RecipeLog
 
+from itertools import chain
+
 User = get_user_model()
 
 # =============================================================
@@ -241,37 +243,35 @@ def preference_view(request):
     return render(request, 'users/preference_steps.html')
 
 def notification_view(request):
-    """
-    [Logic] 유통기한 임박(3일 이내) 식재료 알림
-    """
     user = request.user
     notifications = []
     
     if user.is_authenticated:
-        # 유통기한 있는 것 중 사용 안 한 것
-        ing_qs = UserIngredient.objects.filter(
-            user=user, 
-            is_consumed=False, 
-            expire_at__isnull=False
-        ).select_related('ingredient')
+        # 1. [Model 활용] 곧 상하는 재료 가져오기 (ingredients/views.py 코드)
+        upcoming_qs = UserIngredient.get_expiring_soon_ingredients(user, days_threshold=3)
         
-        today = date.today()
+        # 2. [Model 활용] 이미 상한 재료 가져오기 (ingredients/views.py 코드)
+        # (유통기한 지난 것도 보여주려면 이것도 필요. ingredients/views.py에는 지난거는 없기 때문.)
+        expired_qs = UserIngredient.get_expired_ingredients(user)
         
-        for item in ing_qs:
-            delta = (item.expire_at - today).days
+        # 3. 두 리스트 합치기 (상한 거 + 곧 상할 거)
+        all_targets = list(chain(expired_qs, upcoming_qs))
+        
+        for item in all_targets:
+            # 4. [Model 활용] 멘트 생성도 모델에게 맡긴다!
+            msg = item.get_notification_message()
             
-            # D-3 이내이거나 이미 지난 경우 알림
-            if delta <= 3:
-                msg = ""
-                if delta < 0: msg = f"{item.ingredient.name_ko}의 소비기한이 {abs(delta)}일 지났습니다."
-                elif delta == 0: msg = f"{item.ingredient.name_ko}의 소비기한이 오늘까지입니다."
-                else: msg = f"{item.ingredient.name_ko}의 소비기한이 {delta}일 남았습니다."
-                
-                notifications.append({
-                    'id': item.user_ingredient_id,
-                    'message': msg,
-                    'icon': '🥕' # 아이콘은 일단 고정 or 카테고리별 분기 가능
-                })
+            # 아이콘 처리 (기존 로직 유지)
+            icon_url = '/static/images/default_ing.png' # 기본값
+            if item.ingredient.category and item.ingredient.category.icon_url:
+                 icon_url = item.ingredient.category.icon_url
+
+            notifications.append({
+                'id': item.user_ingredient_id,
+                'message': msg,          # 모델이 만들어준 문장 그대로 사용
+                'ingredient_name': item.ingredient.name_ko,
+                'icon_url': icon_url 
+            })
 
     context = {
         'notifications': notifications,
