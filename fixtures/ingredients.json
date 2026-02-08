@@ -1698,7 +1698,7 @@
   },
   {
     "model": "ingredients.ingredientmaster",
-    "pk": 328,
+    "pk": 320,
     "fields": {
       "name_ko": "다진 돼지고기",
       "name_en": "ground pork",
