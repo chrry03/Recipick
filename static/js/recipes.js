@@ -769,12 +769,27 @@
 
         goToNextStep() {
             if (this.currentStep >= this.totalSteps) {
-                console.log('마지막 단계입니다.');
+                // 마지막 단계에서 다음 버튼 클릭 시 완료 페이지로 이동
+                this._navigateToComplete();
                 return;
             }
 
             const nextStep = this.currentStep + 1;
             this._navigateToStep(nextStep);
+        }
+
+        _navigateToComplete() {
+            if (!this.recipeId) {
+                console.error('레시피 ID를 찾을 수 없습니다.');
+                return;
+            }
+
+            try {
+                const url = `${this.baseUrl}/${this.recipeId}/complete/`;
+                window.location.href = url;
+            } catch (error) {
+                console.error('완료 페이지 이동 중 오류 발생:', error);
+            }
         }
 
         _navigateToStep(step) {
@@ -806,13 +821,9 @@
             const nextBtn = document.querySelector('.btn-next');
 
             if (nextBtn) {
-                if (this.currentStep >= this.totalSteps) {
-                    nextBtn.disabled = true;
-                    nextBtn.classList.add('disabled');
-                } else {
-                    nextBtn.disabled = false;
-                    nextBtn.classList.remove('disabled');
-                }
+                // 마지막 단계에서도 다음 버튼을 활성화하여 완료 페이지로 이동 가능하도록 함
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('disabled');
             }
         }
     }
@@ -1304,7 +1315,7 @@
     function initCookingComplete() {
         const completeContainer = document.querySelector('.cooking-complete-container');
         if (!completeContainer) {
-            return; // 요리 완료 페이지가 아닌 경우 종료
+            return; 
         }
 
         bindChecklistEvents();
@@ -1393,7 +1404,7 @@
                 }
                 
                 // 레시피 목록으로 이동
-                window.location.href = '/recipes/';
+                window.location.href = '/';
             });
         }
 
