@@ -10,17 +10,20 @@
 .header {
   position: relative;
   width: 100%;
-  padding: 1.5rem 0 1rem;
+  padding: 1.5rem 0 0;
 }
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 0;
+  margin-top: 3rem;
+  padding-top: 0.5rem;
 }
 
 .logo {
-  height: 2.25rem;
+  height: 2.3rem;
   object-fit: contain;
 }
 
@@ -39,6 +42,7 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  z-index: 10;
 }
 
 .notification-btn:hover {
@@ -47,17 +51,21 @@
 
 /* Search Bar */
 .search-container {
-  padding: 0 2rem 3rem;
+  padding: 53px 2rem 3rem;
+  margin-top: 0;
+  transition: all 0.3s ease;
 }
 
 .search-bar {
   position: relative;
-  background-color: #f5f0e7;
-  border-radius: 1rem;
-  box-shadow: inset 1px 1px 2px 0px rgba(216, 211, 203, 0.2),
-              inset -1px -1px 2px 0px rgba(216, 211, 203, 0.2),
-              inset 1px -1px 2px 0px rgba(255, 255, 255, 0.9),
-              inset -1px 1px 3px 0px rgba(216, 211, 203, 0.9);
+  background: #F5F0E7;
+  border-radius: 15px;
+  box-shadow: -1px 1px 2px 0 rgba(255, 255, 255, 0.30), 
+              1px -1px 2px 0 rgba(216, 211, 203, 0.50), 
+              1px 1px 2px 0 rgba(216, 211, 203, 0.20) inset, 
+              -1px -1px 2px 0 rgba(216, 211, 203, 0.20) inset, 
+              1px -1px 2px 0 rgba(255, 255, 255, 0.90) inset, 
+              -1px 1px 3px 0 rgba(216, 211, 203, 0.90) inset;
 }
 
 .search-icon {
