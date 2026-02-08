@@ -16,12 +16,13 @@
 /* ==========================================================================
    1. 요리 모드 페이지 스타일 (기존 코드 유지)
    ========================================================================== */
-.recipe-container {
+.recipe-container,
+.cooking-complete-container {
     position: relative;
     width: 100%;
     max-width: 385px;
     height: 100%;
-    max-height: 844px;
+    max-height: 1200px;
     margin: 0 auto;
     background: linear-gradient(180deg, #f5ede0 0%, #f6f3ee 100%);
     border-radius: 20px;
@@ -131,9 +132,44 @@
     margin-top: 20px;
 }
 
+/* 타이머 시간 추가 버튼 그룹 */
+.timer-add-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.timer-add-btn {
+    width: 89px;
+    height: 33px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #FFF 100%, #F2F2F2 0%);
+    box-shadow: 1px 1px 2px 0 rgba(255, 255, 255, 0.30) inset, 
+                -1px -1px 2px 0 rgba(229, 229, 229, 0.50) inset, 
+                -1px 1px 2px 0 rgba(229, 229, 229, 0.20), 
+                1px -1px 2px 0 rgba(229, 229, 229, 0.20), 
+                -1px -1px 2px 0 rgba(255, 255, 255, 0.90), 
+                1px 1px 3px 0 rgba(229, 229, 229, 0.90);
+    border: none;
+    padding: 0;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 16px;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
 .nav-buttons {
     position: absolute;
-    bottom: 41px;
+    bottom: 10px;
     left: 0;
     right: 0;
     display: flex;
@@ -678,6 +714,12 @@
     left: 50%;
     transform: translateX(-50%);
     width: 90%;
+    max-width: calc(100% - 40px);
+    max-height: 300px;
+    box-sizing: border-box;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
 }
 
 .checklist-title {
@@ -688,24 +730,56 @@
     margin-bottom: 20px;
     line-height: 28px;
     font-family: 'MemomentKkukkukk', sans-serif;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .checklist-columns {
     display: flex;
     justify-content: center;
-    gap: 40px;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    max-width: 100%;
+    height: 264px;
+    max-height: 250px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+    padding-left: 24px;
+    padding-right: 24px;
 }
 
 .checklist-column {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    align-items: flex-start;
+    gap: 0px;
+    flex: 1;
+    min-width: 0;
+    max-width: 50%;
+    height: 264px;
+    overflow: hidden;
+}
+
+.checklist-column:empty {
+    display: none;
 }
 
 .checklist-item {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 16px;
+}
+
+.checklist-item:last-child {
+    margin-bottom: 0;
 }
 
 .checkbox {
@@ -742,6 +816,11 @@
     font-size: 18px;
     color: #555;
     line-height: 52.571px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    font-family: 'Gowun Dodum', sans-serif;
 }
 
 .item-text.highlight {
@@ -758,7 +837,7 @@
 /* 구분선 */
 .divider {
     position: absolute;
-    top: 585px;
+    top: 720px;
     left: 50%;
     transform: translateX(-50%);
     width: 324px;
@@ -775,7 +854,7 @@
 /* 일지 질문 */
 .question {
     position: absolute;
-    top: 602px;
+    top: 740px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 30px;
@@ -784,20 +863,20 @@
     text-align: center;
     line-height: 28px;
     font-family: 'MemomentKkukkukk', sans-serif;
+    white-space: nowrap;
+    width: auto;
+    max-width: calc(100% - 40px);
 }
 
 /* 버튼 그룹 */
 .button-group {
     position: absolute;
-    bottom: 42px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 375px;
-    max-width: calc(100% - 0px);
+    bottom: 10px;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: space-between;
     padding: 0 33px;
-    box-sizing: border-box;
 }
 
 .btn {
@@ -818,7 +897,6 @@
 
 .btn-no:hover {
     background-color: #c9c9c9;
-    transform: scale(1.05);
 }
 
 .btn-yes {
@@ -828,7 +906,6 @@
 
 .btn-yes:hover {
     background-color: #ff5722;
-    transform: scale(1.05);
 }
 
 .btn:active {

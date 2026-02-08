@@ -1042,6 +1042,21 @@
         setRemainingPathColor(timeLeft);
     }
 
+    function addTimeToTimer(secondsToAdd) {
+        if (secondsToAdd <= 0) {
+            return;
+        }
+        
+        // 현재 남은 시간에 추가
+        timeLeft += secondsToAdd;
+        TIME_LIMIT += secondsToAdd;
+        
+        // 시간 표시 및 원형 진행 표시 업데이트
+        updateTimerDisplay();
+        setCircleDasharray();
+        setRemainingPathColor(timeLeft);
+    }
+
     function showMinutesInput() {
         if (isEditingTime || timerInterval) {
             return;
@@ -1265,6 +1280,9 @@
         setCircleDasharray();
         setRemainingPathColor(timeLeft);
 
+        // 시간 추가 버튼 이벤트 리스너 추가
+        bindTimerAddButtons();
+
         // 분 클릭 시 분 입력 모드로 전환
         const minutesLabel = document.getElementById("timer-minutes");
         if (minutesLabel) {
@@ -1308,6 +1326,28 @@
     // ============================================
     // 요리 완료 페이지 모듈
     // ============================================
+
+    /**
+     * 시간 추가 버튼 이벤트 바인딩
+     */
+    function bindTimerAddButtons() {
+        const addButtons = document.querySelectorAll('.timer-add-btn');
+        
+        addButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const secondsToAdd = parseInt(this.dataset.seconds, 10);
+                if (!isNaN(secondsToAdd) && secondsToAdd > 0) {
+                    addTimeToTimer(secondsToAdd);
+                    
+                    // 버튼 클릭 효과 (시각적 피드백)
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                }
+            });
+        });
+    }
 
     /**
      * 요리 완료 페이지 초기화
