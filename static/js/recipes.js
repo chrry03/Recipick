@@ -120,12 +120,13 @@
             throw new Error('로그인이 필요합니다');
         }
         
-        try {
-            const response = await fetch('/api/recipes/api/recommendations/', {
+            try {
+            // [수정됨] URL 경로 수정: /api/recipes/ -> /recipes/api/
+            const response = await fetch('/recipes/api/recommendations/', { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}` // 토큰 필수
                 },
                 body: JSON.stringify({
                     ingredient_ids: ingredientIds,
@@ -164,10 +165,12 @@
      */
     async function searchRecipes(query) {
         try {
-            const response = await fetch(`/api/recipes/api/search/?q=${encodeURIComponent(query)}`, {
+            // [수정됨] URL 경로 수정: /api/recipes/ -> /recipes/api/
+            const response = await fetch(`/recipes/api/search/?q=${encodeURIComponent(query)}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
+                    // 검색은 로그인 없이도 될 수 있으므로 Authorization 헤더 상황에 따라 처리
                 }
             });
             
