@@ -9,12 +9,12 @@
 
 {% block content %}
 <div class="app-container">
-    <!-- Main Header (기본값, 임계값 이상일 때 숨김) -->
+    <!-- Main Header (스크롤 시 축소됨) -->
     <header class="header main-header" id="mainHeader">
+        <!-- 상단 알림 아이콘 (초기 상태만 표시) -->
         <div class="header-top">
             <div class="header-top-content">
-                <!-- 알림 아이콘 -->
-                <a href="{% url 'users:notification' %}" class="notification-btn" aria-label="알림">
+                <a href="{% url 'users:notification' %}" class="notification-btn header-top-notification" aria-label="알림">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
                         <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
@@ -23,12 +23,30 @@
             </div>
         </div>
         
-        <!-- 로고  -->
-        <div class="header-content">
-            <img src="{% static 'images/logo.png' %}" alt="Recipick" class="logo" onerror="this.src='https://via.placeholder.com/175x37'">
+        <div class="header-wrapper">
+            <!-- 로고 -->
+            <div class="header-logo-container">
+                <img src="{% static 'images/logo.png' %}" alt="Recipick" class="logo" onerror="this.src='https://via.placeholder.com/175x37'">
+            </div>
+            
+            <!-- 오른쪽 아이콘들 (스크롤 시 표시) -->
+            <div class="header-icons">
+                <!-- 검색 아이콘 (스크롤 시 표시) -->
+                <button class="search-icon-btn" id="searchIconBtn" aria-label="검색">
+                    <img src="{% static 'images/search.png' %}" class="search-icon-small" alt="검색" onerror="console.error('검색 아이콘 로드 실패:', this.src)">
+                </button>
+                
+                <!-- 알림 아이콘 (스크롤 시 표시) -->
+                <a href="{% url 'users:notification' %}" class="notification-btn header-scrolled-notification" aria-label="알림">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                    </svg>
+                </a>
+            </div>
         </div>
         
-        <!-- 검색창 -->
+        <!-- 검색창 (스크롤 시 숨김) -->
         <div class="search-container">
             <div class="search-bar-wrapper">
                 <div class="search-bar">
@@ -38,11 +56,6 @@
             </div>
         </div>
     </header>
-
-    <!-- Scroll Header (스크롤 시 표시) -->
-    <div id="scrollHeader" style="display: none; opacity: 0; transform: translateY(-100%);">
-        {% include 'header.html' %}
-    </div>
 
 
 
