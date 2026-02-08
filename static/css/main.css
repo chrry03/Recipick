@@ -3,7 +3,7 @@
   max-width: 448px;
   margin: 0 auto;
   padding-bottom: 6rem;
-  padding-top: 329px;
+  padding-top: 480px;
   position: relative;
 }
 
@@ -19,6 +19,14 @@
   -webkit-backdrop-filter: blur(8px);
   z-index: 1000;
   box-sizing: border-box;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.header.main-header {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .header-top {
@@ -146,6 +154,11 @@
 /* Section */
 .section {
   margin-bottom: 3.5rem;
+  margin-top: 2rem;
+}
+
+.section:first-child {
+  margin-top: 0;
 }
 
 .section-header {

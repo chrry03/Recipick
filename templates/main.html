@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="app-container">
-    <!-- Main Header (처음에만 표시) -->
+    <!-- Main Header (기본값, 임계값 이상일 때 숨김) -->
     <header class="header main-header" id="mainHeader">
         <div class="header-top">
             <div class="header-top-content">
@@ -40,7 +40,7 @@
     </header>
 
     <!-- Scroll Header (스크롤 시 표시) -->
-    <div id="scrollHeader" style="display: none;">
+    <div id="scrollHeader" style="display: none; opacity: 0; transform: translateY(-100%);">
         {% include 'header.html' %}
     </div>
 
