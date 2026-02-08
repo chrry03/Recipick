@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="log-list-container">
+<div class="app-container">
     <!-- Header -->
     {% include 'header.html' %}
 
@@ -34,11 +34,7 @@
                 {% if log.image %}
                     <img src="{{ log.image }}" alt="{{ log.recipe_name }}" onerror="this.parentElement.classList.add('placeholder'); this.remove();">
                 {% else %}
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M2 17L12 22L22 17" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M2 12L12 17L22 12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <img src="{% static 'images/Recipick_logo.png' %}" alt="Recipick 로고" class="placeholder-logo">
                 {% endif %}
             </div>
             <div class="recipe-info">

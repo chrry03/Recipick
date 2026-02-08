@@ -20,13 +20,15 @@ html, body {
 }
 
 body {
-    font-family: 'Gowun Dodum', 'Nanum Gothic', 'MemomentKkukkukk', sans-serif;
+    font-family: 'Gowun Dodum', 'Nanum Gothic', 'MemomentKkukkukk';
     background: linear-gradient(to bottom, #f5ede0, #f6f3ee);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: #555555;
 }
+
+
 
 /* 하단 네비게이션 스타일 */
 .bottom-nav {
@@ -199,8 +201,9 @@ body {
     width: 100%;
     max-width: 448px;  /* 모바일 너비 제한 */
     margin: 0 auto;    /* 가운데 정렬 */
+    padding: 12px;
+    padding-top: 72px; /* 헤더 높이만큼 상단 패딩 */
     padding-bottom: 6rem; /* 하단 탭바 가림 방지 */
-    padding-top: 60px; /* 헤더 높이만큼 상단 패딩 */
     position: relative;
     background-color: linear-gradient(to bottom, #f5ede0, #f6f3ee); /* 배경색 */
     min-height: 100vh; /* 화면 꽉 차게 */
