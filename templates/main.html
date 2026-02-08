@@ -9,26 +9,43 @@
 
 {% block content %}
 <div class="app-container">
-    <!-- Header -->
-    <header class="header">
+    <!-- Main Header (기본값, 임계값 이상일 때 숨김) -->
+    <header class="header main-header" id="mainHeader">
+        <div class="header-top">
+            <div class="header-top-content">
+                <!-- 알림 아이콘 -->
+                <a href="{% url 'users:notification' %}" class="notification-btn" aria-label="알림">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        
+        <!-- 로고  -->
         <div class="header-content">
             <img src="{% static 'images/logo.png' %}" alt="Recipick" class="logo" onerror="this.src='https://via.placeholder.com/175x37'">
         </div>
-        <a href="{% url 'users:notification' %}" class="notification-btn" aria-label="알림">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-            </svg>
-        </a>
+        
+        <!-- 검색창 -->
+        <div class="search-container">
+            <div class="search-bar-wrapper">
+                <div class="search-bar">
+                    <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색" onerror="console.error('검색 아이콘 로드 실패:', this.src)">
+                    <input type="text" placeholder="레시피 검색" class="search-input" id="searchInput">
+                </div>
+            </div>
+        </div>
     </header>
 
-    <!-- Search Bar -->
-    <div class="search-container">
-        <div class="search-bar">
-            <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색" onerror="console.error('검색 아이콘 로드 실패:', this.src)">
-            <input type="text" placeholder="레시피 검색" class="search-input" id="searchInput">
-        </div>
+    <!-- Scroll Header (스크롤 시 표시) -->
+    <div id="scrollHeader" style="display: none; opacity: 0; transform: translateY(-100%);">
+        {% include 'header.html' %}
     </div>
+
+
+
 
     <!-- Recommended Recipe Section -->
     <section class="section">

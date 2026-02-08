@@ -5,6 +5,104 @@
 
 (function() {
     'use strict';
+    
+    // 스크롤 헤더 전환 함수
+    let scrollTimeout;
+    let isMainHeaderVisible = true; // 기본값은 메인 헤더 (초기에는 메인 헤더 표시)
+    let lastScrollY = 0; // 이전 스크롤 위치 추적
+    
+    function toggleHeaderOnScroll() {
+        // Throttling: 스크롤 이벤트가 너무 자주 발생하는 것을 방지
+        clearTimeout(scrollTimeout);
+        
+        scrollTimeout = setTimeout(function() {
+            // 여러 방법으로 스크롤 위치 확인
+            var y = 0;
+            
+            // 가장 정확한 방법으로 스크롤 위치 확인
+            if (typeof window.pageYOffset !== 'undefined') {
+                y = window.pageYOffset;
+            } else if (typeof window.scrollY !== 'undefined') {
+                y = window.scrollY;
+            } else if (document.documentElement && typeof document.documentElement.scrollTop !== 'undefined') {
+                y = document.documentElement.scrollTop;
+            } else if (document.body && typeof document.body.scrollTop !== 'undefined') {
+                y = document.body.scrollTop;
+            }
+            
+            var mainHeader = document.getElementById('mainHeader');
+            var scrollHeader = document.getElementById('scrollHeader');
+            var scrollThreshold = 60; // 스크롤 임계값 (px)
+            
+            if (!mainHeader || !scrollHeader) {
+                return;
+            }
+            
+            // 히스테리시스 적용: 불안정한 전환 방지
+            // 위로 스크롤할 때와 아래로 스크롤할 때 다른 임계값 사용
+            var upperThreshold = scrollThreshold + 10; // 위쪽 임계값 (50px)
+            var lowerThreshold = scrollThreshold - 10; // 아래쪽 임계값 (30px)
+            
+            // 스크롤 위치가 0일 때만 첫 번째 섹션의 위치를 기준으로 판단
+            // 하지만 실제 스크롤 위치가 있으면 그것을 우선 사용
+            if (y === 0) {
+                var firstSection = document.querySelector('.section');
+                if (firstSection && mainHeader) {
+                    var rect = firstSection.getBoundingClientRect();
+                    var headerHeight = mainHeader.offsetHeight || 350;
+                    // 첫 번째 섹션이 헤더 아래로 많이 내려갔는지 확인 (명확한 경우만)
+                    if (rect.top < headerHeight - 100) {
+                        y = Math.max(0, headerHeight - rect.top);
+                    }
+                }
+            }
+            
+            // 상태가 변경될 때만 전환 (히스테리시스 적용)
+            if (isMainHeaderVisible) {
+                // 현재 메인 헤더가 표시 중일 때: 위쪽 임계값을 넘어야 스크롤 헤더로 전환
+                if (y > upperThreshold) {
+                    // 스크롤이 위쪽 임계값 이상이면 메인 헤더 숨기고 스크롤 헤더 표시
+                    mainHeader.style.opacity = '0';
+                    mainHeader.style.transform = 'translateY(-100%)';
+                    mainHeader.style.pointerEvents = 'none';
+                    
+                    scrollHeader.style.display = 'block';
+                    requestAnimationFrame(function() {
+                        scrollHeader.style.opacity = '1';
+                        scrollHeader.style.transform = 'translateY(0)';
+                        scrollHeader.style.pointerEvents = 'auto';
+                    });
+                    
+                    setTimeout(function() {
+                        mainHeader.style.display = 'none';
+                    }, 300);
+                    
+                    isMainHeaderVisible = false;
+                }
+            } else {
+                // 현재 스크롤 헤더가 표시 중일 때: 아래쪽 임계값 이하로 내려가야 메인 헤더로 전환
+                if (y <= lowerThreshold) {
+                    // 스크롤이 아래쪽 임계값 이하면 메인 헤더 표시하고 스크롤 헤더 숨김
+                    scrollHeader.style.opacity = '0';
+                    scrollHeader.style.transform = 'translateY(-100%)';
+                    scrollHeader.style.pointerEvents = 'none';
+                    
+                    mainHeader.style.display = 'block';
+                    requestAnimationFrame(function() {
+                        mainHeader.style.opacity = '1';
+                        mainHeader.style.transform = 'translateY(0)';
+                        mainHeader.style.pointerEvents = 'auto';
+                    });
+                    
+                    setTimeout(function() {
+                        scrollHeader.style.display = 'none';
+                    }, 300);
+                    
+                    isMainHeaderVisible = true;
+                }
+            }
+        }, 50);
+    }
 
     // 상수 정의
     const CAROUSEL_MAX_VISIBILITY = 3;
@@ -221,7 +319,15 @@
         const container = document.getElementById('ingredientsGrid');
         if (!container) return;
 
-        const ingredients = container.dataset.ingredients ? JSON.parse(container.dataset.ingredients) : [];
+        let ingredients = [];
+        try {
+            if (container.dataset.ingredients) {
+                ingredients = JSON.parse(container.dataset.ingredients);
+            }
+        } catch (e) {
+            console.error('식재료 데이터 파싱 오류:', e, container.dataset.ingredients);
+            ingredients = [];
+        }
         
         if (ingredients.length === 0) {
             const emptyState = document.createElement('div');
@@ -347,6 +453,20 @@
         }
     }
 
+    /**
+     * 헤더 고정 시 컨테이너 패딩 조정
+     */
+    function adjustContainerPadding() {
+        const header = document.querySelector('.header');
+        const appContainer = document.querySelector('.app-container');
+        
+        if (header && appContainer) {
+            // 헤더의 실제 높이를 계산하여 컨테이너 패딩 설정
+            const headerHeight = header.offsetHeight;
+            appContainer.style.paddingTop = headerHeight + 'px';
+        }
+    }
+
     // DOM 로드 완료 시 초기화
     document.addEventListener('DOMContentLoaded', () => {
         // 서버에서 받은 레시피 데이터 설정
@@ -361,12 +481,55 @@
         initIngredients();
         initDiarySlider();
         initFloatingButton();
+        
+        // 헤더 높이에 맞춰 컨테이너 패딩 조정
+        adjustContainerPadding();
+        
+        // 리사이즈 시에도 패딩 조정
+        window.addEventListener('resize', adjustContainerPadding);
+        
+        // 스크롤 헤더 전환 초기화 (다른 초기화 이후에 실행)
+        setTimeout(function() {
+            var mainHeader = document.getElementById('mainHeader');
+            var scrollHeader = document.getElementById('scrollHeader');
+            
+            if (!mainHeader || !scrollHeader) {
+                return;
+            }
+            
+            // 스크롤 이벤트 리스너 추가
+            var scrollHandler = function(e) {
+                toggleHeaderOnScroll();
+            };
+            
+            // window 스크롤 이벤트
+            window.addEventListener('scroll', scrollHandler, { passive: true });
+            
+            // document 스크롤 이벤트도 감지
+            document.addEventListener('scroll', scrollHandler, { passive: true });
+            
+            // html/body 요소의 스크롤 이벤트도 감지
+            document.documentElement.addEventListener('scroll', scrollHandler, { passive: true });
+            document.body.addEventListener('scroll', scrollHandler, { passive: true });
+            
+            // 초기 상태 설정
+            // 초기 opacity와 transform 설정 (기본값은 메인 헤더)
+            mainHeader.style.opacity = '1';
+            mainHeader.style.transform = 'translateY(0)';
+            mainHeader.style.pointerEvents = 'auto';
+            scrollHeader.style.opacity = '0';
+            scrollHeader.style.transform = 'translateY(-100%)';
+            scrollHeader.style.pointerEvents = 'none';
+            
+            toggleHeaderOnScroll();
+        }, 200);
     });
 
     // 전역으로 내보내기 (필요한 경우)
     window.MainPage = {
         setRecipes: setRecipes,
-        setActiveRecipe: setActiveRecipe
+        setActiveRecipe: setActiveRecipe,
+        toggleHeaderOnScroll: toggleHeaderOnScroll
     };
 
 })();
