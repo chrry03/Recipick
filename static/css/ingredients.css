@@ -17,6 +17,8 @@
     position: relative;
     background: inherit;
     overflow: hidden;
+    padding-top: 60px; /* 헤더 높이만큼 상단 패딩 */
+    box-sizing: border-box;
 }
 
 /* 1. 왼쪽 사이드바 (카테고리) */

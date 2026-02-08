@@ -3,12 +3,46 @@
  * 레시피 캐러셀, 찜한 레시피, 식재료, 일지 슬라이더 기능
  */
 
-
-
-
-
 (function() {
     'use strict';
+    
+    // 스크롤 헤더 전환 함수
+    let scrollTimeout;
+    function toggleHeaderOnScroll() {
+        // Throttling: 스크롤 이벤트가 너무 자주 발생하는 것을 방지
+        if (scrollTimeout) {
+            return;
+        }
+        
+        scrollTimeout = setTimeout(function() {
+            var y = window.scrollY || window.pageYOffset;
+            var mainHeader = document.getElementById('mainHeader');
+            var scrollHeader = document.getElementById('scrollHeader');
+            var scrollThreshold = 300; // 스크롤 임계값 (px)
+            
+            if (!mainHeader || !scrollHeader) {
+                console.warn('헤더 요소를 찾을 수 없습니다:', { mainHeader: !!mainHeader, scrollHeader: !!scrollHeader });
+                scrollTimeout = null;
+                return;
+            }
+            
+            if (y > scrollThreshold) {
+                // 스크롤이 임계값 이상이면 메인 헤더 숨기고 스크롤 헤더 표시
+                if (mainHeader.style.display !== 'none') {
+                    mainHeader.style.display = 'none';
+                    scrollHeader.style.display = 'block';
+                }
+            } else {
+                // 스크롤이 임계값 이하면 메인 헤더 표시하고 스크롤 헤더 숨김
+                if (scrollHeader.style.display !== 'none') {
+                    mainHeader.style.display = 'block';
+                    scrollHeader.style.display = 'none';
+                }
+            }
+            
+            scrollTimeout = null;
+        }, 10); // 10ms마다 최대 한 번만 실행
+    }
 
     // 상수 정의
     const CAROUSEL_MAX_VISIBILITY = 3;
@@ -351,6 +385,20 @@
         }
     }
 
+    /**
+     * 헤더 고정 시 컨테이너 패딩 조정
+     */
+    function adjustContainerPadding() {
+        const header = document.querySelector('.header');
+        const appContainer = document.querySelector('.app-container');
+        
+        if (header && appContainer) {
+            // 헤더의 실제 높이를 계산하여 컨테이너 패딩 설정
+            const headerHeight = header.offsetHeight;
+            appContainer.style.paddingTop = headerHeight + 'px';
+        }
+    }
+
     // DOM 로드 완료 시 초기화
     document.addEventListener('DOMContentLoaded', () => {
         // 서버에서 받은 레시피 데이터 설정
@@ -365,6 +413,16 @@
         initIngredients();
         initDiarySlider();
         initFloatingButton();
+        
+        // 헤더 높이에 맞춰 컨테이너 패딩 조정
+        adjustContainerPadding();
+        
+        // 리사이즈 시에도 패딩 조정
+        window.addEventListener('resize', adjustContainerPadding);
+        
+        // 스크롤 헤더 전환 초기화
+        window.addEventListener('scroll', toggleHeaderOnScroll);
+        toggleHeaderOnScroll(); // 초기 상태 설정
     });
 
     // 전역으로 내보내기 (필요한 경우)

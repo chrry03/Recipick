@@ -8,6 +8,7 @@
     min-height: 100vh;
     background: linear-gradient(to bottom, #f5ede0, #f6f3ee);
     padding: 12px;
+    padding-top: 72px; /* 헤더 높이(60px) + 기본 패딩(12px) */
     padding-bottom: 6rem;
 }
 
@@ -269,6 +270,7 @@
     width: 100%;
     max-width: 448px;
     margin: 0 auto;
+    padding-top: 60px; /* 헤더 높이만큼 상단 패딩 */
     padding-bottom: 6rem;
 }
 
@@ -560,6 +562,7 @@
     min-height: 100vh;
     background: linear-gradient(to bottom, #f5ede0, #f6f3ee);
     padding: 12px;
+    padding-top: 72px; /* 헤더 높이(60px) + 기본 패딩(12px) */
     padding-bottom: 6rem;
 }
 
