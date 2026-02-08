@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="log-create-container">
+<div class="app-container">
     <!-- Header -->
     {% include 'header.html' %}
 
@@ -29,19 +29,15 @@
         <!-- Image Upload Area -->
         <div class="image-upload-wrapper">
             <div class="image-upload" id="imageUpload">
-                <svg class="camera-icon" width="60" height="60" viewBox="0 0 60 60" fill="none">
-                    <rect width="60" height="60" rx="8" fill="#A6A6A2" opacity="0.3"/>
-                    <path d="M20 40H40C41.1046 40 42 39.1046 42 38V24C42 22.8954 41.1046 22 40 22H35L33 18H27L25 22H20C18.8954 22 18 22.8954 18 24V38C18 39.1046 18.8954 40 20 40Z" stroke="#A6A6A2" stroke-width="2"/>
-                    <circle cx="30" cy="30" r="5" stroke="#A6A6A2" stroke-width="2"/>
-                </svg>
+                <img src="{% static 'images/image_upload.svg' %}" alt="이미지 업로드" class="camera-icon" width="44" height="44">
             </div>
             <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
             <img class="image-preview" id="imagePreview" alt="업로드된 사진" style="display: none;">
         </div>
 
-        <!-- Recipe Info -->
-        <div class="recipe-info">
-            <h2 class="recipe-name" id="recipeName">{{ recipe_name|default:"로제 파스타" }}</h2>
+        <!-- Cooking Info -->
+        <div class="cooking-info">
+            <h2 class="cooking-name" id="recipeName">{{ recipe_name|default:"로제 파스타" }}</h2>
             
             <!-- Difficulty Rating -->
             <div class="rating-row">
