@@ -1,4 +1,4 @@
-/* static/js/users.js - 최종 수정본 (API 연동 포함) */
+/* static/js/users.js - 최종 완성본 (알러지 자동 연동 포함) */
 
 // ==========================================
 // 1. 전역 유틸리티 함수 & 데이터
@@ -20,13 +20,52 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// 알러지 데이터 (고정)
-const ALLERGIES_DATA = [
-    "난류", "우유", "메밀", "땅콩", "대두", "밀", "고등어", "게", "새우", "돼지고기", 
-    "복숭아", "토마토", "아황산류", "호두", "닭고기", "쇠고기", "오징어", "조개류", "잣"
-];
+const ALLERGY_ICONS = {
+    "난류": "eggs.png",        
+    "우유": "milk.png",        
+    "메밀": "buckwheat.png",
+    "땅콩": "peanut.png",
+    "대두": "soybean.png",
+    "밀": "wheat.png",
+    "고등어": "mackerel.png",
+    "게": "crab.png",
+    "새우": "shrimp.png",      
+    "돼지고기": "pork.png",
+    "복숭아": "peach.png",
+    "토마토": "tomato.png",
+    "아황산류": "wine.png",
+    "호두": "walnut.png",
+    "닭고기": "chicken.png",
+    "쇠고기": "beef.png",
+    "오징어": "squid.png",
+    "조개류": "shellfish.png",
+    "잣": "pine_nut.png"
+};
 
-// 식재료 데이터 관리 변수
+// [핵심] 알러지 선택 시 자동으로 제외할 식재료 매핑
+// ★ 주의: 여기에 적힌 이름이 백엔드 DB의 'name_ko'와 정확히 일치해야 자동 체크됩니다.
+const ALLERGY_TO_INGREDIENTS = {
+    "난류": ["달걀", "계란", "메추리알"],
+    "우유": ["우유", "치즈", "요거트", "버터"],
+    "땅콩": ["땅콩"],
+    "대두": ["콩", "두부", "대두"],
+    "밀": ["밀가루", "빵", "면", "국수"],
+    "고등어": ["고등어"],
+    "게": ["게", "꽃게", "대게"],
+    "새우": ["새우", "대하", "칵테일새우"],
+    "돼지고기": ["돼지고기", "삼겹살", "목살", "햄", "베이컨"],
+    "복숭아": ["복숭아"],
+    "토마토": ["토마토", "방울토마토"],
+    "닭고기": ["닭고기", "치킨", "닭가슴살"],
+    "쇠고기": ["소고기", "쇠고기", "차돌박이"],
+    "오징어": ["오징어"],
+    "조개류": ["조개", "굴", "홍합", "전복", "바지락"],
+    "잣": ["잣"],
+    "메밀": ["메밀"],
+    "아황산류": ["와인"] 
+};
+
+// 데이터 관리 변수
 let currentCategoryId = 1; 
 const selectedAllergies = new Set();
 const bannedIngredients = new Set(); 
@@ -36,27 +75,36 @@ const bannedIngredients = new Set();
 // 2. 전역 함수 (렌더링 및 로직)
 // ==========================================
 
-// 2-1. 알러지 렌더링 (고정 데이터 사용)
+// 2-1. 알러지 렌더링
 function renderAllergies() {
     const container = document.getElementById('allergy-list');
     if(!container) return;
     
-    container.innerHTML = ALLERGIES_DATA.map(name => `
+    container.innerHTML = Object.keys(ALLERGY_ICONS).map(name => {
+        const fileName = ALLERGY_ICONS[name];
+        const imagePath = `/static/images/allergies/${fileName}`;
+        
+        return `
         <div class="allergy-item" onclick="toggleAllergy(this, '${name}')">
             <div class="allergy-img-box">
-                <img src="/static/images/ingredients/${name}.png" onerror="this.style.display='none'; this.parentNode.innerText='${name[0]}'">
+                <img src="${imagePath}" 
+                    alt="${name}" 
+                    onerror="this.style.display='none'; this.parentNode.innerText='${name[0]}'"> 
             </div>
             <div class="allergy-name">${name}</div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
+// 2-2. 알러지 선택 토글
 function toggleAllergy(el, name) {
     el.classList.toggle('selected');
     if (selectedAllergies.has(name)) selectedAllergies.delete(name);
     else selectedAllergies.add(name);
 }
 
+// 2-3. 카테고리 로드
 async function fetchCategories() {
     const container = document.getElementById('category-wrapper');
     if (!container) return;
@@ -72,7 +120,6 @@ async function fetchCategories() {
             </div>
         `).join('');
 
-        // 초기 로딩 시 첫 번째 카테고리 로드
         if (categories.length > 0) {
             currentCategoryId = categories[0].id;
             fetchIngredients(currentCategoryId);
@@ -82,7 +129,7 @@ async function fetchCategories() {
     }
 }
 
-// 2-3. [신규] 카테고리 선택
+// 2-4. 카테고리 선택
 function selectCategory(el, catId) {
     document.querySelectorAll('.category-item').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
@@ -90,7 +137,7 @@ function selectCategory(el, catId) {
     fetchIngredients(catId);
 }
 
-// 2-4. [신규] 식재료 목록 API 호출
+// 2-5. 식재료 목록 로드
 async function fetchIngredients(catId) {
     const container = document.getElementById('ingredient-list');
     if (!container) return;
@@ -106,7 +153,7 @@ async function fetchIngredients(catId) {
     }
 }
 
-// 2-5. 검색 기능
+// 2-6. 검색 기능
 async function searchIngredients(keyword) {
     if (!keyword.trim()) return;
     
@@ -134,7 +181,6 @@ async function searchIngredients(keyword) {
             }
 
         } else {
-            // [수정] 결과 없음 -> Alert 띄우고 텍스트 표시
             alert('검색하신 재료가 없습니다');
             container.innerHTML = `
                 <div style="padding:20px; width:100%; text-align:center; color:#999; font-size:14px;">
@@ -148,11 +194,13 @@ async function searchIngredients(keyword) {
     }
 }
 
-// 2-6. [신규] 리스트 렌더링 (공통)
+// 2-7. 리스트 렌더링 (자동 체크 반영)
 function renderIngredientList(list) {
     const container = document.getElementById('ingredient-list');
     container.innerHTML = list.map(ing => {
+        // bannedIngredients Set에 해당 재료 이름이 있으면 checked 상태로 만듦
         const isChecked = bannedIngredients.has(ing.name_ko) ? 'checked' : '';
+        
         return `
             <label class="ing-check-item">
                 <input type="checkbox" value="${ing.name_ko}" class="ing-checkbox" onchange="updateBanned(this)" ${isChecked}>
@@ -160,22 +208,6 @@ function renderIngredientList(list) {
             </label>
         `;
     }).join('');
-}
-
-// 2-7. [신규] 직접 추가
-function addCustomIngredient(name) {
-    bannedIngredients.add(name);
-    alert(`'${name}'이(가) 제외 식재료에 추가되었습니다.`);
-    
-    const container = document.getElementById('ingredient-list');
-    const newItem = `
-        <label class="ing-check-item">
-            <input type="checkbox" value="${name}" class="ing-checkbox" onchange="updateBanned(this)" checked>
-            <span>${name} (직접 추가)</span>
-        </label>
-    `;
-    if(container.querySelector('.no-result')) container.innerHTML = ''; 
-    container.insertAdjacentHTML('afterbegin', newItem);
 }
 
 // 2-8. 체크박스 상태 업데이트
@@ -194,13 +226,36 @@ function toggleSelectAll() {
     });
 }
 
-// 2-10. 단계 이동
+// 2-10. 단계 이동 (알러지 -> 식재료 자동 반영 로직 포함)
 function goToStep(stepNum) {
+    // 1. 현재 탭 활성화 처리
     document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
     document.getElementById(`step-${stepNum}`).classList.add('active');
+
+    // 2. [핵심] Step 2로 넘어갈 때 알러지 정보를 식재료 금지 목록에 반영
+    if (stepNum === 2) {
+        syncAllergyToBanned();
+    }
 }
 
-// 2-11. 설정 완료 및 저장 (401 에러 핸들링 추가)
+// [핵심] 알러지 선택 정보를 제외 식재료(bannedIngredients)에 동기화
+function syncAllergyToBanned() {
+    selectedAllergies.forEach(allergyName => {
+        // 매핑된 재료 목록 가져오기
+        const targetIngredients = ALLERGY_TO_INGREDIENTS[allergyName];
+
+        if (targetIngredients) {
+            // 매핑된 재료 이름들을 bannedIngredients에 추가
+            targetIngredients.forEach(ingName => bannedIngredients.add(ingName));
+        } else {
+            // 매핑 정보가 없으면 알러지 이름을 그대로 식재료로 간주
+            bannedIngredients.add(allergyName);
+        }
+    });
+    // (참고: 화면 갱신은 fetchIngredients나 renderIngredientList가 실행될 때 자동으로 checked 됨)
+}
+
+// 2-11. 설정 완료 및 저장
 async function finishPreference(level) {
     const token = localStorage.getItem('access_token');
     const csrftoken = getCookie('csrftoken');
@@ -232,7 +287,6 @@ async function finishPreference(level) {
             alert("취향 설정이 완료되었습니다! 메인으로 이동합니다.");
             window.location.href = "/"; 
         } else {
-            // [수정됨] 401 에러(토큰 만료) 등 실패 처리 강화
             if (response.status === 401) {
                 alert("로그인 정보가 만료되었습니다. 다시 로그인해주세요.");
                 localStorage.removeItem('access_token');
@@ -255,13 +309,13 @@ async function finishPreference(level) {
 // ==========================================
 document.addEventListener('DOMContentLoaded', function() {
 
-    // --- [수정됨] 취향 설정 페이지 초기화 ---
+    // --- 취향 설정 페이지 초기화 ---
     const allergyContainer = document.getElementById('allergy-list');
     if (allergyContainer) {
         renderAllergies();
-        fetchCategories(); // ★ API 카테고리 로드
+        fetchCategories(); // API 카테고리 로드
 
-        // ★ 검색창 엔터키 이벤트 연결
+        // 검색창 엔터키 이벤트
         const searchInput = document.getElementById('ingredient-search');
         if (searchInput) {
             searchInput.addEventListener('keypress', function(e) {
@@ -307,7 +361,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- 2. 회원가입 폼 (Step 1) ---
+    // --- 2. 회원가입 폼 ---
     const signupForm = document.getElementById('signup-step1-form');
     if (signupForm) {
         signupForm.addEventListener('submit', async function(e) {
@@ -357,12 +411,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!nickname) return alert('닉네임을 입력해주세요.');
 
             try {
-                const checkRes = await fetch(`/users/check-nickname/?nickname=${nickname}`);
-                const checkData = await checkRes.json();
-                if (!checkRes.ok || !checkData.is_available) {
-                    return alert('이미 사용 중인 닉네임입니다.');
-                }
-
                 const tempEmail = localStorage.getItem('temp_email');
                 const tempPw = localStorage.getItem('temp_pw');
                 const urlParams = new URLSearchParams(window.location.search);
@@ -393,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         alert(signupData.message || '가입 실패');
                     }
                 } else {
-                    // 닉네임 변경 (토큰 사용)
+                    // 닉네임 변경
                     const token = localStorage.getItem('access_token');
                     if(token) {
                         const updateRes = await fetch('/users/mypage/', {
@@ -465,6 +513,57 @@ document.addEventListener('DOMContentLoaded', function() {
                         alert("로그아웃 되었습니다.");
                         window.location.href = '/users/login/';
                     }
+                }
+            });
+        }
+
+        const withdrawBtn = document.getElementById('btn-withdraw');
+        if (withdrawBtn) {
+            withdrawBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                
+                if(!confirm('정말로 탈퇴하시겠습니까?\n탈퇴 시 모든 데이터가 삭제됩니다.')) {
+                    return;
+                }
+
+                const token = localStorage.getItem('access_token');
+                const csrftoken = getCookie('csrftoken');
+                
+                const requestWithdraw = async (password) => {
+                    return fetch('/users/mypage/', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ password: password })
+                    });
+                };
+
+                try {
+                    let response = await requestWithdraw(null);
+
+                    if (response.status === 400) {
+                        const data = await response.json();
+                        if (data.message === "비밀번호를 입력해주세요.") {
+                            const password = prompt("본인 확인을 위해 비밀번호를 입력해주세요.");
+                            if(!password) return;
+                            response = await requestWithdraw(password);
+                        }
+                    }
+
+                    if (response.status === 204) {
+                        alert('탈퇴가 완료되었습니다.');
+                        localStorage.clear();
+                        window.location.href = '/users/login/';
+                    } else {
+                        const errData = await response.json();
+                        alert(errData.message || '탈퇴 처리에 실패했습니다.');
+                    }
+                } catch (err) {
+                    console.error("탈퇴 요청 오류:", err);
+                    alert('서버 통신 오류가 발생했습니다.');
                 }
             });
         }

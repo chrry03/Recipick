@@ -288,8 +288,7 @@ def check_nickname_view(request):
     if not nickname:
         return Response({"message": "닉네임을 입력해주세요."}, status=400)
     
-    is_exist = User.objects.filter(nickname=nickname).exists()
-    return Response({'is_available': not is_exist}, status=200)
+    return Response({'is_available': True}, status=200)
 
 @api_view(['POST']) # 이메일은 body에 담아 보내므로 POST 권장
 @permission_classes([AllowAny])
