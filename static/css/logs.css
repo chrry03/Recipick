@@ -1,26 +1,4 @@
-/* 일지 작성 페이지 스타일 */
-
-.log-create-container {
-    position: relative;
-    width: 100%;
-    max-width: 448px;
-    margin: 0 auto;
-    min-height: 100vh;
-    background: linear-gradient(to bottom, #f5ede0, #f6f3ee);
-    padding: 12px;
-    padding-top: 72px; /* 헤더 높이(60px) + 기본 패딩(12px) */
-    padding-bottom: 6rem;
-}
-
-/* Header - logs.css에서 오버라이드 가능 */
-.log-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-/* Title Section with Back Button */
+/* 일지 작성 페이지(URL: /logs/create/) */
 .title-section {
     display: flex;
     align-items: center;
@@ -29,7 +7,8 @@
     min-height: 40px;
 }
 
-.back-btn {
+
+.back-btn { /* 뒤로가기 버튼 */
     background: none;
     border: none;
     cursor: pointer;
@@ -41,19 +20,14 @@
     left: 0;
     z-index: 1;
 }
+.back-btn:hover {opacity: 0.7;}
 
-.back-btn:hover {
-    opacity: 0.7;
-}
 
-/* Title */
-.page-title {
+.page-title { /* 오늘 요리는 어떠셨나요? */
     font-size: 20px;
-    color: #555;
     text-align: center;
-    margin: 0;
     font-weight: normal;
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-family: 'MemomentKkukkukk';
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -62,15 +36,15 @@
     top: 10px;
 }
 
-/* Image Upload */
-.image-upload-wrapper {
+
+.image-upload-wrapper { /* 이미지 추가 영역 */
     display: flex;
     justify-content: center;
     margin: 30px 0;
     position: relative;
 }
 
-.image-upload {
+.image-upload { /* 이미지 추가 박스  */
     width: 111px;
     height: 148px;
     background: #d9d9d9;
@@ -83,51 +57,51 @@
     transition: all 0.3s ease;
     overflow: hidden;
 }
+.image-upload:hover {background: #c9c9c9;}
 
-.image-upload:hover {
-    background: #c9c9c9;
-}
-
-.image-upload.has-image {
+.image-upload.has-image { /* 이미지 추가 박스에 이미지가 있을 때 */
     padding: 0;
 }
 
-.image-upload img,
-.image-preview {
+.image-upload img:not(.camera-icon) { /* 카메라 아이콘을 제외한 이미지 */
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: 4px;
 }
 
-.image-preview {
+.image-preview { /* 업로드된 이미지 */
     position: absolute;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
     width: 111px;
     height: 148px;
+    object-fit: cover;
+    border-radius: 4px;
 }
 
-.camera-icon {
-    opacity: 0.5;
+.camera-icon { /* 카메라 아이콘 */
+    width: 44px ;
+    height: 44px ;
+    object-fit: contain;
 }
 
-/* Recipe Info */
-.recipe-info {
+
+.cooking-info { /* 요리 정보 영역 */
     text-align: center;
     margin: 30px 0 20px;
 }
 
-.recipe-name {
+.cooking-name { /* 요리 이름 */
     font-size: 20px;
     color: #000;
     margin-bottom: 15px;
-    font-weight: normal;
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-family: 'MemomentKkukkukk';
 }
 
-.rating-row {
+
+.rating-row { /* 난이도 평가 영역 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -136,17 +110,17 @@
     gap: 5px;
 }
 
-.rating-label {
+.rating-label { /* 난이도 평가 라벨 */
     color: #000;
-    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    font-family: 'Gowun Dodum';
 }
 
-.stars {
+.stars { /* 별점 영역 */
     display: inline-flex;
     gap: 2px;
 }
 
-.star-btn {
+.star-btn { /* 별점 버튼 */
     background: none;
     border: none;
     padding: 0;
@@ -158,25 +132,15 @@
     transition: all 0.2s ease;
     user-select: none;
 }
+.star-btn:hover {transform: scale(1.2);}
+.star-btn.active {color: #FFD983;}
 
-.star-btn:hover {
-    transform: scale(1.2);
-}
-
-.star-btn.active {
-    color: #000;
-}
-
-/* Memo Header */
-.memo-header {
-    font-size: 13px;
-    color: #000;
+.memo-header { /* 메모 */
+    font-size: 15px;
     margin-bottom: 10px;
     text-align: center;
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-family: 'MemomentKkukkukk';
 }
-
-/* Memo Container */
 .memo-container {
     background: white;
     border: 1px solid rgba(0, 0, 0, 0.08);
@@ -192,27 +156,17 @@
     min-height: 180px;
     border: none;
     outline: none;
-    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
     font-size: 12px;
-    color: #555;
     resize: vertical;
     background: transparent;
+    font-family: 'Gowun Dodum';
 }
+.memo-input::placeholder {color: #A6A6A2;}
+.memo-input:focus {outline: none;}
 
-.memo-input::placeholder {
-    color: #999;
-}
 
-.memo-input:focus {
-    outline: none;
-}
+.date-input-hidden {display: none;}
 
-/* Date Input (Hidden) */
-.date-input-hidden {
-    display: none;
-}
-
-/* Submit Button */
 .submit-btn {
     width: calc(100% - 30px);
     max-width: 344px;
@@ -222,59 +176,18 @@
     border-radius: 20px;
     color: #ffeedb;
     font-size: 20px;
-    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    font-family: 'Gowun Dodum';
     cursor: pointer;
     margin: 30px auto 20px;
     display: block;
     transition: all 0.3s ease;
 }
-
-.submit-btn:hover {
-    background: #ff5722;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(255, 112, 67, 0.3);
-}
-
-.submit-btn:active {
-    transform: translateY(0);
-}
-
-.submit-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-    .log-create-container {
-        max-width: 100%;
-        border-radius: 0;
-        min-height: 100vh;
-    }
-    
-    .memo-container {
-        margin: 20px 0;
-    }
-    
-    .submit-btn {
-        width: calc(100% - 24px);
-    }
-}
+.submit-btn:hover {background: #ff5722; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(255, 112, 67, 0.3);}
+.submit-btn:active {transform: translateY(0);}
+.submit-btn:disabled {background: #ccc; cursor: not-allowed; transform: none; box-shadow: none;}
 
 
-/* 일지 목록 페이지 스타일 */
-.log-list-container {
-    position: relative;
-    width: 100%;
-    max-width: 448px;
-    margin: 0 auto;
-    padding-top: 60px; /* 헤더 높이만큼 상단 패딩 */
-    padding-bottom: 6rem;
-}
-
-/* 월 선택 */
+/* 일지 리스트 (URL: /logs/) */
 .month-selector {
     display: flex;
     justify-content: center;
@@ -284,13 +197,9 @@
     font-size: 30px;
 }
 
-.current-month {
-    color: #555;
-    font-weight: normal;
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
-}
+.current-month {font-family: 'MemomentKkukkukk';}
 
-.month-nav {
+.month-nav { /* 월 선택 버튼 */
     background: none;
     border: none;
     color: #a5a5a4;
@@ -298,36 +207,18 @@
     cursor: pointer;
     padding: 0 10px;
     transition: color 0.3s;
-    font-family: 'Noto Sans KR', sans-serif;
+    font-family: 'MemomentKkukkukk';
 }
+.month-nav:hover {color: #555;}
 
-.month-nav:hover {
-    color: #555;
-}
-
-/* 구분선 */
 .divider {
     width: 100%;
     max-width: 400px;
-    height: 2.5px;
+    height: 1.8px;
     background: #555555;
-    margin: 0 auto;
 }
 
-/* 일지 디테일 페이지의 구분선 */
-.log-detail-container .divider {
-    height: 1px;
-}
 
-.log-detail-container .divider:first-of-type {
-    margin-top: 37px;
-    margin-bottom: 18px;
-}
-
-.log-detail-container .divider:last-of-type {
-    margin-top: 13px;
-    margin-bottom: 13px;
-}
 
 .divider-dashed {
     width: 100%;
@@ -343,26 +234,15 @@
     margin: 0 auto;
 }
 
-/* 요리 일지 리스트 */
-.recipe-list {
+.recipe-list { /* 일지 리스트 */
     padding: 0 20px 20px;
     padding-top: 0;
-    overflow-y: auto;
-    max-height: calc(100vh - 250px);
-}
-
-/* 요리 항목 */
-.recipe-item-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
 }
 
 .recipe-item {
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 0;
     padding-left: 27px;
     padding-right: 27px;
     cursor: pointer;
@@ -373,41 +253,34 @@
     box-sizing: border-box;
 }
 
-/* 날짜/시간 */
-.date-time {
+
+.date-time { /* 날짜/시간 */
     display: flex;
     flex-direction: column;
     align-items: center;
     min-width: 60px;
 }
 
-.date {
+.date { /* 날짜 */
     font-size: 30px;
     color: #000;
-    font-weight: normal;
     line-height: 1;
-    margin: 0;
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-family: 'MemomentKkukkukk';
 }
 
-.time {
+.time { /* 시간 */
     font-size: 20px;
     color: #a5a5a4;
-    margin-top: 0;
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
-    font-weight: 300;
+    margin-top: 10px;
+    font-family: 'MemomentKkukkukk';
 }
 
-/* 요리 이미지 */
 .recipe-image {
     width: 60px;
     height: 60px;
     border-radius: 50%;
     overflow: hidden;
-    flex-shrink: 0;
-    margin: 0;
 }
-
 .recipe-image img {
     width: 100%;
     height: 100%;
@@ -421,60 +294,50 @@
     justify-content: center;
 }
 
-.recipe-image.placeholder svg {
-    font-size: 24px;
+.recipe-image.placeholder .placeholder-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    margin-left: -5px;
 }
 
-/* 요리 정보 */
-.recipe-info {
+.recipe-info { /* 요리 정보 */
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.recipe-title {
+.recipe-title { /* 요리 이름 */
     font-size: 20px;
     color: #000;
-    font-weight: normal;
     margin-bottom: 4px;
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-family: 'MemomentKkukkukk';
     display: flex;
 }
 
-.rating {
+.rating { /* 난이도/만족도 */
     font-size: 13px;
-    color: #555;
     line-height: 1.6;
     display: flex;
     align-items: center;
     gap: 4px;
+    font-family: 'Gowun Dodum';
 }
 
-.rating-label {
-    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
-}
 
-.rating .stars {
-    color: #000;
-    font-size: 13px;
-    letter-spacing: 1px;
-}
-
-/* 빈 상태 */
-.empty-state {
+.empty-state { /* 일지가 없는 상태태 */
     text-align: center;
     padding: 60px 20px;
 }
-
 .empty-message {
     font-size: 15px;
     color: #a5a5a4;
-    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    font-family: 'Gowun Dodum';
 }
 
-/* 인스타그램 공유 버튼 */
-.floating-btn {
+
+.floating-btn { /* 인스타그램 공유 버튼 */
     position: fixed;
     right: 1.5rem;
     bottom: 7.5rem;
@@ -498,75 +361,19 @@
     object-fit: contain;
     display: block;
 }
+.floating-btn:hover {transform: scale(1.1);}
+.floating-btn:active {transform: scale(0.95);}
 
-.floating-btn:hover {
-    transform: scale(1.1);
-}
+/* 스크롤바 스타일  (추후에 수정 예정)*/
+.recipe-list::-webkit-scrollbar {width: 6px;}
+.recipe-list::-webkit-scrollbar-track {background: transparent;}
+.recipe-list::-webkit-scrollbar-thumb {background: #d9d9d9; border-radius: 3px;}
+.recipe-list::-webkit-scrollbar-thumb:hover {background: #bbb;}
 
-.floating-btn:active {
-    transform: scale(0.95);
-}
 
-/* 일지 상세 페이지에서 공유 버튼 위치 조정 */
-.log-detail-container .floating-btn {
-    bottom: 2rem;
-}
 
-/* 반응형 */
-@media (min-width: 448px) {
-    .floating-btn {
-        right: calc(50% - 224px + 1.5rem);
-    }
-}
+/* 일지 상세세 페이지 (URL: /logs/detail/<log_id>/) */
 
-@media (max-width: 448px) {
-    .log-list-container {
-        max-width: 100%;
-    }
-    
-    .floating-btn {
-        right: 1rem;
-        bottom: 6.5rem;
-    }
-    
-    /* 일지 상세 페이지에서 공유 버튼 위치 조정 */
-    .log-detail-container .floating-btn {
-        bottom: 2rem;
-    }
-}
-
-/* 스크롤바 스타일 */
-.recipe-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.recipe-list::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.recipe-list::-webkit-scrollbar-thumb {
-    background: #d9d9d9;
-    border-radius: 3px;
-}
-
-.recipe-list::-webkit-scrollbar-thumb:hover {
-    background: #bbb;
-}
-
-/* 일지 디테일 페이지 스타일 */
-.log-detail-container {
-    position: relative;
-    width: 100%;
-    max-width: 448px;
-    margin: 0 auto;
-    min-height: 100vh;
-    background: linear-gradient(to bottom, #f5ede0, #f6f3ee);
-    padding: 12px;
-    padding-top: 72px; /* 헤더 높이(60px) + 기본 패딩(12px) */
-    padding-bottom: 6rem;
-}
-
-/* 디테일 헤더 */
 .detail-header {
     display: flex;
     align-items: center;
@@ -575,7 +382,7 @@
     position: relative;
 }
 
-.detail-header .back-btn {
+.detail-header .back-btn { /* 뒤로가기 버튼 */
     background: none;
     border: none;
     cursor: pointer;
@@ -586,32 +393,28 @@
     transition: opacity 0.2s;
 }
 
-.detail-header .back-btn:hover {
-    opacity: 0.7;
-}
+.detail-header .back-btn:hover {opacity: 0.7;}
 
-.detail-header .date-section {
+.detail-header .date-section { /* 날짜/시간 */
     text-align: center;
     flex: 1;
+    font-family: 'MemomentKkukkukk';
 }
 
-.detail-header .date {
+.detail-header .date { /* 날짜 */
     font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
     font-size: 30px;
-    font-weight: normal;
     margin-bottom: 5px;
 }
-
-.detail-header .time {
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+.detail-header .time { /* 시간 */
     font-size: 20px;
     color: #a5a5a4;
+    font-family: 'MemomentKkukkukk';
 }
-
 .detail-header .more-btn {
     background: none;
     border: none;
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-family: 'MemomentKkukkukk';
     font-size: 30px;
     color: #555;
     cursor: pointer;
@@ -619,12 +422,10 @@
     line-height: 1;
     transition: opacity 0.2s;
 }
+.detail-header .more-btn:hover {opacity: 0.7;}
 
-.detail-header .more-btn:hover {
-    opacity: 0.7;
-}
 
-/* 옵션 메뉴 (알림 페이지와 동일한 스타일) */
+/* 옵션 메뉴 점 세 개 누름면 나오는 메뉴 화면면 */
 .detail-header .options-menu {
     position: absolute;
     background-color: #ffffff;
@@ -642,34 +443,22 @@
     font-size: 14px;
     color: #333;
     transition: background-color 0.2s;
-    font-family: 'Gowun Dodum', sans-serif;
+    font-family: 'Gowun Dodum';
 }
 
-.detail-header .option-item:hover {
-    background-color: #f5f5f5;
-}
+.detail-header .option-item:hover {background-color: #f5f5f5;}
 
-.detail-header .option-item:first-child {
+.detail-header .option-item { 
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
-}
-
-.detail-header .option-item:last-child {
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
 }
 
 .detail-header .option-item:not(:last-child) {
     border-bottom: 1px solid #f0f0f0;
 }
 
-.detail-content {
-    padding: 0 26px;
-    position: relative;
-}
 
-/* 요리 정보 섹션 */
-.recipe-info-section {
+.recipe-info-section { /* 요리 정보 섹션 */
     display: flex;
     gap: 35px;
     margin-bottom: 30px;
@@ -677,12 +466,12 @@
     padding-right: 31px;
 }
 
-.recipe-image-wrapper {
+.recipe-image-wrapper { /* 요리 이미지 영역 */
     position: relative;
     flex-shrink: 0;
 }
 
-.recipe-image-wrapper .recipe-image {
+.recipe-image-wrapper .recipe-image { /* 요리 이미지 */
     width: 111px;
     height: 148px;
     object-fit: cover;
@@ -690,7 +479,7 @@
     border-radius: 0;
 }
 
-.recipe-image-wrapper .bookmark {
+.recipe-image-wrapper .bookmark { /* 포스트잇같은 아이콘콘 */
     position: absolute;
     top: -10px;
     left: 53px;
@@ -701,7 +490,7 @@
     z-index: 1;
 }
 
-.recipe-image-wrapper .recipe-image.placeholder {
+.recipe-image-wrapper .recipe-image.placeholder { /* 요리 이미지 없을 때 대체 이미지 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -709,22 +498,20 @@
     border: 1px solid #ddd;
 }
 
-.recipe-details {
+.recipe-details { /* 요리 정보 */
     flex: 1;
 }
 
-.recipe-details .recipe-name {
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+.recipe-details .recipe-name { /* 요리 이름 */
+    font-family: 'MemomentKkukkukk';
     font-size: 20px;
-    font-weight: normal;
     margin-bottom: 5px;
 }
 
 .recipe-details .difficulty,
 .recipe-details .satisfaction {
-    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    font-family: 'Gowun Dodum';
     font-size: 13px;
-    color: #555;
     margin: 5px 0;
 }
 
@@ -733,16 +520,14 @@
 }
 
 .ingredients-section h3 {
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-family: 'MemomentKkukkukk';
     font-size: 13px;
-    font-weight: normal;
     margin-bottom: 8px;
 }
 
 .ingredients-text {
-    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    font-family: 'Gowun Dodum';
     font-size: 12px;
-    color: #555;
     line-height: 1.6;
 }
 
@@ -752,13 +537,11 @@
 }
 
 .recipe-steps-section h3 {
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-family: 'MemomentKkukkukk';
     font-size: 13px;
-    font-weight: normal;
     text-align: center;
     margin-top: 8px;
     margin-bottom: 15px;
-    color: #000;
 }
 
 .recipe-steps {
@@ -766,28 +549,26 @@
 }
 
 .recipe-steps li {
-    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    font-family: 'Gowun Dodum';
     font-size: 12px;
-    color: #555;
     line-height: 1.75;
     margin-bottom: 8px;
 }
 
 /* 메모 섹션 */
-.log-detail-container .memo-section {
+.app-container .memo-section {
     margin-bottom: 30px;
 }
 
-.log-detail-container .memo-section h3 {
-    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+.app-container .memo-section h3 {
+    font-family: 'MemomentKkukkukk';
     font-size: 13px;
-    font-weight: normal;
     text-align: center;
     margin-top: 8px;
     margin-bottom: 15px;
 }
 
-.log-detail-container .memo-box {
+.app-container .memo-box {
     background: #f5f5f5;
     border: 1.108px solid rgba(0, 0, 0, 0.08);
     border-radius: 16px;
@@ -796,10 +577,9 @@
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 }
 
-.log-detail-container .memo-box p {
-    font-family: 'NanumGothic', 'Noto Sans KR', sans-serif;
+.app-container .memo-box p {
+    font-family: 'Gowun Dodum';
     font-size: 12px;
-    color: #555;
     line-height: 1.5;
     padding-left: 31px;
     padding-right: 31px;
@@ -807,18 +587,34 @@
 }
 
 
-/* 반응형 디자인 */
-@media (max-width: 448px) {
-    .log-detail-container {
+/* 일지 작성 페이지 반응형 */
+@media (max-width: 480px) {
+    .log-create-container {
         max-width: 100%;
-        padding: 8px;
+        border-radius: 0;
+        min-height: 100vh;
     }
     
-    .detail-content {
-        padding: 0 20px;
+    .memo-container {
+        margin: 20px 0;
+    }
+    
+    .submit-btn {
+        width: calc(100% - 24px);
     }
 }
 
-/* 커스텀 폰트 로드 (필요시 추가) */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+/* 일지 리스트 반응형 */
+@media (min-width: 448px) {
+    .floating-btn {
+        right: calc(50% - 224px + 1.5rem);
+    }
+}
+
+
+@media (max-width: 448px) {
+    .floating-btn {
+        right: 1rem;
+        bottom: 6.5rem;
+    }
+}

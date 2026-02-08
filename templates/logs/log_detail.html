@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="log-detail-container">
+<div class="app-container">
     <!-- Header -->
     {% include 'header.html' %}
     
@@ -93,6 +93,7 @@
         <img src="{% static 'images/insta_share_btn.png' %}" alt="인스타그램 공유" width="56" height="56">
     </button>
 </div>
+{% include 'base_with_navbar.html' %}
 {% endblock %}
 
 {% block extra_script %}
