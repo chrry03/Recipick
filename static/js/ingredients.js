@@ -338,13 +338,14 @@
 
         async submitAll() {
             const items = Object.values(this.selectedItems);
+            
+            // [수정] 선택된 재료가 없으면 알림 없이 바로 냉장고로 이동
             if (items.length === 0) { 
-                alert('추가할 식재료가 없습니다.'); 
+                window.location.href = '/ingredients/my-fridge/';
                 return; 
             }
+            
             try {
-                // views.py의 add_ingredient_view로 POST 전송
-                // 구조: { added: [ ... ] }
                 const promises = items.map(item => 
                     fetch('/ingredients/add/', {
                         method: 'POST',
