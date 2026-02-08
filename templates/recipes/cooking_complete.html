@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}요리 완료 - {{ recipe.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recipes.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+{% include 'header.html' %}
+
+<div class="cooking-complete-container">
+    <!-- 로고 -->
+    <div class="complete-logo">
+        <img src="{% static 'images/logo.png' %}" alt="Recipick 로고" onerror="this.src='https://via.placeholder.com/175x37'">
+    </div>
+
+    <!-- 완성 타이틀 -->
+    <h1 class="complete-title">완성</h1>
+
+    <!-- 요리 이미지 -->
+    <div class="dish-image">
+        {% if recipe.image_url %}
+            <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" loading="lazy">
+        {% else %}
+            <img src="{% static 'images/cooking_dish.png' %}" alt="완성된 요리" loading="lazy">
+        {% endif %}
+    </div>
+
+    <!-- 재료 체크리스트 섹션 -->
+    <div class="checklist-section">
+        <h2 class="checklist-title">다 쓴 재료 체크하기</h2>
+        
+        <div class="checklist-columns">
+            {% if ingredients %}
+                {% for ingredient in ingredients %}
+                    {% if forloop.counter0|divisibleby:2 %}
+                        <!-- 왼쪽 컬럼 시작 -->
+                        {% if forloop.counter0 == 0 %}
+                            <div class="checklist-column">
+                        {% endif %}
+                    {% endif %}
+                    
+                    <div class="checklist-item" data-ingredient-id="{{ ingredient.id }}">
+                        <div class="checkbox">
+                            <svg class="checkmark" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M18.75 2.11094C18.5806 2.13969 18.3716 2.2402 18.2397 2.35645C18.1846 2.40496 15.6192 5.32492 12.5388 8.84531L6.93789 15.2459L6.83809 15.1287C6.7832 15.0642 5.60934 13.8081 4.22953 12.3373C2.23918 10.2159 1.68223 9.64391 1.53422 9.56945C1.27711 9.44016 0.834492 9.43535 0.600937 9.55934C0.179883 9.78285 0.00101563 10.0727 0.000390625 10.5327C7.8125e-05 10.7623 0.0189062 10.8468 0.107422 11.0127C0.18082 11.1502 1.18027 12.2429 3.26172 14.4611C6.65145 18.0737 6.46422 17.9004 6.97703 17.9004C7.17371 17.9004 7.27406 17.8766 7.45113 17.7881C7.6616 17.6829 8.05996 17.2368 13.7573 10.727C18.2301 5.61629 19.8602 3.72859 19.9194 3.59082C20.0289 3.33637 20.0287 2.95078 19.919 2.71746C19.8242 2.5157 19.6179 2.29227 19.4432 2.20188C19.2952 2.12539 18.9397 2.07875 18.75 2.11094Z" fill="#FF7043"/>
+                            </svg>
+                        </div>
+                        <span class="item-text">{{ ingredient.name }}</span>
+                    </div>
+                    
+                    {% if forloop.counter|divisibleby:2 or forloop.last %}
+                        <!-- 오른쪽 컬럼 시작 또는 마지막 항목 -->
+                        {% if forloop.counter|divisibleby:2 %}
+                            </div>
+                            <div class="checklist-column">
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if forloop.last %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <!-- 재료가 없을 때 기본 메시지 -->
+                <div class="checklist-column">
+                    <p class="no-ingredients">사용한 재료가 없습니다.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 구분선 -->
+    <div class="divider" aria-hidden="true"></div>
+
+    <!-- 일지 작성 질문 -->
+    <h2 class="question">일지 작성하시겠습니까?</h2>
+
+    <!-- 버튼 그룹 -->
+    <div class="button-group">
+        <button type="button" 
+                class="btn btn-no" 
+                id="btnNo"
+                aria-label="일지 작성하지 않고 레시피 목록으로 이동">
+            아니오
+        </button>
+        <button type="button" 
+                class="btn btn-yes" 
+                id="btnYes"
+                aria-label="일지 작성 페이지로 이동">
+            예
+        </button>
+    </div>
+</div>
+
+<!-- 데이터 전달용 hidden 요소 -->
+<div id="cooking-complete-data" 
+     data-recipe-id="{{ recipe.recipe_id }}"
+     data-log-create-url="{% url 'logs:create' %}"
+     style="display: none;">
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+<script src="{% static 'js/recipes.js' %}"></script>
+{% endblock extra_script %}

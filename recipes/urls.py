@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.recipe_list_view, name='list'),
     path('<int:recipe_id>/', views.recipe_detail_view, name='detail'),
     path('<int:recipe_id>/step/<int:step>/', views.cooking_mode_view, name='cooking_mode_step'),
+    path('<int:recipe_id>/complete/', views.cooking_complete_view, name='cooking_complete'),
     
     # API 엔드포인트
     path('api/list/', views.recipe_list, name='api-list'),

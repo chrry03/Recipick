@@ -67,6 +67,40 @@ def cooking_mode_view(request, recipe_id, step=1):
     })
 
 
+def cooking_complete_view(request, recipe_id):
+    """요리 완료 페이지 - 테스트용 더미 데이터"""
+    # 테스트용 더미 데이터
+    test_recipe = {
+        'recipe_id': recipe_id,
+        'title': '로제 파스타',
+        'image_url': '/static/images/ex/pasta.png',
+    }
+    
+    # 테스트용 재료 데이터
+    test_ingredients = [
+        {'id': 1, 'name': '스파게티 면'},
+        {'id': 2, 'name': '토마토소스'},
+        {'id': 3, 'name': '생크림'},
+        {'id': 4, 'name': '베이컨'},
+        {'id': 5, 'name': '양파'},
+        {'id': 6, 'name': '마늘'},
+    ]
+    
+    # 레시피 객체처럼 사용할 수 있도록 속성 추가
+    class RecipeObj:
+        def __init__(self, data):
+            self.recipe_id = data['recipe_id']
+            self.title = data['title']
+            self.image_url = data.get('image_url')
+    
+    recipe_obj = RecipeObj(test_recipe)
+    
+    return render(request, 'recipes/cooking_complete.html', {
+        'recipe': recipe_obj,
+        'ingredients': test_ingredients,
+    })
+
+
 
 
 # ==================== API 뷰 ==================== #
