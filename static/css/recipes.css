@@ -16,12 +16,13 @@
 /* ==========================================================================
    1. 요리 모드 페이지 스타일 (기존 코드 유지)
    ========================================================================== */
-.recipe-container {
+.recipe-container,
+.cooking-complete-container {
     position: relative;
     width: 100%;
     max-width: 385px;
     height: 100%;
-    max-height: 844px;
+    max-height: 1200px;
     margin: 0 auto;
     background: linear-gradient(180deg, #f5ede0 0%, #f6f3ee 100%);
     border-radius: 20px;
@@ -131,9 +132,44 @@
     margin-top: 20px;
 }
 
+/* 타이머 시간 추가 버튼 그룹 */
+.timer-add-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.timer-add-btn {
+    width: 89px;
+    height: 33px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #FFF 100%, #F2F2F2 0%);
+    box-shadow: 1px 1px 2px 0 rgba(255, 255, 255, 0.30) inset, 
+                -1px -1px 2px 0 rgba(229, 229, 229, 0.50) inset, 
+                -1px 1px 2px 0 rgba(229, 229, 229, 0.20), 
+                1px -1px 2px 0 rgba(229, 229, 229, 0.20), 
+                -1px -1px 2px 0 rgba(255, 255, 255, 0.90), 
+                1px 1px 3px 0 rgba(229, 229, 229, 0.90);
+    border: none;
+    padding: 0;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 16px;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
 .nav-buttons {
     position: absolute;
-    bottom: 41px;
+    bottom: 10px;
     left: 0;
     right: 0;
     display: flex;
@@ -415,21 +451,65 @@
    ========================================================================== */
 .base-timer {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     margin: 0 auto;
-    border-radius: 50%;
-    background-color: #f8f5ed;
-    border: 8px solid #ff6e40;
+    display: block;
+    visibility: visible;
+}
+
+.base-timer__svg {
+    transform: scaleX(-1);
+    width: 100%;
+    height: 100%;
+}
+
+.base-timer__circle {
+    fill: none;
+    stroke: none;
+}
+
+.base-timer__path-elapsed {
+    stroke-width: 4px;
+    stroke: #d9d9d9;
+}
+
+.base-timer__path-remaining {
+    stroke-width: 4px;
+    stroke-linecap: round;
+    transform: rotate(90deg);
+    transform-origin: center;
+    transition: 1s linear all;
+    fill-rule: nonzero;
+    stroke: currentColor;
+}
+
+.base-timer__path-remaining.green {
+    color: rgb(65, 184, 131);
+}
+
+.base-timer__path-remaining.orange {
+    color: #ff7043;
+}
+
+.base-timer__path-remaining.red {
+    color: #f44336;
+}
+
+.base-timer__content {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
 }
 
 .base-timer__left-label {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 500;
     color: rgba(85, 85, 85, 1);
     text-transform: uppercase;
@@ -440,11 +520,12 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    margin-top: -59px;
+    margin-top: -45px;
+    z-index: 1;
 }
 
 .base-timer__time {
-    font-size: 80px;
+    font-size: 65px;
     font-weight: normal;
     color: #000000;
     line-height: 1;
@@ -460,11 +541,12 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 1;
 }
 
 .timer-time-part {
     display: inline-block;
-    min-width: 60px;
+    min-width: 50px;
     text-align: center;
     transition: background-color 0.2s ease;
     border-radius: 4px;
@@ -482,8 +564,8 @@
 }
 
 .timer-time-input {
-    width: 120px;
-    font-size: 80px;
+    width: 100px;
+    font-size: 65px;
     font-weight: normal;
     color: #000000;
     background-color: transparent;
@@ -496,8 +578,8 @@
 }
 
 .timer-time-input--small {
-    width: 60px;
-    font-size: 80px;
+    width: 50px;
+    font-size: 65px;
 }
 
 .timer-time-input::-webkit-inner-spin-button,
@@ -519,14 +601,15 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    margin-top: 50px;
+    margin-top: 40px;
     width: 0;
     height: 0;
-    border-left: 30px solid #ff6e40;
-    border-top: 20px solid transparent;
-    border-bottom: 20px solid transparent;
+    border-left: 24px solid #ff6e40;
+    border-top: 16px solid transparent;
+    border-bottom: 16px solid transparent;
     cursor: pointer;
     transition: transform 0.2s ease;
+    z-index: 1;
 }
 
 .base-timer__play-button:hover {
@@ -541,12 +624,12 @@
     border-left: 0;
     border-top: 0;
     border-bottom: 0;
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
     background-color: transparent;
     position: absolute;
     transform: translate(-50%, -50%);
-    margin-top: 50px;
+    margin-top: 40px;
 }
 
 .base-timer__play-button.paused::before,
@@ -554,8 +637,8 @@
     content: '';
     position: absolute;
     top: 0;
-    width: 8px;
-    height: 30px;
+    width: 6px;
+    height: 24px;
     background-color: #ff6e40;
     border-radius: 2px;
 }
@@ -566,4 +649,274 @@
 
 .base-timer__play-button.paused::after {
     right: 0;
+}
+
+
+
+
+
+
+/* 로고 */
+.logo,
+.complete-logo {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 175px;
+    height: 37px;
+}
+
+.logo img,
+.complete-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 완성 타이틀 */
+.title,
+.complete-title {
+    position: absolute;
+    top: 171px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 48px;
+    font-weight: normal;
+    color: #000;
+    text-align: center;
+    line-height: 28px;
+    font-family: 'MemomentKkukkukk', sans-serif;
+}
+
+/* 요리 이미지 */
+.dish-image {
+    position: absolute;
+    top: 217px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 306px;
+    height: 168px;
+    border-radius: 17px;
+    overflow: hidden;
+    background-color: #d9d9d9;
+}
+
+.dish-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 체크리스트 섹션 */
+.checklist-section {
+    position: absolute;
+    top: 403px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: calc(100% - 40px);
+    max-height: 300px;
+    box-sizing: border-box;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+}
+
+.checklist-title {
+    font-size: 30px;
+    font-weight: normal;
+    color: #555;
+    text-align: center;
+    margin-bottom: 20px;
+    line-height: 28px;
+    font-family: 'MemomentKkukkukk', sans-serif;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.checklist-columns {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    max-width: 100%;
+    height: 264px;
+    max-height: 250px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.checklist-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0px;
+    flex: 1;
+    min-width: 0;
+    max-width: 50%;
+    height: 264px;
+    overflow: hidden;
+}
+
+.checklist-column:empty {
+    display: none;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 16px;
+}
+
+.checklist-item:last-child {
+    margin-bottom: 0;
+}
+
+.checkbox {
+    width: 20px;
+    height: 19px;
+    border: 2px solid #ff7043;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.checkbox:hover {
+    background-color: #fff5f2;
+}
+
+.checklist-item.checked .checkbox {
+    background-color: transparent;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    display: none; /* 기본적으로 숨김 */
+}
+
+.checklist-item.checked .checkmark {
+    display: block; /* 체크된 경우에만 표시 */
+}
+
+.item-text {
+    font-size: 18px;
+    color: #555;
+    line-height: 52.571px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    font-family: 'Gowun Dodum', sans-serif;
+}
+
+.item-text.highlight {
+    color: #ff7043;
+}
+
+.no-ingredients {
+    text-align: center;
+    color: #999;
+    font-size: 16px;
+    padding: 20px;
+}
+
+/* 구분선 */
+.divider {
+    position: absolute;
+    top: 720px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 324px;
+    height: 1px;
+    background-image: repeating-linear-gradient(
+        to right,
+        #555 0px,
+        #555 5px,
+        transparent 5px,
+        transparent 10px
+    );
+}
+
+/* 일지 질문 */
+.question {
+    position: absolute;
+    top: 740px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 30px;
+    font-weight: normal;
+    color: #555;
+    text-align: center;
+    line-height: 28px;
+    font-family: 'MemomentKkukkukk', sans-serif;
+    white-space: nowrap;
+    width: auto;
+    max-width: calc(100% - 40px);
+}
+
+/* 버튼 그룹 */
+.button-group {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 33px;
+}
+
+.btn {
+    width: 89px;
+    height: 33px;
+    border-radius: 30px;
+    border: none;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 20.082px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-no {
+    background-color: #d9d9d9;
+    color: #000;
+}
+
+.btn-no:hover {
+    background-color: #c9c9c9;
+}
+
+.btn-yes {
+    background-color: #ff7043;
+    color: #f2f2f2;
+}
+
+.btn-yes:hover {
+    background-color: #ff5722;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+/* 반응형 (선택사항) */
+@media (max-width: 400px) {
+    .container {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+    }
 }

@@ -57,6 +57,17 @@
             </div>
         {% endif %}
         <div id="timer-app"></div>
+        <div class="timer-add-buttons">
+            <button type="button" class="timer-add-btn" data-seconds="30" aria-label="30초 추가">
+                +30초
+            </button>
+            <button type="button" class="timer-add-btn" data-seconds="60" aria-label="1분 추가">
+                +1분
+            </button>
+            <button type="button" class="timer-add-btn" data-seconds="300" aria-label="5분 추가">
+                +5분
+            </button>
+        </div>
     </div>
 
     
@@ -81,9 +92,8 @@
         <button type="button" 
                 class="btn btn-next" 
                 id="nextStepBtn"
-                aria-label="다음 단계로 이동"
-                {% if current_step >= total_steps %}disabled aria-disabled="true"{% endif %}>
-            다음
+                aria-label="{% if current_step >= total_steps %}완료 페이지로 이동{% else %}다음 단계로 이동{% endif %}">
+            {% if current_step >= total_steps %}완료{% else %}다음{% endif %}
         </button>
     </nav>
 </div>

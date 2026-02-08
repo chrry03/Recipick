@@ -769,12 +769,27 @@
 
         goToNextStep() {
             if (this.currentStep >= this.totalSteps) {
-                console.log('마지막 단계입니다.');
+                // 마지막 단계에서 다음 버튼 클릭 시 완료 페이지로 이동
+                this._navigateToComplete();
                 return;
             }
 
             const nextStep = this.currentStep + 1;
             this._navigateToStep(nextStep);
+        }
+
+        _navigateToComplete() {
+            if (!this.recipeId) {
+                console.error('레시피 ID를 찾을 수 없습니다.');
+                return;
+            }
+
+            try {
+                const url = `${this.baseUrl}/${this.recipeId}/complete/`;
+                window.location.href = url;
+            } catch (error) {
+                console.error('완료 페이지 이동 중 오류 발생:', error);
+            }
         }
 
         _navigateToStep(step) {
@@ -799,20 +814,16 @@
         }
 
         exitCooking() {
-            window.location.href = '/main/';
+            window.location.href = '/recipes/';
         }
 
         _updateButtonStates() {
             const nextBtn = document.querySelector('.btn-next');
 
             if (nextBtn) {
-                if (this.currentStep >= this.totalSteps) {
-                    nextBtn.disabled = true;
-                    nextBtn.classList.add('disabled');
-                } else {
-                    nextBtn.disabled = false;
-                    nextBtn.classList.remove('disabled');
-                }
+                // 마지막 단계에서도 다음 버튼을 활성화하여 완료 페이지로 이동 가능하도록 함
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('disabled');
             }
         }
     }
@@ -877,11 +888,22 @@
     // 타이머 모듈
     // ============================================
 
+    const FULL_DASH_ARRAY = 283;
+    const WARNING_THRESHOLD = 10;
+    const ALERT_THRESHOLD = 5;
+
+    const COLOR_CODES = {
+        warning: {
+            color: "orange"
+        }
+    };
+
     let TIME_LIMIT = 0;
     let timePassed = 0;
     let timeLeft = TIME_LIMIT;
     let timerInterval = null;
     let isEditingTime = false;
+    let remainingPathColor = COLOR_CODES.warning.color;
 
     function formatTime(time) {
         const minutes = Math.floor(time / 60);
@@ -911,9 +933,35 @@
         return isNaN(totalSeconds) ? 0 : totalSeconds;
     }
 
+    function updatePlayButtonState() {
+        const playButton = document.getElementById("base-timer-play-button");
+        if (playButton) {
+            if (timerInterval) {
+                // 타이머 실행 중 = 일시정지 버튼 표시
+                playButton.classList.add("paused");
+            } else {
+                // 타이머 멈춤 = 재생 버튼 표시
+                playButton.classList.remove("paused");
+            }
+        }
+    }
+
     function onTimesUp() {
         clearInterval(timerInterval);
         timerInterval = null;
+        updatePlayButtonState();
+        playTimerSound();
+    }
+
+    function playTimerSound() {
+        try {
+            const audio = new Audio('/static/sounds/time_out.mp3');
+            audio.play().catch(error => {
+                console.log('타이머 소리 재생 실패:', error);
+            });
+        } catch (error) {
+            console.log('오디오 생성 실패:', error);
+        }
     }
 
     function startTimer() {
@@ -925,17 +973,21 @@
             timePassed += 1;
             timeLeft = TIME_LIMIT - timePassed;
             updateTimerDisplay();
+            setCircleDasharray();
+            setRemainingPathColor(timeLeft);
 
             if (timeLeft === 0) {
                 onTimesUp();
             }
         }, 1000);
+        updatePlayButtonState();
     }
 
     function stopTimer() {
         if (timerInterval) {
             clearInterval(timerInterval);
             timerInterval = null;
+            updatePlayButtonState();
         }
     }
 
@@ -943,7 +995,41 @@
         stopTimer();
         timePassed = 0;
         timeLeft = TIME_LIMIT;
-        updateTimerDisplay();
+        const minutesLabel = document.getElementById("timer-minutes");
+        const secondsLabel = document.getElementById("timer-seconds");
+        if (minutesLabel && secondsLabel) {
+            updateTimerDisplay();
+        }
+        updatePlayButtonState();
+        setCircleDasharray();
+        setRemainingPathColor(timeLeft);
+    }
+
+    function calculateTimeFraction() {
+        if (TIME_LIMIT === 0) return 1;
+        const rawTimeFraction = timeLeft / TIME_LIMIT;
+        return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+    }
+
+    function setCircleDasharray() {
+        const remainingPath = document.getElementById("base-timer-path-remaining");
+        if (!remainingPath || TIME_LIMIT === 0) return;
+        
+        const circleDasharray = `${(
+            calculateTimeFraction() * FULL_DASH_ARRAY
+        ).toFixed(0)} ${FULL_DASH_ARRAY}`;
+        remainingPath.setAttribute("stroke-dasharray", circleDasharray);
+    }
+
+    function setRemainingPathColor(timeLeft) {
+        const remainingPath = document.getElementById("base-timer-path-remaining");
+        if (!remainingPath) return;
+
+        
+        const { warning } = COLOR_CODES;
+        remainingPath.classList.remove("green", "red");
+        remainingPath.classList.add(warning.color);
+        remainingPathColor = warning.color;
     }
 
     function setTimerTime(seconds) {
@@ -952,6 +1038,23 @@
         }
         TIME_LIMIT = seconds;
         resetTimer();
+        setCircleDasharray();
+        setRemainingPathColor(timeLeft);
+    }
+
+    function addTimeToTimer(secondsToAdd) {
+        if (secondsToAdd <= 0) {
+            return;
+        }
+        
+        // 현재 남은 시간에 추가
+        timeLeft += secondsToAdd;
+        TIME_LIMIT += secondsToAdd;
+        
+        // 시간 표시 및 원형 진행 표시 업데이트
+        updateTimerDisplay();
+        setCircleDasharray();
+        setRemainingPathColor(timeLeft);
     }
 
     function showMinutesInput() {
@@ -1135,20 +1238,50 @@
             return;
         }
 
-        resetTimer();
+        // 타이머 상태 초기화 (DOM 생성 전)
+        stopTimer();
+        timePassed = 0;
+        timeLeft = TIME_LIMIT;
 
         const timeObj = formatTime(timeLeft);
         timerApp.innerHTML = `
             <div class="base-timer">
-                <div class="base-timer__left-label">LEFT</div>
-                <div id="base-timer-label" class="base-timer__time">
-                    <span id="timer-minutes" class="timer-time-part">${timeObj.minutes}</span>
-                    <span class="timer-time-separator">:</span>
-                    <span id="timer-seconds" class="timer-time-part">${timeObj.seconds}</span>
+                <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <g class="base-timer__circle">
+                        <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+                        <path
+                            id="base-timer-path-remaining"
+                            stroke-dasharray="${FULL_DASH_ARRAY}"
+                            class="base-timer__path-remaining ${remainingPathColor}"
+                            d="
+                                M 50, 50
+                                m -45, 0
+                                a 45,45 0 1,0 90,0
+                                a 45,45 0 1,0 -90,0
+                            "
+                        ></path>
+                    </g>
+                </svg>
+                <div class="base-timer__content">
+                    <div class="base-timer__left-label">LEFT</div>
+                    <div id="base-timer-label" class="base-timer__time">
+                        <span id="timer-minutes" class="timer-time-part">${timeObj.minutes}</span>
+                        <span class="timer-time-separator">:</span>
+                        <span id="timer-seconds" class="timer-time-part">${timeObj.seconds}</span>
+                    </div>
+                    <div id="base-timer-play-button" class="base-timer__play-button"></div>
                 </div>
-                <div id="base-timer-play-button" class="base-timer__play-button"></div>
             </div>
         `;
+        
+        // DOM 생성 후 타이머 상태 업데이트
+        updateTimerDisplay();
+        updatePlayButtonState();
+        setCircleDasharray();
+        setRemainingPathColor(timeLeft);
+
+        // 시간 추가 버튼 이벤트 리스너 추가
+        bindTimerAddButtons();
 
         // 분 클릭 시 분 입력 모드로 전환
         const minutesLabel = document.getElementById("timer-minutes");
@@ -1179,14 +1312,209 @@
                 e.stopPropagation();
                 if (timerInterval) {
                     stopTimer();
-                    this.classList.add("paused");
                 } else {
                     if (timeLeft > 0) {
                         startTimer();
-                        this.classList.remove("paused");
                     }
                 }
             });
         }
     }
 
+
+
+    // ============================================
+    // 요리 완료 페이지 모듈
+    // ============================================
+
+    /**
+     * 시간 추가 버튼 이벤트 바인딩
+     */
+    function bindTimerAddButtons() {
+        const addButtons = document.querySelectorAll('.timer-add-btn');
+        
+        addButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const secondsToAdd = parseInt(this.dataset.seconds, 10);
+                if (!isNaN(secondsToAdd) && secondsToAdd > 0) {
+                    addTimeToTimer(secondsToAdd);
+                    
+                    // 버튼 클릭 효과 (시각적 피드백)
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                }
+            });
+        });
+    }
+
+    /**
+     * 요리 완료 페이지 초기화
+     */
+    function initCookingComplete() {
+        const completeContainer = document.querySelector('.cooking-complete-container');
+        if (!completeContainer) {
+            return; 
+        }
+
+        bindChecklistEvents();
+        bindCompleteButtonEvents();
+    }
+
+    /**
+     * 체크리스트 이벤트 바인딩
+     */
+    function bindChecklistEvents() {
+        const checklistItems = document.querySelectorAll('.checklist-item');
+        
+        checklistItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleChecklistItem(this);
+            });
+        });
+    }
+
+    /**
+     * 체크리스트 항목 토글
+     */
+    function toggleChecklistItem(item) {
+        const checkbox = item.querySelector('.checkbox');
+        const checkmark = checkbox.querySelector('.checkmark');
+        const itemText = item.querySelector('.item-text');
+        
+        if (item.classList.contains('checked')) {
+            // 체크 해제
+            item.classList.remove('checked');
+            if (checkmark) {
+                checkmark.style.display = 'none';
+            }
+            if (itemText) {
+                itemText.classList.remove('highlight');
+            }
+        } else {
+            // 체크
+            item.classList.add('checked');
+            if (checkmark) {
+                checkmark.style.display = 'block';
+            } else {
+                // 체크마크가 없으면 생성 (템플릿에 이미 있지만 안전장치)
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('class', 'checkmark');
+                svg.setAttribute('viewBox', '0 0 20 20');
+                svg.setAttribute('fill', 'none');
+                svg.setAttribute('aria-hidden', 'true');
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M18.75 2.11094C18.5806 2.13969 18.3716 2.2402 18.2397 2.35645C18.1846 2.40496 15.6192 5.32492 12.5388 8.84531L6.93789 15.2459L6.83809 15.1287C6.7832 15.0642 5.60934 13.8081 4.22953 12.3373C2.23918 10.2159 1.68223 9.64391 1.53422 9.56945C1.27711 9.44016 0.834492 9.43535 0.600937 9.55934C0.179883 9.78285 0.00101563 10.0727 0.000390625 10.5327C7.8125e-05 10.7623 0.0189062 10.8468 0.107422 11.0127C0.18082 11.1502 1.18027 12.2429 3.26172 14.4611C6.65145 18.0737 6.46422 17.9004 6.97703 17.9004C7.17371 17.9004 7.27406 17.8766 7.45113 17.7881C7.6616 17.6829 8.05996 17.2368 13.7573 10.727C18.2301 5.61629 19.8602 3.72859 19.9194 3.59082C20.0289 3.33637 20.0287 2.95078 19.919 2.71746C19.8242 2.5157 19.6179 2.29227 19.4432 2.20188C19.2952 2.12539 18.9397 2.07875 18.75 2.11094Z');
+                path.setAttribute('fill', '#FF7043');
+                
+                svg.appendChild(path);
+                checkbox.appendChild(svg);
+            }
+            if (itemText) {
+                itemText.classList.add('highlight');
+            }
+        }
+    }
+
+    /**
+     * 완료 페이지 버튼 이벤트 바인딩
+     */
+    function bindCompleteButtonEvents() {
+        const btnNo = document.getElementById('btnNo');
+        const btnYes = document.getElementById('btnYes');
+        const dataElement = document.getElementById('cooking-complete-data');
+        
+        if (!dataElement) {
+            console.warn('cooking-complete-data 요소를 찾을 수 없습니다.');
+        }
+
+        const recipeId = dataElement ? dataElement.dataset.recipeId : null;
+        const logCreateUrl = dataElement ? dataElement.dataset.logCreateUrl : null;
+
+        // "아니오" 버튼 - 레시피 목록으로 이동
+        if (btnNo) {
+            btnNo.addEventListener('click', function() {
+                // 체크된 재료를 소비 처리 (선택사항)
+                const checkedIngredients = getCheckedIngredientIds();
+                if (checkedIngredients.length > 0) {
+                    consumeIngredients(checkedIngredients);
+                }
+                
+                // 레시피 목록으로 이동
+                window.location.href = '/';
+            });
+        }
+
+        // "예" 버튼 - 일지 작성 페이지로 이동
+        if (btnYes) {
+            btnYes.addEventListener('click', function() {
+                // 체크된 재료를 소비 처리 (선택사항)
+                const checkedIngredients = getCheckedIngredientIds();
+                if (checkedIngredients.length > 0) {
+                    consumeIngredients(checkedIngredients);
+                }
+                
+                // 일지 작성 페이지로 이동
+                if (logCreateUrl && recipeId) {
+                    window.location.href = `${logCreateUrl}?recipe_id=${recipeId}`;
+                } else if (logCreateUrl) {
+                    window.location.href = logCreateUrl;
+                } else {
+                    window.location.href = '/logs/create/';
+                }
+            });
+        }
+    }
+
+    /**
+     * 체크된 재료 ID 수집
+     */
+    function getCheckedIngredientIds() {
+        const checkedItems = document.querySelectorAll('.checklist-item.checked');
+        return Array.from(checkedItems)
+            .map(item => item.dataset.ingredientId)
+            .filter(id => id); // 유효한 ID만 반환
+    }
+
+    /**
+     * 재료 소비 처리 (API 호출)
+     */
+    async function consumeIngredients(ingredientIds) {
+        if (!ingredientIds || ingredientIds.length === 0) {
+            return;
+        }
+
+        try {
+            const csrfToken = getCsrfToken();
+            if (!csrfToken) {
+                console.warn('CSRF 토큰을 찾을 수 없습니다.');
+                return;
+            }
+            
+            // API 호출 (실제 엔드포인트에 맞게 수정 필요)
+            const response = await fetch('/ingredients/api/consume/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({
+                    ingredient_ids: ingredientIds
+                })
+            });
+
+            if (!response.ok) {
+                console.error('재료 소비 처리 실패:', response.statusText);
+            }
+        } catch (error) {
+            console.error('재료 소비 처리 중 오류:', error);
+        }
+    }
+
+    // DOMContentLoaded 시 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+        initCookingComplete();
+    });
