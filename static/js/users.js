@@ -327,6 +327,23 @@ async function finishPreference(level) {
 // ==========================================
 document.addEventListener('DOMContentLoaded', function() {
 
+    // ★ [추가] 소셜 로그인 토큰 처리: URL에 있는 토큰을 잡아채서 저장하기
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('access');
+    const refreshToken = urlParams.get('refresh');
+
+    if (accessToken) {
+        // 1. 토큰 저장
+        localStorage.setItem('access_token', accessToken);
+        if (refreshToken) {
+            localStorage.setItem('refresh_token', refreshToken);
+        }
+        
+        // 2. 주소창 깔끔하게 정리 (토큰 파라미터 숨기기)
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+    }
+
     // --- 취향 설정 페이지 초기화 ---
     const allergyContainer = document.getElementById('allergy-list');
     if (allergyContainer) {
