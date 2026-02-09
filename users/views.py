@@ -1,5 +1,8 @@
+import requests
+from django.conf import settings
+
 from datetime import date
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.db.models import F
 
@@ -87,13 +90,108 @@ def login_view(request):
             return Response({"message": "이메일 또는 비밀번호가 틀렸습니다."}, status=401)
 
 # =============================================================
-# 3. 소셜 로그인 (기능)
+# 3. 소셜 로그인 (구글)
 # =============================================================
-@api_view(['POST'])
+
+# 3-1. 구글 로그인 페이지로 리다이렉트
+@api_view(['GET'])
 @permission_classes([AllowAny])
-def social_login_view(request, provider):
-    # [To Do] 소셜 로그인 구현 시 로직 추가
-    return Response({"message": "소셜 로그인 기능 준비 중입니다."}, status=200)
+def google_login_view(request):
+    # 구글에게 "이메일"과 "프로필" 정보를 달라고 요청하는 범위 설정
+    scope = "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
+    
+    # settings.py (또는 .env)에서 설정한 키 값 가져오기
+    client_id = settings.GOOGLE_CLIENT_ID
+    redirect_uri = settings.GOOGLE_REDIRECT_URI
+    
+    # 구글 인증 페이지 URL 생성
+    google_auth_url = (
+        f"https://accounts.google.com/o/oauth2/v2/auth?"
+        f"client_id={client_id}&"
+        f"redirect_uri={redirect_uri}&"
+        f"response_type=code&"
+        f"scope={scope}"
+    )
+    
+    # 사용자를 구글 로그인 페이지로 보냄
+    return redirect(google_auth_url)
+
+
+# 3-2. 구글에서 돌아왔을 때 처리 (Callback)
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def google_callback_view(request):
+    # 1. 구글이 보내준 "인증 코드" 받기
+    code = request.GET.get('code')
+    
+    if not code:
+        return Response({"message": "구글 인증 코드가 없습니다."}, status=400)
+
+    # 2. 인증 코드를 주고 "액세스 토큰" 받아오기
+    token_req = requests.post(
+        f"https://oauth2.googleapis.com/token",
+        data={
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "client_secret": settings.GOOGLE_CLIENT_SECRET,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        }
+    )
+    token_req_json = token_req.json()
+    error = token_req_json.get("error")
+    if error is not None:
+        return Response({"error": error}, status=400)
+        
+    access_token = token_req_json.get('access_token')
+
+    # 3. 액세스 토큰으로 "유저 정보" 가져오기
+    user_req = requests.get(
+        f"https://www.googleapis.com/oauth2/v1/userinfo?access_token={access_token}"
+    )
+    user_req_json = user_req.json()
+    email = user_req_json.get('email')
+    social_id = str(user_req_json.get('id')) # 구글의 고유 사용자 ID
+
+    # 4. 내 DB에서 회원가입 또는 로그인 처리
+    try:
+        # 4-1. 이메일로 기존 회원 찾기
+        user = User.objects.get(email=email)
+        
+        # 소셜 계정 연결 여부 확인 (없으면 연결)
+        SocialAccount.objects.get_or_create(
+            user=user,
+            provider='GOOGLE',
+            defaults={'provider_uid': social_id}
+        )
+        
+    except User.DoesNotExist:
+        # 4-2. 회원이 아니면 신규 가입
+        user = User.objects.create_user(
+            email=email,
+            password=None, # 소셜 유저는 비밀번호 없음
+            # 닉네임은 임시로 설정 (예: user_12345)
+            nickname=f"user_{social_id[:5]}"
+        )
+        # 소셜 계정 정보 저장
+        SocialAccount.objects.create(
+            user=user,
+            provider='GOOGLE',
+            provider_uid=social_id
+        )
+
+    # 5. ★ Django 세션 로그인 (핵심!)
+    # backend를 명시해주는 것이 안전합니다.
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+    
+    # 6. 페이지 이동 로직
+    # 신규 가입자(임시 닉네임)라면 -> 닉네임 설정 페이지로
+    # 기존 회원라면 -> 메인 페이지로
+    if user.nickname.startswith('user_'):
+        # 'users:nickname'은 urls.py에서 설정한 닉네임 페이지의 name입니다.
+        return redirect('users:nickname') 
+    else:
+        return redirect('home') # 'home'은 메인 페이지의 name입니다.
 
 # =============================================================
 # 4. 메인 화면 (★ Real DB 연동 완료)
