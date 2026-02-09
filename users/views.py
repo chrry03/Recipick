@@ -170,6 +170,7 @@ def google_callback_view(request):
     except User.DoesNotExist:
         # 4-2. 회원이 아니면 신규 가입
         user = User.objects.create_user(
+            username=email,  # ★ [추가] username을 email과 똑같이 설정해줍니다.
             email=email,
             password=None, # 소셜 유저는 비밀번호 없음
             # 닉네임은 임시로 설정 (예: user_12345)
