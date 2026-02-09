@@ -508,7 +508,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- 4. 마이페이지 로직 ---
     const loggedInView = document.getElementById('logged-in-view');
     if (loggedInView) {
+        console.log("마이페이지 로직 시작!"); // ★ 추가
         const token = localStorage.getItem('access_token');
+        console.log("토큰 있나요?", token);   // ★ 추가
         const loggedOutView = document.getElementById('logged-out-view');
         const nicknameDisplay = document.getElementById('display-nickname');
 
