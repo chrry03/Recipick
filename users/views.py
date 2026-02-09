@@ -197,7 +197,8 @@ def google_callback_view(request):
     # 기존 회원라면 -> 메인 페이지로
     if user.nickname.startswith('user_'):
         # 'users:nickname'은 urls.py에서 설정한 닉네임 페이지의 name입니다.
-        return redirect(f'/users/nickname/?access={access_token}&refresh={refresh_token}')
+        # ★ 신규 유저는 닉네임 설정 후 "취향 설정"으로 가도록 next 파라미터 추가!
+        return redirect(f'/users/nickname/?access={access_token}&refresh={refresh_token}&next=preference')
     else:
         return redirect(f'/?access={access_token}&refresh={refresh_token}')
 

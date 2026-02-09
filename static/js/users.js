@@ -477,6 +477,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         alert(signupData.message || '가입 실패');
                     }
                 } else {
+                    // [소셜 로그인 / 기존 회원] 로직
                     const token = localStorage.getItem('access_token');
                     if(token) {
                         const updateRes = await fetch('/users/mypage/', {
@@ -488,10 +489,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             },
                             body: JSON.stringify({ nickname: nickname })
                         });
+
                         if(updateRes.ok) {
                             alert('변경 완료');
                             localStorage.setItem('user_nickname', nickname);
-                            window.location.href = '/users/mypage/';
+                            
+                            // ★ [수정] next 파라미터가 'preference'면 취향 설정으로, 아니면 메인으로!
+                            if (nextStep === 'preference') {
+                                window.location.href = '/users/preference/';
+                            } else {
+                                window.location.href = '/'; // 보통 닉네임만 바꾸면 메인으로 가는 게 자연스러움
+                            }
                         }
                     } else {
                         alert("로그인 정보가 없습니다.");
