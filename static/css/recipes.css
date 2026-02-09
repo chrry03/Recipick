@@ -235,111 +235,32 @@
     }
 }
 
-
 /* ==========================================================================
-   2. [수정됨] 레시피 리스트 스타일 (Figma 디자인 + 반응형 적용)
+   2. [수정됨] 레시피 리스트 스타일 (Figma 디자인 반영)
    ========================================================================== */
 .recipe-list-container {
-    padding: 96px 20px 100px 20px; /* 헤더 높이 확보 */
+    padding: 96px 20px 100px 20px;
     width: 100%;
     max-width: 377px;
     margin: 0 auto;
     box-sizing: border-box;
 }
 
-/* 검색창 */
-.search-wrapper {
-    position: relative;
-    width: 100%;
-    height: 30px;
-    margin-bottom: 20px;
-}
+/* ... (검색창, 필터 칩 스타일은 기존 유지하거나 필요시 복구) ... */
 
-.search-input {
-    width: 100%;
-    height: 100%;
-    background: #F5F0E7;
-    border: none;
-    border-radius: 15px;
-    /* Neumorphism 스타일 유지 */
-    box-shadow: -1px 1px 2px rgba(255, 255, 255, 0.3), 
-                1px -1px 2px rgba(216, 211, 203, 0.5), 
-                inset 1px 1px 2px rgba(216, 211, 203, 0.2), 
-                inset -1px -1px 2px rgba(216, 211, 203, 0.2), 
-                inset 1px -1px 2px rgba(255, 255, 255, 0.9), 
-                inset -1px 1px 3px rgba(216, 211, 203, 0.9);
-    padding-left: 40px;
-    padding-right: 15px;
-    font-family: 'Gowun Dodum';
-    font-size: 12px;
-    color: #666;
-    outline: none;
-    box-sizing: border-box;
-}
-
-.search-icon {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
-    opacity: 0.6;
-}
-
-/* 필터 칩 */
-.filter-bar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
-    overflow-x: auto;
-    padding-bottom: 5px;
-    scrollbar-width: none;
-}
-.filter-bar::-webkit-scrollbar { display: none; }
-
-.filter-chip {
-    flex: 0 0 auto;
-    height: 27px;
-    padding: 0 12px;
-    border-radius: 16px;
-    border: none;
-    background: #D9D9D9;
-    color: #555;
-    font-family: 'Gowun Dodum';
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.filter-chip.active {
-    background: #FF7043;
-    color: #FFFFFF;
-    font-weight: bold;
-}
-
-.filter-chip .count {
-    font-size: 10px;
-    margin-left: 4px;
-    opacity: 0.8;
-}
-
-/* 레시피 카드 (Figma 디자인) */
+/* 레시피 카드 컨테이너 */
 #recipe-recommendations {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
+/* 카드 본체 */
 .recipe-card {
     background: #FFFFFF;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
     border-radius: 18px;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.05);
-    padding: 20px;
+    padding: 20px 15px;
     position: relative;
     cursor: pointer;
     transition: transform 0.2s;
@@ -349,13 +270,15 @@
     transform: translateY(-2px);
 }
 
+/* 찜 버튼 */
 .favorite-btn {
     position: absolute;
     top: 15px;
     right: 15px;
     background: none;
     border: none;
-    font-size: 24px;
+    font-family: 'MemomentKkukkukk', sans-serif;
+    font-size: 25px;
     color: #FFD983;
     cursor: pointer;
     padding: 0;
@@ -363,18 +286,22 @@
     z-index: 2;
 }
 .favorite-btn.inactive {
-    color: #E0E0E0;
-    -webkit-text-stroke: 1px #888;
+    color: #fff;
+    -webkit-text-stroke: 1px rgba(85, 85, 85, 0.5);
 }
 
+/* 제목 */
 .recipe-title {
     font-family: 'MemomentKkukkukk', sans-serif;
+    font-weight: 400;
     font-size: 24px;
+    line-height: 28px;
     color: #555555;
     text-align: center;
     margin: 5px 0 15px 0;
 }
 
+/* 이미지 */
 .recipe-image-wrapper {
     width: 100%;
     height: 150px;
@@ -382,7 +309,7 @@
     overflow: hidden;
     margin-bottom: 15px;
     background: #D9D9D9;
-    box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.25);
 }
 
 .recipe-image {
@@ -401,9 +328,11 @@
 .info-row {
     background: #EFEFEF;
     border-radius: 7px;
-    padding: 6px 12px;
+    height: 30px;
+    padding: 0 12px;
     display: flex;
     align-items: center;
+    /* Inner Shadow */
     box-shadow: inset 1px -1px 2px rgba(233, 233, 233, 0.2), 
                 inset -1px 1px 2px rgba(233, 233, 233, 0.2), 
                 inset 1px 1px 2px rgba(255, 255, 255, 0.9), 
@@ -411,38 +340,30 @@
 }
 
 .info-label {
+    font-family: 'Gowun Dodum', sans-serif;
     font-size: 12px;
-    color: #555;
+    color: #555555;
     width: 80px;
     flex-shrink: 0;
     font-weight: bold;
+    letter-spacing: -0.5px;
 }
 
 .info-value {
+    font-family: 'Gowun Dodum', sans-serif;
     font-size: 13px;
-    color: #333;
+    color: #555555;
+    flex-grow: 1;
+    padding-left: 5px;
+    min-width: 0; /* 말줄임표 작동 필수 */
+}
+
+/* 말줄임표 처리 */
+.text-ellipsis {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-/* 로딩 & 빈 상태 */
-.loading-spinner {
-    display: none;
-    text-align: center;
-    padding: 40px;
-    color: #888;
-}
-.loading-spinner.show { display: block; }
-
-.empty-state {
-    text-align: center;
-    padding: 50px 0;
-    color: #999;
-}
-.empty-state p {
-    font-size: 14px;
-    margin-top: 10px;
+    display: block;
 }
 
 

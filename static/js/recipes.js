@@ -360,51 +360,66 @@
     // ============================================
     // 레시피 목록 페이지 모듈
     // ============================================
-// ============================================
-    // [수정] 레시피 카드 생성 함수 (Figma 디자인 반영)
-    // ============================================
+/**
+     * 레시피 카드 HTML 생성 (수정완료)
+     */
     function createRecipeCard(recipe) {
         const difficultyMap = { 'EASY': '쉬움', 'NORMAL': '보통', 'DIFFICULT': '어려움' };
         const difficultyText = difficultyMap[recipe.difficulty] || '보통';
         
-        // 추천 점수 데이터가 있으면 활용
-        const scoreData = recipe.recommendation_score || {};
-        const missingCount = scoreData.missing_ingredients_count || 0;
-        
-        // 재료 상태 텍스트 생성
+        // 1. 재료 텍스트 가공 로직 (이중 구조 파싱)
         let ownedText = "정보 없음";
-        let missingText = "-";
+        let missingText = "정보 없음";
 
-        // API 응답 구조에 따라 재료 텍스트 처리
         if (recipe.ingredients_status) {
-            // 상세 상태가 있는 경우
-            const status = recipe.ingredients_status;
-            const owned = Object.keys(status).filter(k => status[k] !== 'missing');
-            const missing = Object.keys(status).filter(k => status[k] === 'missing');
-            
-            ownedText = owned.length > 0 ? owned.join(', ') : '없음';
-            missingText = missing.length > 0 ? missing.join(', ') : '없음';
+            // models.py에서 보낸 구조: { ingredients_status: { ... }, has_expired: ... }
+            // 따라서 진짜 목록은 .ingredients_status 안에 있습니다.
+            const realStatusList = recipe.ingredients_status.ingredients_status;
+
+            if (realStatusList) {
+                const ownedList = [];
+                const missingList = [];
+
+                for (const [name, status] of Object.entries(realStatusList)) {
+                    // 시스템 변수(has_expired 등)가 섞여 들어올 경우 건너뛰기
+                    if (['has_expired', 'has_urgent'].includes(name)) continue;
+
+                    if (status === 'missing') {
+                        missingList.push(name);
+                    } else {
+                        // owned, urgent, expired 모두 '보유'로 처리
+                        ownedList.push(name); 
+                    }
+                }
+
+                ownedText = ownedList.length > 0 ? ownedList.join(', ') : '없음';
+                missingText = missingList.length > 0 ? missingList.join(', ') : '없음';
+            }
         } else {
-            // 기본 정보만 있는 경우
-            ownedText = "보유 재료 포함";
+            // 데이터가 없을 때 (기존 방식 fallback)
+            const score = recipe.recommendation_score || {};
+            const missingCount = score.missing_ingredients_count || 0;
+            ownedText = "상세 정보 확인";
             missingText = missingCount > 0 ? `${missingCount}개 부족` : '없음';
         }
 
         const imageUrl = recipe.image_url || '/static/images/default-recipe.jpg';
-        const isFavorited = recipe.is_favorited; 
+        const safeTitle = escapeHtml(recipe.title);
+        // is_favorited가 undefined일 경우 false 처리
+        const isFavorited = recipe.is_favorited ? true : false;
 
         return `
-            <div class="recipe-card" onclick="location.href='/recipes/${recipe.recipe_id}/'">
+            <div class="recipe-card" data-recipe-id="${recipe.recipe_id}">
                 <button class="favorite-btn ${isFavorited ? '' : 'inactive'}" 
                         onclick="event.stopPropagation(); toggleLike(${recipe.recipe_id}, this)">
                     ★
                 </button>
                 
-                <h3 class="recipe-title">${escapeHtml(recipe.title)}</h3>
+                <h3 class="recipe-title">${safeTitle}</h3>
                 
                 <div class="recipe-image-wrapper">
-                    <img src="${imageUrl}" alt="${escapeHtml(recipe.title)}" class="recipe-image" 
-                         onerror="this.src='/static/images/default-recipe.jpg'">
+                    <img src="${imageUrl}" alt="${safeTitle}" class="recipe-image"
+                         data-default-image="/static/images/default-recipe.jpg" loading="lazy">
                 </div>
                 
                 <div class="info-rows">
@@ -418,11 +433,11 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">보유 재료</span>
-                        <span class="info-value">${ownedText}</span>
+                        <span class="info-value text-ellipsis" title="${ownedText}">${ownedText}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">없는 재료</span>
-                        <span class="info-value" style="color: #999;">${missingText}</span>
+                        <span class="info-value text-ellipsis" style="color: #999;" title="${missingText}">${missingText}</span>
                     </div>
                 </div>
             </div>

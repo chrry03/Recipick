@@ -104,21 +104,11 @@ def cooking_complete_view(request, recipe_id):
 
 
 # ==================== API 뷰 ==================== #
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def get_recipe_recommendations(request):
     """
     통합 레시피 추천 API
-    
-    POST /api/recipes/api/recommendations/
-    Body:
-    {
-        "ingredient_ids": [1, 2, 3],  // 선택한 식재료 ID들 (선택사항)
-        "use_all": false,  // true면 보유한 모든 식재료 사용
-        "include_spoonacular": true,  // Spoonacular API 사용 여부
-        "max_results": 20  // 최대 결과 개수
-    }
     """
     user = request.user
     
@@ -147,49 +137,32 @@ def get_recipe_recommendations(request):
             'recipes': []
         }, status=status.HTTP_400_BAD_REQUEST)
     
-    # 식재료 ID 리스트
+    # 식재료 ID 리스트 & 딕셔너리
     selected_ingredient_ids = list(selected_ingredients.values_list('ingredient_id', flat=True))
+    user_ingredients_dict = {ui.ingredient_id: ui for ui in selected_ingredients}
     
-    # 식재료 딕셔너리 (유통기한 계산용)
-    user_ingredients_dict = {
-        ui.ingredient_id: ui for ui in selected_ingredients
-    }
+    # 1. DB 검색
+    db_recipes = search_recipes_from_db(selected_ingredient_ids, user)
     
-    # 1. DB에서 레시피 검색
-    db_recipes = search_recipes_from_db(
-        selected_ingredient_ids,
-        user
-    )
-    
-    # 2. Spoonacular API에서 레시피 검색 (선택적)
+    # 2. Spoonacular 검색
     spoon_recipes = []
     if include_spoonacular:
-        spoon_recipes = search_recipes_from_spoonacular(
-            selected_ingredients,
-            max_results=10
-        )
+        spoon_recipes = search_recipes_from_spoonacular(selected_ingredients, max_results=10)
     
-    # 3. 레시피 통합 및 추천 점수 계산
+    # 3. 통합 및 중복 제거
     all_recipes = list(db_recipes) + spoon_recipes
-    
-    # 중복 제거 (external_id 기준)
     unique_recipes = {}
     for recipe in all_recipes:
         if recipe.external_id not in unique_recipes:
             unique_recipes[recipe.external_id] = recipe
     
-    # 4. 각 레시피에 대해 추천 점수 계산
+    # 4. 점수 계산
     scored_recipes = []
-    
-    # 사용자 스킬 레벨 가져오기 (User 모델에 skill_level 필드가 있다고 가정)
-    # 없으면 기본값 'INTERMEDIATE' 사용
-    if hasattr(user, 'skill_level'):
-        user_skill_level = user.skill_level
-    elif hasattr(user, 'profile') and hasattr(user.profile, 'cooking_level'):
-        user_skill_level = user.profile.cooking_level
-    else:
-        user_skill_level = 'INTERMEDIATE'  # 기본값
-    
+    # 사용자 스킬 레벨 가져오기 로직 (간소화)
+    user_skill_level = getattr(user, 'skill_level', 'INTERMEDIATE')
+    if hasattr(user, 'profile'):
+        user_skill_level = getattr(user.profile, 'cooking_level', 'INTERMEDIATE')
+
     for recipe in unique_recipes.values():
         score_data = recipe.calculate_recommendation_score(
             user=user,
@@ -198,35 +171,31 @@ def get_recipe_recommendations(request):
             user_skill_level=user_skill_level
         )
         
-        # 필터링: 60점 이상만
         if score_data['total_score'] >= 60:
-            scored_recipes.append({
-                'recipe': recipe,
-                'score_data': score_data
-            })
+            scored_recipes.append({'recipe': recipe, 'score_data': score_data})
     
-    # 5. 점수순으로 정렬
+    # 5. 정렬 & 제한
     scored_recipes.sort(key=lambda x: x['score_data']['total_score'], reverse=True)
-    
-    # 6. 최대 결과 개수 제한
     scored_recipes = scored_recipes[:max_results]
     
-    # 7. 카테고리별 분류
+    # 6. 카테고리 분류 및 데이터 구성
     categorized = {
-        'urgent_ready': [],  # 90점 이상 (유통기한 임박 포함)
-        'ready': [],         # 75-89점 (바로 가능)
-        'almost_ready': [],  # 60-74점 (1-2개 재료 부족)
+        'urgent_ready': [],
+        'ready': [],
+        'almost_ready': [],
     }
     
     for item in scored_recipes:
         recipe = item['recipe']
         score_data = item['score_data']
-        
         category = recipe.get_recommendation_category(score_data['total_score'])
         
-        # Serializer를 통해 데이터 변환
+        # 기본 데이터 변환
         recipe_data = RecipeListSerializer(recipe).data
         recipe_data['recommendation_score'] = score_data
+        
+        # [핵심] 재료 상태 정보 추가 (이게 있어야 JS가 김치, 양파를 보여줍니다)
+        recipe_data['ingredients_status'] = recipe.get_ingredients_status_for_user(user_ingredients_dict)
         
         if category in categorized:
             categorized[category].append(recipe_data)
