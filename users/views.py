@@ -186,15 +186,20 @@ def google_callback_view(request):
     # 5. ★ Django 세션 로그인 (핵심!)
     # backend를 명시해주는 것이 안전합니다.
     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+    # ★ [추가] JS를 안심시키기 위해 토큰을 만들어서 URL에 붙여줍니다.
+    token = RefreshToken.for_user(user)
+    access_token = str(token.access_token)
+    refresh_token = str(token)
     
-    # 6. 페이지 이동 로직
+    # 6. 페이지 이동 로직 (URL 뒤에 토큰을 달고 갑니다!)
     # 신규 가입자(임시 닉네임)라면 -> 닉네임 설정 페이지로
     # 기존 회원라면 -> 메인 페이지로
     if user.nickname.startswith('user_'):
         # 'users:nickname'은 urls.py에서 설정한 닉네임 페이지의 name입니다.
-        return redirect('users:nickname') 
+        return redirect(f'/users/nickname/?access={access_token}&refresh={refresh_token}')
     else:
-        return redirect('root') # 'home'은 메인 페이지의 name입니다.
+        return redirect(f'/?access={access_token}&refresh={refresh_token}')
 
 # =============================================================
 # 4. 메인 화면 (★ Real DB 연동 완료)
