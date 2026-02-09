@@ -24,4 +24,8 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # 토큰 재발급 (★추가됨)
 
     # [참고] 'me/' 경로는 'mypage/'와 기능이 같으므로(mypage_view가 다 처리함) 굳이 따로 안 만들어도 됩니다!
+
+    # 4. 소셜 로그인 (구글)
+    path('google/login/', views.google_login_view, name='google_login'),           # 구글 로그인 페이지로 보내는 URL
+    path('google/callback/', views.google_callback_view, name='google_callback'),  # 구글 인증 후 돌아오는 URL (Callback)
 ]
