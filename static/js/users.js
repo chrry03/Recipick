@@ -1,10 +1,9 @@
-/* static/js/users.js - 최종 완성본 (알러지 자동 연동 포함) */
+/* static/js/users.js - 카테고리 자동 전환 수정 및 최신 식재료 반영 */
 
 // ==========================================
 // 1. 전역 유틸리티 함수 & 데이터
 // ==========================================
 
-// CSRF 토큰 가져오기
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -42,30 +41,55 @@ const ALLERGY_ICONS = {
     "잣": "pine_nut.png"
 };
 
-// [핵심] 알러지 선택 시 자동으로 제외할 식재료 매핑
-// ★ 주의: 여기에 적힌 이름이 백엔드 DB의 'name_ko'와 정확히 일치해야 자동 체크됩니다.
+// [업데이트] ingredients.json 데이터를 기반으로 알러지-식재료 매핑 최신화
 const ALLERGY_TO_INGREDIENTS = {
     "난류": ["달걀", "계란", "메추리알"],
-    "우유": ["우유", "치즈", "요거트", "버터"],
+    "우유": [
+        "우유", "저지방 우유", "무지방 우유", "두유", 
+        "요거트", "그릭요거트", "치즈", "모짜렐라 치즈", "체다 치즈", 
+        "파르메산 치즈", "리코타 치즈", "크림치즈", "버터", "생크림", 
+        "휘핑크림", "연유"
+    ],
     "땅콩": ["땅콩"],
-    "대두": ["콩", "두부", "대두"],
-    "밀": ["밀가루", "빵", "면", "국수"],
+    "대두": [
+        "대두", "콩", "검은콩", "서리태", "강낭콩", "병아리콩", "렌틸콩", 
+        "완두콩", "팥", "두부", "부침두부", "찌개두부", "연두부", "순두부", 
+        "콩비지", "유부", "두부면", "두부가루", "콩가루", "템페", "두유요거트", 
+        "두유", "된장", "쌈장", "간장"
+    ],
+    "밀": [
+        "밀가루", "부침가루", "튀김가루", "소면", "중면", "국수", "라면", 
+        "우동면", "칼국수면", "당면", "쌀국수면", "파스타", "스파게티", "우동",
+        "빵", "식빵", "빵가루", "또띠야"
+    ],
     "고등어": ["고등어"],
     "게": ["게", "꽃게", "대게"],
-    "새우": ["새우", "대하", "칵테일새우"],
-    "돼지고기": ["돼지고기", "삼겹살", "목살", "햄", "베이컨"],
+    "새우": ["새우", "새우젓", "칵테일새우", "생새우", "건새우"],
+    "돼지고기": [
+        "돼지고기", "삼겹살", "목살", "앞다리살", "뒷다리살", "다진 돼지고기", 
+        "햄", "스팸", "베이컨", "소시지", "살라미"
+    ],
     "복숭아": ["복숭아"],
-    "토마토": ["토마토", "방울토마토"],
-    "닭고기": ["닭고기", "치킨", "닭가슴살"],
-    "쇠고기": ["소고기", "쇠고기", "차돌박이"],
-    "오징어": ["오징어"],
-    "조개류": ["조개", "굴", "홍합", "전복", "바지락"],
+    "토마토": ["토마토", "방울토마토", "케첩", "토마토소스"],
+    "닭고기": [
+        "닭고기", "통닭", "닭가슴살", "닭다리", "닭다리살", "닭날개", 
+        "닭봉", "닭안심", "영계", "닭가공품"
+    ],
+    "쇠고기": [
+        "소고기", "쇠고기", "소고기 국거리", "소고기 불고기용", "샤브샤브용 소고기", 
+        "등심", "안심", "채끝", "갈비", "우둔", "홍두깨", "다진 소고기", 
+        "소내장", "사골", "양고기" // 양고기는 붉은 고기류라 편의상 포함 가능
+    ],
+    "오징어": ["오징어", "오징어채", "한치", "문어", "낙지", "주꾸미"], // 두족류 포함
+    "조개류": [
+        "조개", "바지락", "홍합", "꼬막", "가리비", "키조개", "전복", "굴", 
+        "골뱅이", "성게", "해삼"
+    ],
     "잣": ["잣"],
-    "메밀": ["메밀"],
+    "메밀": ["메밀", "메밀면"],
     "아황산류": ["와인"] 
 };
 
-// 데이터 관리 변수
 let currentCategoryId = 1; 
 const selectedAllergies = new Set();
 const bannedIngredients = new Set(); 
@@ -75,7 +99,6 @@ const bannedIngredients = new Set();
 // 2. 전역 함수 (렌더링 및 로직)
 // ==========================================
 
-// 2-1. 알러지 렌더링
 function renderAllergies() {
     const container = document.getElementById('allergy-list');
     if(!container) return;
@@ -97,14 +120,12 @@ function renderAllergies() {
     }).join('');
 }
 
-// 2-2. 알러지 선택 토글
 function toggleAllergy(el, name) {
     el.classList.toggle('selected');
     if (selectedAllergies.has(name)) selectedAllergies.delete(name);
     else selectedAllergies.add(name);
 }
 
-// 2-3. 카테고리 로드
 async function fetchCategories() {
     const container = document.getElementById('category-wrapper');
     if (!container) return;
@@ -129,7 +150,6 @@ async function fetchCategories() {
     }
 }
 
-// 2-4. 카테고리 선택
 function selectCategory(el, catId) {
     document.querySelectorAll('.category-item').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
@@ -137,7 +157,6 @@ function selectCategory(el, catId) {
     fetchIngredients(catId);
 }
 
-// 2-5. 식재료 목록 로드
 async function fetchIngredients(catId) {
     const container = document.getElementById('ingredient-list');
     if (!container) return;
@@ -153,7 +172,7 @@ async function fetchIngredients(catId) {
     }
 }
 
-// 2-6. 검색 기능
+// 2-6. [수정됨] 검색 기능 (카테고리 자동 전환 강화)
 async function searchIngredients(keyword) {
     if (!keyword.trim()) return;
     
@@ -167,16 +186,29 @@ async function searchIngredients(keyword) {
         if (ingredients.length > 0) {
             renderIngredientList(ingredients);
 
-            // 검색된 첫 번째 재료의 카테고리로 사이드바 하이라이트 변경
-            if (ingredients[0].category_id) {
-                const targetId = ingredients[0].category_id;
-                
+            // [핵심] 검색 결과의 첫 번째 아이템 정보를 확인
+            const firstItem = ingredients[0];
+            
+            // API 응답 형태에 따라 id 추출 (객체일 수도 있고, 숫자일 수도 있음)
+            let targetId = null;
+            if (firstItem.category) {
+                targetId = (typeof firstItem.category === 'object') ? firstItem.category.id : firstItem.category;
+            } else if (firstItem.category_id) {
+                targetId = firstItem.category_id;
+            }
+
+            // 카테고리 ID가 확인되면 사이드바 이동
+            if (targetId) {
+                // 1. 모든 탭 비활성화
                 document.querySelectorAll('.category-item').forEach(el => el.classList.remove('active'));
                 
+                // 2. 해당 ID를 가진 탭 찾기 (문자열/숫자 형변환 고려)
                 const targetEl = document.querySelector(`.category-item[data-id="${targetId}"]`);
+                
                 if (targetEl) {
                     targetEl.classList.add('active');
                     targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    currentCategoryId = targetId; // 현재 상태 업데이트
                 }
             }
 
@@ -194,11 +226,9 @@ async function searchIngredients(keyword) {
     }
 }
 
-// 2-7. 리스트 렌더링 (자동 체크 반영)
 function renderIngredientList(list) {
     const container = document.getElementById('ingredient-list');
     container.innerHTML = list.map(ing => {
-        // bannedIngredients Set에 해당 재료 이름이 있으면 checked 상태로 만듦
         const isChecked = bannedIngredients.has(ing.name_ko) ? 'checked' : '';
         
         return `
@@ -210,13 +240,11 @@ function renderIngredientList(list) {
     }).join('');
 }
 
-// 2-8. 체크박스 상태 업데이트
 function updateBanned(checkbox) {
     if (checkbox.checked) bannedIngredients.add(checkbox.value);
     else bannedIngredients.delete(checkbox.value);
 }
 
-// 2-9. 전체 선택/해제
 function toggleSelectAll() {
     const checkboxes = document.querySelectorAll('.ing-checkbox');
     const allChecked = Array.from(checkboxes).every(cb => cb.checked);
@@ -226,36 +254,26 @@ function toggleSelectAll() {
     });
 }
 
-// 2-10. 단계 이동 (알러지 -> 식재료 자동 반영 로직 포함)
 function goToStep(stepNum) {
-    // 1. 현재 탭 활성화 처리
     document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
     document.getElementById(`step-${stepNum}`).classList.add('active');
 
-    // 2. [핵심] Step 2로 넘어갈 때 알러지 정보를 식재료 금지 목록에 반영
     if (stepNum === 2) {
         syncAllergyToBanned();
     }
 }
 
-// [핵심] 알러지 선택 정보를 제외 식재료(bannedIngredients)에 동기화
 function syncAllergyToBanned() {
     selectedAllergies.forEach(allergyName => {
-        // 매핑된 재료 목록 가져오기
         const targetIngredients = ALLERGY_TO_INGREDIENTS[allergyName];
-
         if (targetIngredients) {
-            // 매핑된 재료 이름들을 bannedIngredients에 추가
             targetIngredients.forEach(ingName => bannedIngredients.add(ingName));
         } else {
-            // 매핑 정보가 없으면 알러지 이름을 그대로 식재료로 간주
             bannedIngredients.add(allergyName);
         }
     });
-    // (참고: 화면 갱신은 fetchIngredients나 renderIngredientList가 실행될 때 자동으로 checked 됨)
 }
 
-// 2-11. 설정 완료 및 저장
 async function finishPreference(level) {
     const token = localStorage.getItem('access_token');
     const csrftoken = getCookie('csrftoken');
@@ -313,9 +331,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const allergyContainer = document.getElementById('allergy-list');
     if (allergyContainer) {
         renderAllergies();
-        fetchCategories(); // API 카테고리 로드
+        fetchCategories(); 
 
-        // 검색창 엔터키 이벤트
         const searchInput = document.getElementById('ingredient-search');
         if (searchInput) {
             searchInput.addEventListener('keypress', function(e) {
@@ -376,10 +393,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            const csrftoken = getCookie('csrftoken');
+
             try {
                 const response = await fetch('/users/check-email/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json',
+                                'X-CSRFToken': csrftoken},
                     body: JSON.stringify({ email: email })
                 });
                 
@@ -417,7 +437,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const nextStep = urlParams.get('next');
 
                 if (tempEmail && tempPw) {
-                    // 신규 가입
                     const signupRes = await fetch('/users/signup/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
@@ -441,7 +460,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         alert(signupData.message || '가입 실패');
                     }
                 } else {
-                    // 닉네임 변경
                     const token = localStorage.getItem('access_token');
                     if(token) {
                         const updateRes = await fetch('/users/mypage/', {
