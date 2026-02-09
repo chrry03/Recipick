@@ -193,7 +193,7 @@ def google_callback_view(request):
         # 'users:nickname'은 urls.py에서 설정한 닉네임 페이지의 name입니다.
         return redirect('users:nickname') 
     else:
-        return redirect('home') # 'home'은 메인 페이지의 name입니다.
+        return redirect('root') # 'home'은 메인 페이지의 name입니다.
 
 # =============================================================
 # 4. 메인 화면 (★ Real DB 연동 완료)
