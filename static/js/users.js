@@ -334,8 +334,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ★ [추가] URL 청소하기 전에 'next' 값도 있는지 확인하고 주머니에 챙깁니다!
     const nextParam = urlParams.get('next');
+
+    // ★ [추가] URL에서 닉네임 꺼내기
+    const nicknameParam = urlParams.get('nickname');
+
     if (nextParam) {
         localStorage.setItem('next_step', nextParam);
+    }
+
+    // ★ [추가] 닉네임이 있으면 주머니에 저장!
+    if (nicknameParam) {
+        localStorage.setItem('user_nickname', nicknameParam);
     }
 
     if (accessToken) {

@@ -21,6 +21,7 @@ from ingredients.models import UserIngredient
 from logs.models import RecipeLog
 
 from itertools import chain
+from urllib.parse import quote  # ★ [추가] 한글 닉네임 깨짐 방지용
 
 User = get_user_model()
 
@@ -191,16 +192,19 @@ def google_callback_view(request):
     token = RefreshToken.for_user(user)
     access_token = str(token.access_token)
     refresh_token = str(token)
+
+    # ★ [추가] 닉네임을 URL에 넣기 좋게 포장합니다 (한글 -> %ED%8... 변환)
+    encoded_nickname = quote(user.nickname)
     
-    # 6. 페이지 이동 로직 (URL 뒤에 토큰을 달고 갑니다!)
+    # 6. 페이지 이동 로직 (URL 뒤에 토큰을 달고 갑니다! URL 뒤에 nickname도 추가!)
     # 신규 가입자(임시 닉네임)라면 -> 닉네임 설정 페이지로
     # 기존 회원라면 -> 메인 페이지로
     if user.nickname.startswith('user_'):
         # 'users:nickname'은 urls.py에서 설정한 닉네임 페이지의 name입니다.
         # ★ 신규 유저는 닉네임 설정 후 "취향 설정"으로 가도록 next 파라미터 추가!
-        return redirect(f'/users/nickname/?access={access_token}&refresh={refresh_token}&next=preference')
+        return redirect(f'/users/nickname/?access={access_token}&refresh={refresh_token}&next=preference&nickname={encoded_nickname}')
     else:
-        return redirect(f'/?access={access_token}&refresh={refresh_token}')
+        return redirect(f'/?access={access_token}&refresh={refresh_token}&nickname={encoded_nickname}')
 
 # =============================================================
 # 4. 메인 화면 (★ Real DB 연동 완료)
