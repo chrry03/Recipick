@@ -327,6 +327,38 @@ async function finishPreference(level) {
 // ==========================================
 document.addEventListener('DOMContentLoaded', function() {
 
+    // ★ [추가] 소셜 로그인 토큰 처리: URL에 있는 토큰을 잡아채서 저장하기
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('access');
+    const refreshToken = urlParams.get('refresh');
+
+    // ★ [추가] URL 청소하기 전에 'next' 값도 있는지 확인하고 주머니에 챙깁니다!
+    const nextParam = urlParams.get('next');
+
+    // ★ [추가] URL에서 닉네임 꺼내기
+    const nicknameParam = urlParams.get('nickname');
+
+    if (nextParam) {
+        localStorage.setItem('next_step', nextParam);
+    }
+
+    // ★ [추가] 닉네임이 있으면 주머니에 저장!
+    if (nicknameParam) {
+        localStorage.setItem('user_nickname', nicknameParam);
+    }
+
+    if (accessToken) {
+        // 1. 토큰 저장
+        localStorage.setItem('access_token', accessToken);
+        if (refreshToken) {
+            localStorage.setItem('refresh_token', refreshToken);
+        }
+        
+        // 2. 주소창 깔끔하게 정리 (토큰 파라미터 숨기기)
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+    }
+
     // --- 취향 설정 페이지 초기화 ---
     const allergyContainer = document.getElementById('allergy-list');
     if (allergyContainer) {
@@ -460,7 +492,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         alert(signupData.message || '가입 실패');
                     }
                 } else {
+                    // [소셜 로그인 / 기존 회원] 로직
                     const token = localStorage.getItem('access_token');
+
+                    // ★ [수정] URL이 아니라 아까 저장해둔 localStorage에서 꺼내봅니다.
+                    // (일반 회원가입은 URL에 남아있을 수 있으니 둘 다 체크하는 OR 연산자 사용)
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const nextStep = localStorage.getItem('next_step') || urlParams.get('next');
+                    
                     if(token) {
                         const updateRes = await fetch('/users/mypage/', {
                             method: 'PATCH',
@@ -471,10 +510,20 @@ document.addEventListener('DOMContentLoaded', function() {
                             },
                             body: JSON.stringify({ nickname: nickname })
                         });
+
                         if(updateRes.ok) {
                             alert('변경 완료');
                             localStorage.setItem('user_nickname', nickname);
-                            window.location.href = '/users/mypage/';
+
+                            // 사용한 'next_step'은 지워주는 센스 (청소)
+                            localStorage.removeItem('next_step');
+                            
+                            // ★ [수정] next 파라미터가 'preference'면 취향 설정으로, 아니면 메인으로!
+                            if (nextStep === 'preference') {
+                                window.location.href = '/users/preference/';
+                            } else {
+                                window.location.href = '/'; // 보통 닉네임만 바꾸면 메인으로 가는 게 자연스러움
+                            }
                         }
                     } else {
                         alert("로그인 정보가 없습니다.");
@@ -491,7 +540,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- 4. 마이페이지 로직 ---
     const loggedInView = document.getElementById('logged-in-view');
     if (loggedInView) {
+        console.log("마이페이지 로직 시작!"); // ★ 추가
         const token = localStorage.getItem('access_token');
+        console.log("토큰 있나요?", token);   // ★ 추가
         const loggedOutView = document.getElementById('logged-out-view');
         const nicknameDisplay = document.getElementById('display-nickname');
 
