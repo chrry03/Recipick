@@ -182,6 +182,11 @@ CACHES = {
     }
 }
 
+# [Google OAuth 설정] - .env에서 가져오기
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+GOOGLE_REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI')
+
 # Redis 사용 시 아래 주석 해제하고 django-redis 패키지 설치
 # CACHES = {
 #     'default': {
