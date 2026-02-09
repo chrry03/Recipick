@@ -43,7 +43,8 @@ def signup_view(request):
                     password=request.data['password'],
                     nickname=request.data['nickname']
                 )
-                login(request, user) # 세션 로그인
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend') # 세션 로그인
+                
                 token = RefreshToken.for_user(user) # 토큰 발급
                 return Response({
                     "message": "회원가입이 완료되었습니다.",
@@ -76,8 +77,9 @@ def login_view(request):
         user = authenticate(email=email, password=password)
 
         if user is not None:
-            login(request, user)
-            token = RefreshToken.for_user(user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend') # 세션 로그인
+            
+            token = RefreshToken.for_user(user) # 토큰 발급
             return Response({
                 "message": "로그인 성공",
                 "user": UserSerializer(user).data,
