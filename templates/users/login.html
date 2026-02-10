@@ -7,6 +7,21 @@
 
 {% block extra_script %}
     <script src="{% static 'js/users.js' %}"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 주소창의 파라미터(?next=...) 확인
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // 'next' 파라미터가 있으면 알림 띄우기
+            if (urlParams.has('next')) {
+                // 약간의 지연 시간을 주어 페이지 로드 후 뜨게 함 (선택사항)
+                setTimeout(() => {
+                    alert("로그인이 필요한 서비스입니다.\n로그인 후 이용해주세요. 🔒");
+                }, 100);
+            }
+        });
+    </script>
 {% endblock %}
 
 {% block content %}

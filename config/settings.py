@@ -194,3 +194,12 @@ GOOGLE_REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI')
 #         'LOCATION': f"redis://{os.getenv('REDIS_HOST', '127.0.0.1')}:{os.getenv('REDIS_PORT', '6379')}/1",
 #     }
 # }
+
+# 1. 비회원이 접근하면 이동할 로그인 페이지 주소 (기본값 변경)
+LOGIN_URL = '/users/login/'
+
+# 2. 로그인 성공 후 이동할 기본 페이지
+LOGIN_REDIRECT_URL = ''
+
+# 3. 로그아웃 후 이동할 페이지
+LOGOUT_REDIRECT_URL = ''
