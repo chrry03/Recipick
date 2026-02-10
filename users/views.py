@@ -331,6 +331,114 @@ def naver_callback_view(request):
         # 기존 회원 -> 메인 페이지로
         return redirect(f'/?access={access_token}&refresh={refresh_token}&nickname={encoded_nickname}')
 
+# =============================================================
+# s. 소셜 로그인 (카카오)
+# =============================================================
+
+# s-1. 카카오 로그인 페이지로 리다이렉트
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def kakao_login_view(request):
+    client_id = settings.KAKAO_CLIENT_ID
+    redirect_uri = settings.KAKAO_REDIRECT_URI
+    
+    # 카카오 인증 페이지 URL 생성
+    kakao_auth_url = (
+        f"https://kauth.kakao.com/oauth/authorize?"
+        f"client_id={client_id}&"
+        f"redirect_uri={redirect_uri}&"
+        f"response_type=code"
+    )
+    return redirect(kakao_auth_url)
+
+# 3-2. 카카오에서 돌아왔을 때 처리 (Callback)
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def kakao_callback_view(request):
+    # 1. 카카오가 보내준 "인증 코드" 받기
+    code = request.GET.get('code')
+    if not code:
+        return Response({"message": "카카오 인증 코드가 없습니다."}, status=400)
+
+    # 2. 인증 코드로 "액세스 토큰" 요청 (POST 방식)
+    token_url = "https://kauth.kakao.com/oauth/token"
+    token_data = {
+        "grant_type": "authorization_code",
+        "client_id": settings.KAKAO_CLIENT_ID,
+        # client_secret을 제거했습니다.
+        "redirect_uri": settings.KAKAO_REDIRECT_URI,
+        "code": code,
+    }
+    
+    token_res = requests.post(token_url, data=token_data)
+    token_json = token_res.json()
+
+    # 에러 확인을 위해 로그 출력 (디버깅용)
+    print("카카오 응답:", token_json)
+
+    if "error" in token_json:
+        return Response({
+            "error": token_json.get("error"),
+            "description": token_json.get("error_description")
+        }, status=400)
+
+    kakao_access_token = token_json.get("access_token")
+
+    # 3. 액세스 토큰으로 "유저 정보" 가져오기
+    profile_url = "https://kapi.kakao.com/v2/user/me"
+    headers = {
+        "Authorization": f"Bearer {kakao_access_token}",
+        "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+    }
+    
+    profile_res = requests.get(profile_url, headers=headers)
+    profile_json = profile_res.json()
+    
+    # 유저 정보 추출
+    kakao_account = profile_json.get("kakao_account")
+    social_id = str(profile_json.get("id"))
+    email = kakao_account.get("email") if kakao_account else None
+
+    if not email:
+        return Response({"error": "카카오 계정에 이메일 설정이 없거나 동의하지 않았습니다."}, status=400)
+
+    # 4. 내 DB에서 회원가입 또는 로그인 처리
+    try:
+        user = User.objects.get(email=email)
+        SocialAccount.objects.get_or_create(
+            user=user,
+            provider='KAKAO',
+            defaults={'provider_uid': social_id}
+        )
+    except User.DoesNotExist:
+        temp_nickname = f"user_{social_id[:8]}"
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password=None,
+            nickname=temp_nickname
+        )
+        SocialAccount.objects.create(
+            user=user,
+            provider='KAKAO',
+            provider_uid=social_id
+        )
+
+    # 5. Django 세션 로그인 및 JWT 토큰 생성
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+    # 6. ★ JWT 토큰 생성
+    token = RefreshToken.for_user(user)
+    access_token = str(token.access_token)
+    refresh_token = str(token)
+    encoded_nickname = quote(user.nickname)
+
+    # 7. 리다이렉트 (기존 로직 유지)
+    if user.nickname.startswith('user_'):
+        return redirect(f'/users/nickname/?access={access_token}&refresh={refresh_token}&next=preference&nickname={encoded_nickname}')
+    else:
+        return redirect(f'/?access={access_token}&refresh={refresh_token}&nickname={encoded_nickname}')
+
 
 # =============================================================
 # 4. 메인 화면 (★ Real DB 연동 완료)
