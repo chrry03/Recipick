@@ -2,11 +2,11 @@ from rest_framework import serializers
 from .models import IngredientMaster, IngredientCategory, UserIngredient
 from datetime import date
 
-
 class IngredientCategorySerializer(serializers.ModelSerializer):
     """식재료 카테고리 시리얼라이저"""
     
     subcategories = serializers.SerializerMethodField()
+    # 모델의 프로퍼티 이름인 display_icon을 사용
     icon = serializers.CharField(source='display_icon', read_only=True)
     
     class Meta:
@@ -17,20 +17,20 @@ class IngredientCategorySerializer(serializers.ModelSerializer):
         ]
     
     def get_subcategories(self, obj):
-        """하위 카테고리 포함"""
         if obj.subcategories.exists():
             return IngredientCategorySerializer(obj.subcategories.all(), many=True).data
         return []
 
+
 class IngredientSerializer(serializers.ModelSerializer):
-    """식재료 마스터 시리얼라이저"""
+    """식재료 마스터 시리얼라이저 (수정됨)"""
     
-    # [수정 1] 프론트엔드가 'id'를 찾으므로 ingredient_id를 'id'로 내보냅니다.
+    # [핵심 수정 1] 프론트엔드가 'id'를 찾으므로 ingredient_id를 'id'로 내보냅니다.
     id = serializers.IntegerField(source='ingredient_id', read_only=True)
     
     category_name = serializers.CharField(source='category.name', read_only=True)
     
-    # [수정 2] 모델에 icon_url 필드는 없고, icon 프로퍼티가 있습니다. source를 'icon'으로 변경!
+    # [핵심 수정 2] 모델에 icon_url 필드는 없고, icon 프로퍼티가 있습니다. source를 'icon'으로 변경!
     icon = serializers.CharField(source='icon', read_only=True)
     
     all_names = serializers.SerializerMethodField()
@@ -44,7 +44,6 @@ class IngredientSerializer(serializers.ModelSerializer):
         ]
     
     def get_all_names(self, obj):
-        """모든 이름 반환 (검색용)"""
         return obj.get_all_names()
 
 
