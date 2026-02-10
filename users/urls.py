@@ -28,4 +28,7 @@ urlpatterns = [
     # 4. 소셜 로그인 (구글)
     path('google/login/', views.google_login_view, name='google_login'),           # 구글 로그인 페이지로 보내는 URL
     path('google/callback/', views.google_callback_view, name='google_callback'),  # 구글 인증 후 돌아오는 URL (Callback)
+
+    path('naver/login/', views.naver_login_view, name='naver_login'),           # 네이버 로그인 페이지로 보내는 URL
+    path('naver/callback/', views.naver_callback_view, name='naver_callback'),  # 네이버 인증 후 돌아오는 URL (Callback)
 ]

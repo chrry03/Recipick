@@ -584,11 +584,13 @@
   border-radius: 1.5rem;
   box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 1rem;
-  min-height: 8rem;
-  align-items: center;
+  height: 240px;
+  align-content: flex-start;
+  align-items: flex-start;
 }
 
 .ingredient-empty-state {
