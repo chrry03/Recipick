@@ -22,17 +22,23 @@ class IngredientCategorySerializer(serializers.ModelSerializer):
             return IngredientCategorySerializer(obj.subcategories.all(), many=True).data
         return []
 
-
 class IngredientSerializer(serializers.ModelSerializer):
     """식재료 마스터 시리얼라이저"""
     
+    # [수정 1] 프론트엔드가 'id'를 찾으므로 ingredient_id를 'id'로 내보냅니다.
+    id = serializers.IntegerField(source='ingredient_id', read_only=True)
+    
     category_name = serializers.CharField(source='category.name', read_only=True)
-    icon = serializers.CharField(source='icon_url', read_only=True)
+    
+    # [수정 2] 모델에 icon_url 필드는 없고, icon 프로퍼티가 있습니다. source를 'icon'으로 변경!
+    icon = serializers.CharField(source='icon', read_only=True)
+    
     all_names = serializers.SerializerMethodField()
     
     class Meta:
         model = IngredientMaster
         fields = [
+            'id', # [수정] id 필드 추가
             'ingredient_id', 'name_ko', 'name_en', 'category', 
             'category_name', 'aliases', 'icon', 'all_names'
         ]
