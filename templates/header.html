@@ -4,7 +4,9 @@
 <header class="app-header">
     <div class="header-content">
         <div class="header-logo">
-            <img src="{% static 'images/logo.png' %}" alt="Recipick" class="logo-img" onerror="this.src='https://via.placeholder.com/175x37'">
+            <a href="{% url 'root' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Recipick" class="logo-img" onerror="this.src='https://via.placeholder.com/175x37'">
+            </a>
         </div>
         <a href="{% url 'users:notification' %}" class="notification-btn" aria-label="알림">
             <svg width="21" height="23" viewBox="0 0 23 26" fill="none" xmlns="http://www.w3.org/2000/svg">

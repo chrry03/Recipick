@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}홈 - Recipick{% endblock %}
+{% block title %}Recipick - Home{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
@@ -64,7 +64,7 @@
     <section class="section">
         <div class="section-header">
             <h2 class="section-title">오늘의 추천 메뉴</h2>
-            <button class="view-all-btn" onclick="window.location.href='#'">전체보기</button>
+            <a class="view-all-btn" href="{% url 'recipes:list' %}">전체보기</a>
         </div>
         
         <div class="carousel-wrapper">
@@ -85,7 +85,7 @@
                 <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
             </svg>
             <h2 class="section-title">찜한 레시피</h2>
-            <button class="view-all-btn" onclick="window.location.href='#'">전체보기</button>
+            <a class="view-all-btn" href="{% url 'recipes:list' %}">전체보기</a>
         </div>
         
         <div class="recipe-list" id="favoriteRecipes" data-recipes='{{ favorite_recipes|safe }}'>
@@ -98,7 +98,7 @@
         <div class="section-header">
             <img src="{% static 'images/main_ingredient.svg' %}" class="section-icon" alt="내 식재료">
             <h2 class="section-title">내 식재료</h2>
-            <button class="view-all-btn" onclick="window.location.href='#'">전체보기</button>
+            <a class="view-all-btn" href="{% url 'ingredients:my_fridge' %}">전체보기</a>
         </div>
         
         <div class="ingredients-container">
@@ -113,7 +113,7 @@
         <div class="section-header">
             <img src="{% static 'images/main_log.svg' %}" class="section-icon" alt="내 일지">
             <h2 class="section-title">내 일지</h2>
-            <button class="view-all-btn" onclick="window.location.href='#'">전체보기</button>
+            <a class="view-all-btn" href="{% url 'logs:list' %}">전체보기</a>
         </div>
         
         <div class="diary-slider-wrapper">

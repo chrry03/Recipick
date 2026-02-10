@@ -295,7 +295,7 @@
                 </div>
             `;
             btn.addEventListener('click', () => {
-                // TODO: 식재료 상세 페이지로 이동
+                // TODO: 식재료 상세        
             });
             container.appendChild(btn);
         });
