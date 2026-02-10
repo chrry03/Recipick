@@ -10,6 +10,7 @@
     <button type="button" 
             class="back-btn" 
             id="backBtn"
+            onclick="history.back()"
             aria-label="이전 페이지로 돌아가기">
         ←
     </button>
@@ -17,10 +18,10 @@
     <button type="button" 
             class="header-action-btn like-toggle-btn" 
             id="likeBtn" 
-            data-recipe-id="{{ recipe.id }}"
+            data-recipe-id="{{ recipe.recipe_id }}"
             aria-label="좋아요"
-            aria-pressed="{% if is_liked %}true{% else %}false{% endif %}">
-        {% if is_liked %}❤️{% else %}🤍{% endif %}
+            aria-pressed="{% if is_favorited %}true{% else %}false{% endif %}">
+        {% if is_favorited %}❤️{% else %}🤍{% endif %}
     </button>
 </header>
 {% endblock header %}
@@ -28,18 +29,24 @@
 {% block main_content %}
 <section class="recipe-detail-container">
     <div class="detail-main-image">
-        <img src="{{ recipe.image.url }}" 
+        <img src="{{ recipe.image_url|default:'/static/images/default-recipe.jpg' }}" 
              alt="{{ recipe.title }}"
-             loading="lazy">
+             loading="lazy"
+             onerror="this.src='{% static 'images/default-recipe.jpg' %}'">
     </div>
 
     <div class="detail-header-info">
         <h2 class="detail-title">{{ recipe.title }}</h2>
+        {% if recipe.description %}
         <p class="detail-desc">{{ recipe.description }}</p>
+        {% endif %}
+        
         <div class="detail-meta-badges" role="list">
-            <span class="badge" role="listitem">{{ recipe.time }}분</span>
+            <span class="badge" role="listitem">{{ recipe.ready_minutes }}분</span>
             <span class="badge" role="listitem">{{ recipe.difficulty }}</span>
+            {% if recipe.calories %}
             <span class="badge" role="listitem">{{ recipe.calories }}kcal</span>
+            {% endif %}
         </div>
     </div>
 
@@ -48,14 +55,16 @@
     <div class="detail-ingredients">
         <h3 class="section-title">준비 재료</h3>
         <ul class="ingredient-check-list">
-            {% for ingredient in recipe.ingredients.all %}
+            {% for ri in recipe_ingredients %}
             <li class="ingredient-item">
-                <span class="name">{{ ingredient.name }}</span>
-                <span class="amount">{{ ingredient.quantity }}</span>
-                {% if ingredient.is_owned %}
+                <span class="name">{{ ri.ingredient.name_ko }}</span>
+                <span class="amount">{{ ri.quantity }}</span>
+                {% if ri.is_owned %}
                 <span class="owned-badge" aria-label="보유 중">보유중</span>
                 {% endif %}
             </li>
+            {% empty %}
+            <li class="ingredient-item">재료 정보가 없습니다.</li>
             {% endfor %}
         </ul>
     </div>
@@ -65,15 +74,13 @@
     <div class="detail-steps-preview">
         <h3 class="section-title">조리 순서</h3>
         <ol class="step-list-summary">
-            {% for step in recipe.steps.all %}
-            <li>{{ step.description }}</li>
-            {% endfor %}
+            <li>요리 시작하기 버튼을 눌러 상세 조리 과정을 확인하세요! 🍳</li>
         </ol>
     </div>
 </section>
 
 <div class="floating-action-container">
-    <a href="{% url 'recipes:cooking_mode_step' recipe.id step=1 %}" 
+    <a href="{% url 'recipes:cooking_mode' recipe.recipe_id %}" 
        class="btn-primary-full"
        aria-label="요리 시작하기">
         요리 시작하기 🍳
@@ -82,7 +89,7 @@
 {% endblock main_content %}
 
 {% block extra_script %}
-<div data-favorite-url="{% url 'recipes:api-favorite' recipe.id %}" 
+<div data-favorite-url="{% url 'recipes:favorite-list' %}" 
      data-csrf-token="{{ csrf_token }}" 
      style="display: none;"></div>
 <script src="{% static 'js/recipes.js' %}"></script>
