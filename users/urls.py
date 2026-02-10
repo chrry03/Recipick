@@ -31,4 +31,7 @@ urlpatterns = [
 
     path('naver/login/', views.naver_login_view, name='naver_login'),           # 네이버 로그인 페이지로 보내는 URL
     path('naver/callback/', views.naver_callback_view, name='naver_callback'),  # 네이버 인증 후 돌아오는 URL (Callback)
+
+    path('kakao/login/', views.kakao_login_view, name='kakao_login'),           # 카카오 로그인 페이지로 보내는 URL
+    path('kakao/callback/', views.kakao_callback_view, name='kakao_callback'),  # 카카오 인증 후 돌아오는 URL (Callback)
 ]

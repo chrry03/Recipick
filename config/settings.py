@@ -192,6 +192,11 @@ NAVER_CLIENT_ID = os.getenv('NAVER_CLIENT_ID')
 NAVER_CLIENT_SECRET = os.getenv('NAVER_CLIENT_SECRET')
 NAVER_REDIRECT_URI = os.getenv('NAVER_REDIRECT_URI')
 
+# [Kakao OAuth 설정] - .env에서 가져오기
+KAKAO_CLIENT_ID = os.getenv('KAKAO_CLIENT_ID')
+KAKAO_CLIENT_SECRET = os.getenv('KAKAO_CLIENT_SECRET')
+KAKAO_REDIRECT_URI = os.getenv('KAKAO_REDIRECT_URI')
+
 # Redis 사용 시 아래 주석 해제하고 django-redis 패키지 설치
 # CACHES = {
 #     'default': {
