@@ -498,6 +498,9 @@
                         html += createRecipeCard(recipe);
                     });
                     resultsContainer.innerHTML = html;
+                    
+                    // [🔥 핵심 수정] 이 줄을 꼭 추가해야 클릭이 됩니다!
+                    attachRecipeCardListeners(); 
                 }
                 
                 updateFilterCounts(recipes.length);
