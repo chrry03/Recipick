@@ -11,17 +11,15 @@
     let isScrolled = false;
     
     function toggleHeaderOnScroll() {
-        // Throttling: 스크롤 이벤트가 너무 자주 발생하는 것을 방지
         clearTimeout(scrollTimeout);
         
         scrollTimeout = setTimeout(function() {
-            // 여러 방법으로 스크롤 위치 확인
             var y = window.pageYOffset || window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
             
             var mainHeader = document.getElementById('mainHeader');
             var searchIconBtn = document.getElementById('searchIconBtn');
             var scrolledNotification = document.querySelector('.header-scrolled-notification');
-            var scrollThreshold = 80; // 스크롤 임계값 (px)
+            var scrollThreshold = 40; // 스크롤 임계값 (px)
             
             if (!mainHeader) {
                 console.error('mainHeader를 찾을 수 없습니다');
@@ -32,26 +30,23 @@
             var upperThreshold = scrollThreshold; // 위쪽 임계값 (80px)
             var lowerThreshold = scrollThreshold - 30; // 아래쪽 임계값 (50px)
             
-            // 상태가 변경될 때만 전환 (히스테리시스 적용)
+
             if (!isScrolled) {
-                // 현재 확장된 헤더일 때: 위쪽 임계값을 넘어야 축소
                 if (y > upperThreshold) {
                     mainHeader.classList.add('scrolled');
-                    // CSS로 처리되므로 display 조작 불필요
                     isScrolled = true;
-                    console.log('✅ 헤더 축소됨! 스크롤 위치:', y, 'px');
+                    // console.log('헤더 축소/ 스크롤 위치:', y, 'px'); 스크롤 위치치콘솔 로그
                 }
             } else {
-                // 현재 축소된 헤더일 때: 아래쪽 임계값 이하로 내려가야 확장
                 if (y <= lowerThreshold) {
                     mainHeader.classList.remove('scrolled');
-                    // CSS로 처리되므로 display 조작 불필요
                     isScrolled = false;
-                    console.log('✅ 헤더 확장됨! 스크롤 위치:', y, 'px');
+                    // console.log('헤더 확장/ 스크롤 위치:', y, 'px'); 스크롤 위치 콘솔 로그
                 }
             }
-        }, 16); // 60fps를 위한 더 빠른 업데이트
+        }, 16);
     }
+
 
     // 상수 정의
     const CAROUSEL_MAX_VISIBILITY = 3;
