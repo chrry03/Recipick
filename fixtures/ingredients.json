@@ -1068,20 +1068,6 @@
   },
   {
     "model": "ingredients.ingredientmaster",
-    "pk": 98,
-    "fields": {
-      "name_ko": "파프리카",
-      "name_en": "bell pepper",
-      "category": 1,
-      "aliases": [
-        "파프리카", "bell pepper",
-        "red pepper", "yellow pepper", "orange pepper"
-      ],
-      "created_at": "2025-02-01T08:30:00Z"
-    }
-  },
-  {
-    "model": "ingredients.ingredientmaster",
     "pk": 201,
     "fields": {
       "name_ko": "사과",
@@ -1880,20 +1866,6 @@
   },
   {
     "model": "ingredients.ingredientmaster",
-    "pk": 333,
-    "fields": {
-      "name_ko": "햄",
-      "name_en": "ham",
-      "category": 3,
-      "aliases": [
-        "햄", "ham"
-      ],
-      "created_at": "2025-02-01T08:30:00Z"
-    }
-  },
-
-  {
-    "model": "ingredients.ingredientmaster",
     "pk": 334,
     "fields": {
       "name_ko": "스팸",
@@ -1901,33 +1873,6 @@
       "category": 3,
       "aliases": [
         "스팸", "spam", "canned ham"
-      ],
-      "created_at": "2025-02-01T08:30:00Z"
-    }
-  },
-  {
-    "model": "ingredients.ingredientmaster",
-    "pk": 335,
-    "fields": {
-      "name_ko": "베이컨",
-      "name_en": "bacon",
-      "category": 3,
-      "aliases": [
-        "베이컨", "bacon"
-      ],
-      "created_at": "2025-02-01T08:30:00Z"
-    }
-  },
-  {
-    "model": "ingredients.ingredientmaster",
-    "pk": 336,
-    "fields": {
-      "name_ko": "소시지",
-      "name_en": "sausage",
-      "category": 3,
-      "aliases": [
-        "소시지", "비엔나소시지", "프랑크소시지",
-        "sausage", "vienna sausage", "frankfurter"
       ],
       "created_at": "2025-02-01T08:30:00Z"
     }
@@ -2308,39 +2253,6 @@
       "name_en": "whelk",
       "category": 4,
       "aliases": ["골뱅이", "whelk"],
-      "created_at": "2025-02-01T08:30:00Z"
-    }
-  },
-  {
-    "model": "ingredients.ingredientmaster",
-    "pk": 433,
-    "fields": {
-      "name_ko": "미역",
-      "name_en": "seaweed",
-      "category": 4,
-      "aliases": ["미역", "seaweed"],
-      "created_at": "2025-02-01T08:30:00Z"
-    }
-  },
-  {
-    "model": "ingredients.ingredientmaster",
-    "pk": 434,
-    "fields": {
-      "name_ko": "다시마",
-      "name_en": "kelp",
-      "category": 4,
-      "aliases": ["다시마", "kelp"],
-      "created_at": "2025-02-01T08:30:00Z"
-    }
-  },
-  {
-    "model": "ingredients.ingredientmaster",
-    "pk": 435,
-    "fields": {
-      "name_ko": "김",
-      "name_en": "seaweed laver",
-      "category": 4,
-      "aliases": ["김", "구이김", "조미김", "laver"],
       "created_at": "2025-02-01T08:30:00Z"
     }
   },
@@ -3777,28 +3689,6 @@
       "name_en": "laver",
       "category": 13,
       "aliases": ["김", "laver", "dried seaweed sheets"],
-      "created_at": "2025-02-01T08:30:00Z"
-    }
-  },
-  {
-    "model": "ingredients.ingredientmaster",
-    "pk": 1304,
-    "fields": {
-      "name_ko": "멸치",
-      "name_en": "dried anchovy",
-      "category": 13,
-      "aliases": ["멸치", "dried anchovy"],
-      "created_at": "2025-02-01T08:30:00Z"
-    }
-  },
-  {
-    "model": "ingredients.ingredientmaster",
-    "pk": 1305,
-    "fields": {
-      "name_ko": "표고버섯",
-      "name_en": "dried shiitake",
-      "category": 13,
-      "aliases": ["표고버섯", "dried shiitake"],
       "created_at": "2025-02-01T08:30:00Z"
     }
   },

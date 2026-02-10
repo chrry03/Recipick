@@ -238,8 +238,8 @@
     width: 100%;
     height: 100%;
     padding-top: 60px; /* 헤더 높이만큼 상단 패딩 */
-    overflow-y: auto;
     overflow-x: hidden;
+    overflow-y: auto;
     padding-bottom: 100px;
     background: linear-gradient(180deg, #F5EDE0 0%, #F6F3EE 100%);
     -ms-overflow-style: none;
@@ -599,12 +599,13 @@
 /* 2. 레이아웃 (사이드바 - 점선 - 컨텐츠) */
 .exclude-layout {
     display: flex;
-    gap: 0; /* 점선이 중간에 들어가므로 gap 제거 */
-    height: 500px;
+    gap: 0;
+    height: auto;
+    min-height: 500px;
     text-align: left;
     margin-bottom: 20px;
-    align-items: flex-start;
     justify-content: center; /* 전체 중앙 정렬 */
+    align-items: stretch;
 }
 
 /* 왼쪽 사이드바 */
@@ -613,8 +614,8 @@
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    overflow-y: auto;
+    gap: 20px;
+    overflow-y: hidden;
     padding-right: 12px; /* 점선과의 간격 */
     scrollbar-width: none;
 }
@@ -622,7 +623,8 @@
 
 .category-item {
     width: 100%;
-    height: 31px;
+    min-width: 36px;
+    flex-shrink: 0;
     border-radius: 10px;
     background: #F6EEE3;
     display: flex;
@@ -638,12 +640,29 @@
     white-space: nowrap; 
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.2;
 }
 .category-item.active {
     background: #F9F9F9;
     box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
     font-weight: bold;
+    min-height: 38px;
+    z-index: 10;
+    transform-origin: center;
 }
+
+.exclude-sidebar .category-item[data-id="16"] {
+    display: none !important;
+}
+
+.exclude-sidebar .category-item:last-child {
+    display: none !important;
+}
+
+.exclude-sidebar .category-item:nth-last-child(1) {
+    display: none !important;
+}
+
 
 /* 3. 세로 점선 (피그마 Line 5) */
 .vertical-dashed-line {
@@ -662,7 +681,8 @@
     padding: 20px 15px;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: auto;
+    min-height: 100%;
     box-sizing: border-box;
     position: relative; /* 책갈피 배치를 위한 기준 */
 }
@@ -709,6 +729,7 @@
     flex-direction: column;
     gap: 12px;
     padding-right: 5px;
+    max-height: 800px;
 }
 
 .ing-check-item {
