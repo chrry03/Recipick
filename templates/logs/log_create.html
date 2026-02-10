@@ -5,15 +5,12 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/logs.css' %}">
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 <div class="app-container">
-    <!-- Header -->
     {% include 'header.html' %}
 
-    <!-- Title Section with Back Button -->
     <div class="title-section">
         <button class="back-btn" onclick="window.history.back();" aria-label="뒤로가기">
             <svg width="23" height="21" viewBox="0 0 23 21" fill="none">
@@ -23,59 +20,51 @@
         <h1 class="page-title">오늘 요리는 어떠셨나요?</h1>
     </div>
 
-    <form id="log-create-form" enctype="multipart/form-data">
+    <form id="log-create-form" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        
-        <!-- Image Upload Area -->
+        <input type="hidden" name="recipe" value="{{ recipe_id }}">
+
         <div class="image-upload-wrapper">
             <div class="image-upload" id="imageUpload">
-                <img src="{% static 'images/image_upload.svg' %}" alt="이미지 업로드" class="camera-icon" width="44" height="44">
+                <img src="{% static 'images/image_upload.svg' %}" alt="이미지 업로드" class="camera-icon">
             </div>
             <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
             <img class="image-preview" id="imagePreview" alt="업로드된 사진" style="display: none;">
         </div>
 
-        <!-- Cooking Info -->
         <div class="cooking-info">
-            <h2 class="cooking-name" id="recipeName">{{ recipe_name|default:"로제 파스타" }}</h2>
+            <h2 class="cooking-name">{{ recipe_name|default:"요리 이름 없음" }}</h2>
             
-            <!-- Difficulty Rating -->
             <div class="rating-row">
                 <span class="rating-label">난이도:</span>
                 <div class="stars difficulty-stars" id="difficultyStars">
-                    <button type="button" class="star-btn" data-rating="1" aria-label="난이도 1점">★</button>
-                    <button type="button" class="star-btn" data-rating="2" aria-label="난이도 2점">★</button>
-                    <button type="button" class="star-btn" data-rating="3" aria-label="난이도 3점">★</button>
-                    <button type="button" class="star-btn" data-rating="4" aria-label="난이도 4점">★</button>
-                    <button type="button" class="star-btn" data-rating="5" aria-label="난이도 5점">★</button>
+                    <button type="button" class="star-btn" data-value="EASY">★</button>
+                    <button type="button" class="star-btn" data-value="NORMAL">★</button>
+                    <button type="button" class="star-btn" data-value="DIFFICULT">★</button>
                 </div>
             </div>
-            <input type="hidden" id="difficultyRating" name="difficulty_rating" value="0" required>
+            <input type="hidden" id="difficultyRating" name="difficulty" required>
             
-            <!-- Satisfaction Rating -->
             <div class="rating-row">
                 <span class="rating-label">만족도:</span>
                 <div class="stars satisfaction-stars" id="satisfactionStars">
-                    <button type="button" class="star-btn" data-rating="1" aria-label="만족도 1점">★</button>
-                    <button type="button" class="star-btn" data-rating="2" aria-label="만족도 2점">★</button>
-                    <button type="button" class="star-btn" data-rating="3" aria-label="만족도 3점">★</button>
-                    <button type="button" class="star-btn" data-rating="4" aria-label="만족도 4점">★</button>
-                    <button type="button" class="star-btn" data-rating="5" aria-label="만족도 5점">★</button>
+                    <button type="button" class="star-btn" data-value="1">★</button>
+                    <button type="button" class="star-btn" data-value="2">★</button>
+                    <button type="button" class="star-btn" data-value="3">★</button>
+                    <button type="button" class="star-btn" data-value="4">★</button>
+                    <button type="button" class="star-btn" data-value="5">★</button>
                 </div>
             </div>
-            <input type="hidden" id="satisfactionRating" name="satisfaction_rating" value="0" required>
+            <input type="hidden" id="satisfactionRating" name="rating" required>
         </div>
 
-        <!-- Memo Section -->
         <div class="memo-header">&lt;메모&gt;</div>
         <div class="memo-container">
-            <textarea class="memo-input" id="memoInput" name="memo" placeholder="후기를 남겨주세요."></textarea>
+            <textarea class="memo-input" name="memo" placeholder="후기를 남겨주세요."></textarea>
         </div>
 
-        <!-- Hidden Date Input -->
-        <input type="date" id="cookedAt" name="cooked_at" class="date-input-hidden" required>
+        <input type="date" id="cookedAt" name="cooked_at" class="date-input-hidden">
 
-        <!-- Submit Button -->
         <button type="submit" class="submit-btn" id="submitBtn">작성하기</button>
     </form>
 </div>
