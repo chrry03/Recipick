@@ -10,7 +10,7 @@ Recipes Views (통합 개선 버전)
 """
 
 from datetime import date, timedelta
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count, Prefetch
 
@@ -28,6 +28,9 @@ from recipes.serializers import (
 )
 from ingredients.models import UserIngredient
 from ingredients.utils.mapper import IngredientMapper
+
+from rest_framework.permissions import AllowAny # <-- 이거 필수!
+#from rest_framework.decorators import api_view, permission_classes # <-- 함수형 뷰일 경우
 
 
 # ==================== ViewSets ==================== #
@@ -356,26 +359,31 @@ def calculate_final_recommendations(recipes, user, user_ingredients_dict, user_s
 
 
 # ==================== API 뷰 ==================== #
-
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def get_recipe_recommendations(request):
     """
     통합 레시피 추천 API
     """
-    user = request.user
-    
+    # [수정 1] 로그인 여부에 따라 user와 user_ingredients 초기화
+    if request.user.is_authenticated:
+        user = request.user
+        user_ingredients = UserIngredient.objects.filter(
+            user=user,
+            is_consumed=False
+        ).select_related('ingredient', 'ingredient__category')
+    else:
+        user = None
+        user_ingredients = UserIngredient.objects.none() # 비회원은 빈 쿼리셋
+
     # 요청 파라미터
     ingredient_ids = request.data.get('ingredient_ids', [])
     use_all = request.data.get('use_all', False)
     include_spoonacular = request.data.get('include_spoonacular', True)
     max_results = request.data.get('max_results', 20)
     
-    # 사용자 보유 식재료 조회
-    user_ingredients = UserIngredient.objects.filter(
-        user=user,
-        is_consumed=False
-    ).select_related('ingredient', 'ingredient__category')
+    # [중요] 여기에 있던 중복된 user_ingredients 조회 코드를 삭제했습니다!
+    # (위에서 이미 처리했으므로 다시 조회하면 user=None 에러가 날 수 있음)
     
     # 선택된 식재료 필터링
     if use_all:
@@ -387,7 +395,12 @@ def get_recipe_recommendations(request):
     else:
         selected_ingredients = user_ingredients
     
+    # [수정 2] 비회원이거나 재료가 없어도 '추천 결과 없음'이 아니라, 그냥 빈 상태로 로직 진행
+    # (원하시면 여기서 바로 리턴해도 되지만, 검색 로직이 뒤에 있다면 통과시키는 게 나을 수 있음)
     if not selected_ingredients.exists():
+        # 비회원도 접근 가능하므로 바로 리턴하기보다, 
+        # 검색 로직을 탈 수 있도록 구조를 잡거나, 현재처럼 메시지를 줍니다.
+        # 여기서는 기존 로직 유지 (재료 기반 추천이므로 재료 없으면 종료)
         return Response({
             'message': '선택된 식재료가 없습니다',
             'categories': {
@@ -422,8 +435,8 @@ def get_recipe_recommendations(request):
             unique_recipes[recipe.external_id] = recipe
     
     # 4. 사용자 스킬 레벨
-    user_skill_level = 'INTERMEDIATE'  # 기본값
-    if hasattr(user, 'profile') and user.profile:
+    user_skill_level = 'INTERMEDIATE'
+    if user and hasattr(user, 'profile') and user.profile:
         user_skill_level = user.profile.cooking_level
     
     # 5. 추천 점수 계산 및 정렬
@@ -471,13 +484,11 @@ def get_recipe_detail(request, recipe_id):
 
 # ==================== 템플릿 뷰 ==================== #
 
-@login_required
 def recipe_list_view(request):
     """레시피 목록 페이지"""
     return render(request, 'recipes/recipe_list.html')
 
 
-@login_required
 def recipe_detail_view(request, recipe_id):
     """레시피 상세 페이지"""
     try:
@@ -528,7 +539,6 @@ def recipe_detail_view(request, recipe_id):
     return render(request, 'recipes/recipe_detail.html', context)
 
 
-@login_required
 def cooking_mode_view(request, recipe_id):
     """조리 모드 페이지 (단계별 UI)"""
     try:
@@ -540,7 +550,8 @@ def cooking_mode_view(request, recipe_id):
     return render(request, 'recipes/cooking_mode.html', context)
 
 
-@login_required
+
+# [수정] 로그인 데코레이터 제거 및 비회원 처리 추가
 def cooking_complete_view(request, recipe_id):
     """조리 완료 페이지"""
     try:
@@ -550,12 +561,14 @@ def cooking_complete_view(request, recipe_id):
     except Recipe.DoesNotExist:
         return render(request, 'recipes/recipe_not_found.html', status=404)
     
-    # 사용한 식재료 체크리스트
-    user_ingredients = UserIngredient.objects.filter(
-        user=request.user,
-        ingredient_id__in=recipe.recipe_ingredients.values_list('ingredient_id', flat=True),
-        is_consumed=False
-    ).select_related('ingredient')
+    # 사용한 식재료 체크리스트 (로그인한 경우에만)
+    user_ingredients = []
+    if request.user.is_authenticated:
+        user_ingredients = UserIngredient.objects.filter(
+            user=request.user,
+            ingredient_id__in=recipe.recipe_ingredients.values_list('ingredient_id', flat=True),
+            is_consumed=False
+        ).select_related('ingredient')
     
     context = {
         'recipe': recipe,

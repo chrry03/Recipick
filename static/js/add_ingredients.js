@@ -1,6 +1,6 @@
 /**
  * static/js/add_ingredients.js
- * 식재료 검색 및 추가 기능 (URL 수정 완료 ✅)
+ * 식재료 검색 및 추가 기능 (전체 탭 제거 및 수정 완료)
  */
 
 const Utils = {
@@ -51,7 +51,7 @@ class IngredientAdder {
         this.attachEventListeners();
         await this.fetchOwnedIngredients(); 
         await this.fetchCategories();       
-        await this.fetchIngredients();      
+        // 초기 로드는 카테고리 로드 후 첫 번째 카테고리로 진행
     }
 
     attachEventListeners() {
@@ -109,15 +109,31 @@ class IngredientAdder {
         try {
             const res = await fetch('/ingredients/api/categories/'); 
             const data = await res.json();
-            this.renderCategories(Array.isArray(data) ? data : (data.results || []));
+            // 데이터 구조 확인 (results 안에 있는지 그냥 배열인지)
+            const categories = Array.isArray(data) ? data : (data.results || []);
+            this.renderCategories(categories);
+            
+            // [추가] 카테고리 로드 후 첫 번째 카테고리 자동 선택 및 로드
+            if (categories.length > 0) {
+                const firstCat = categories[0];
+                // 카테고리 ID가 id 또는 category_id 일 수 있음
+                const firstId = firstCat.id || firstCat.category_id;
+                
+                // 첫 번째 카테고리 활성화 UI 처리
+                const firstBtn = this.categorySidebar.querySelector(`.category-item[data-id="${firstId}"]`);
+                if(firstBtn) firstBtn.classList.add('active');
+                
+                this.currentCategory = firstId;
+                this.fetchIngredients(firstId);
+            }
         } catch (err) { console.error(err); }
     }
 
-    // [수정 완료] URL을 /ingredients/? 로 변경
     async fetchIngredients(categoryId = '', keyword = '') {
         this.container.innerHTML = '<div class="loading-msg">로딩 중...</div>';
         try {
-            let url = `/ingredients/?`; // <--- 여기가 수정되었습니다!
+            // [수정 완료] URL에서 'api/list/' 제거
+            let url = `/ingredients/?`; 
             if (categoryId) url += `category_id=${categoryId}&`;
             if (keyword) url += `keyword=${encodeURIComponent(keyword)}`;
 
@@ -126,19 +142,28 @@ class IngredientAdder {
             const data = await res.json();
             this.renderIngredients(Array.isArray(data) ? data : (data.results || []));
         } catch (err) {
+            console.error(err);
             this.container.innerHTML = '<div class="loading-msg" style="margin-top:20px;">목록 로드 실패<br><span style="font-size:11px; color:#ccc;">(잠시 후 다시 시도해주세요)</span></div>';
         }
     }
 
     // --- Render ---
     renderCategories(categories) {
-        let html = `<div class="category-item active" data-id="">전체</div>`;
+        let html = '';
+        
+        // [수정] '전체' 탭 제거함
+        
         categories.forEach(cat => {
-            html += `<div class="category-item" data-id="${cat.id}">${cat.name}</div>`;
+            // 카테고리 ID 처리 (id 또는 category_id)
+            const catId = cat.id || cat.category_id;
+            html += `<div class="category-item" data-id="${catId}">${cat.name}</div>`;
         });
+        
+        // 직접 추가 버튼
         html += `<div class="category-item direct-add-btn" style="color: #FF7043; font-weight:bold;">
                     <span style="margin-right:5px;">+</span> 직접 추가
                  </div>`;
+        
         this.categorySidebar.innerHTML = html;
 
         this.categorySidebar.querySelectorAll('.category-item').forEach(item => {
@@ -147,7 +172,7 @@ class IngredientAdder {
                     this.openDirectAddModal();
                     return;
                 }
-                this.categorySidebar.querySelector('.active').classList.remove('active');
+                this.categorySidebar.querySelector('.active')?.classList.remove('active');
                 item.classList.add('active');
                 this.currentCategory = item.dataset.id;
                 this.fetchIngredients(this.currentCategory, this.searchInput.value);
@@ -168,15 +193,15 @@ class IngredientAdder {
     }
 
     createCardElement(ing) {
-        const masterId = ing.id;
+        const masterId = ing.id; // 이제 serializer에서 id를 보내주므로 undefined가 아님!
         const isOwned = this.ownedMap.hasOwnProperty(masterId);
         const isSelected = this.selectedItems.hasOwnProperty(masterId);
 
         const card = document.createElement('div');
         card.className = `ingredient-item ${isOwned || isSelected ? 'added' : ''}`;
         
-        const iconHtml = ing.icon_name 
-            ? `<img src="/static/images/icons/${ing.icon_name}" class="grid-icon" onerror="this.style.display='none'">` 
+        const iconHtml = ing.icon 
+            ? `<img src="/static/images/icons/${ing.icon}" class="grid-icon" onerror="this.style.display='none'">` 
             : '';
 
         card.innerHTML = `
@@ -264,7 +289,8 @@ class IngredientAdder {
         this.updateCount();
         this.closeModal(this.dateModal);
     }
-    // [수정] 직접 추가 확인 로직 (백엔드 저장 포함)
+
+    // [직접 추가] 백엔드 저장 로직
     async confirmDirectAdd() {
         const name = this.customInput.value.trim();
         if (!name) return;
@@ -283,21 +309,17 @@ class IngredientAdder {
             if (!res.ok) throw new Error('저장 실패');
 
             // 2. 생성된 진짜 식재료 데이터 받기
-            const newIngredient = await res.json(); // {id: 123, name_ko: "홍합", ...}
+            const newIngredient = await res.json(); 
 
             // 3. 모달 닫기
             this.closeModal(this.directAddModal);
 
-            // 4. 화면에 '선택됨' 상태로 카드 추가 (맨 앞에)
+            // 4. 화면에 카드 추가 및 즉시 선택 모달 열기
             this.createCardElement(newIngredient);
-            
-            // 방금 추가된 카드를 찾아서 'added' 클래스 주고, 체크 표시
-            // (createCardElement가 맨 앞에 추가하므로 firstChild 사용)
             const newCard = this.container.firstChild; 
             newCard.classList.add('added');
-
-            // 5. [중요] 곧바로 소비기한 입력 모달 열기
-            // 이제 가짜 ID가 아니라 진짜 DB ID(newIngredient.id)를 사용합니다.
+            
+            // [중요] 생성된 재료로 소비기한 입력창 바로 띄우기
             this.openDateModal(newIngredient, newCard);
 
         } catch (err) {
