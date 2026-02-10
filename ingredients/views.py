@@ -32,6 +32,37 @@ from ingredients.serializers import (
 # 매핑 유틸리티
 from ingredients.utils.mapper import IngredientMapper
 
+# 직접 추가 로직을 위한 구현
+from .models import IngredientMaster, IngredientCategory 
+from .serializers import IngredientSerializer
+
+
+@api_view(['POST'])
+def create_custom_ingredient(request):
+    name = request.data.get('name')
+    
+    if not name:
+        return Response({'error': '이름을 입력해주세요.'}, status=400)
+
+    # 1. '직접 추가' 카테고리 찾기 (IngredientCategory 사용)
+    try:
+        category, _ = IngredientCategory.objects.get_or_create(name='직접 추가')
+    except Exception as e:
+        print(f"카테고리 생성 오류: {e}")
+        category = None
+
+    # 2. 식재료 생성 (IngredientMaster 사용)
+    # 모델에 icon_name 필드가 없으므로 defaults에서 제외했습니다.
+    ingredient, created = IngredientMaster.objects.get_or_create(
+        name_ko=name,
+        defaults={
+            'category': category
+        }
+    )
+    
+    # 3. Serializer를 통해 프론트엔드 포맷(json)으로 변환
+    serializer = IngredientSerializer(ingredient)
+    return Response(serializer.data)
 
 # ==================== API ViewSets (DRF) ==================== #
 

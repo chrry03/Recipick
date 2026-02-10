@@ -27,4 +27,6 @@ urlpatterns = [
     path('', views.ingredient_list_view, name='ingredient_list'),
     # 3. 검색 (/ingredients/search/?keyword=양파)
     path('search/', views.search_ingredient_view, name='search_ingredient'),
+    # [추가] 커스텀 식재료 생성 API
+    path('api/custom/', views.create_custom_ingredient, name='create_custom_ingredient'),
 ]
