@@ -1,0 +1,224 @@
+/* ==========================================================================
+   식재료 추가 페이지 (add_ingredients.css)
+   - users.css의 '제외 식재료(STEP 2)' 디자인 이식
+   ========================================================================== */
+
+/* 1. 전체 배경 (users.css .background 참고) */
+.add-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(180deg, #F5EDE0 0%, #F6F3EE 100%);
+    padding-top: 80px; /* 헤더 공간 */
+    padding-bottom: 20px;
+    box-sizing: border-box;
+    overflow: hidden; /* 스크롤 방지 */
+    align-items: center; /* 중앙 정렬 */
+}
+
+/* 2. 상단 검색창 (users.css .search-wrapper-step2 복사) */
+.grid-search-bar {
+    position: relative;
+    width: 314px;
+    height: 30px;
+    margin-bottom: 20px;
+    background: #F5F0E7;
+    border-radius: 15px;
+    /* Inner Shadow */
+    box-shadow: inset 1px 1px 2px rgba(216, 211, 203, 0.2), 
+                inset -1px -1px 2px rgba(216, 211, 203, 0.2), 
+                inset 1px -1px 2px rgba(255, 255, 255, 0.9), 
+                inset -1px 1px 3px rgba(216, 211, 203, 0.9);
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.grid-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 12px;
+    color: #555;
+    padding-left: 5px;
+}
+
+/* 3. 메인 레이아웃 (users.css .exclude-layout 복사) */
+/* 사이드바 - 점선 - 리스트박스 구조 */
+.content-layout-wrapper {
+    display: flex;
+    gap: 0;
+    height: calc(100% - 70px); /* 검색창 제외한 높이 */
+    max-height: 600px; /* 너무 길어지지 않게 제한 */
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* (1) 좌측 사이드바 (users.css .exclude-sidebar 복사) */
+.category-sidebar {
+    width: 101px;
+    height: 100%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    padding-right: 12px;
+    
+    /* 스크롤바 숨김 */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.category-sidebar::-webkit-scrollbar { display: none; }
+
+/* 카테고리 아이템 */
+.category-item {
+    width: 100%;
+    height: 31px;
+    border-radius: 10px;
+    background: #F6EEE3; /* 기본 색상 */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* 텍스트 중앙 정렬 */
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 13px;
+    color: #555555;
+    flex-shrink: 0;
+}
+
+.category-item.active {
+    background: #F9F9F9;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+}
+
+/* 직접 추가 버튼 */
+.category-item.direct-add-btn {
+    background: #FFFFFF;
+    border: 1px dashed #FF7043;
+    color: #FF7043;
+}
+
+/* (2) 세로 점선 (users.css .vertical-dashed-line 복사) */
+.vertical-dashed-line {
+    width: 1px;
+    height: 100%;
+    border-left: 1px dashed #555555;
+    margin-right: 12px;
+}
+
+/* (3) 우측 컨텐츠 박스 (users.css .exclude-content-box 복사) */
+.ingredient-list-box {
+    width: 231px;
+    background: #F9F9F9;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* 주황색 책갈피 장식 (users.css .orange-bookmark 복사) */
+.orange-bookmark {
+    position: absolute;
+    width: 14px;
+    height: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -12px;
+    background: rgba(255, 112, 67, 0.8);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 0 0 2px 2px;
+    z-index: 10;
+}
+
+/* 식재료 리스트 영역 */
+.ingredient-grid {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 5px;
+    margin-top: 15px; /* 책갈피 공간 확보 */
+}
+
+/* 리스트 아이템 (users.css .ing-check-item 스타일) */
+.ingredient-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 13px;
+    color: #555;
+    padding: 2px 0;
+}
+
+/* 체크박스 디자인 (users.css 그대로 적용) */
+/* 체크박스 아이콘 대신 div로 구현하여 커스텀 */
+.checkbox-icon {
+    width: 12px;
+    height: 11px;
+    background-color: #FFFFFF;
+    border: 0.5px solid rgba(85, 85, 85, 0.33);
+    border-radius: 2px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* 선택된 상태 */
+.ingredient-item.added .checkbox-icon {
+    border-color: #FF7043;
+}
+
+/* 체크 이미지 (users.css 처럼 가상요소 사용) */
+.ingredient-item.added .checkbox-icon::after {
+    content: '';
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    /* 체크마크 이미지를 base64로 넣거나 이미지 경로 사용 */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF7043' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+}
+
+.ingredient-item.added .ingredient-name {
+    color: #FF7043;
+    font-weight: bold;
+}
+
+/* 이미지 아이콘 등은 숨김 */
+.ingredient-item img, .no-icon { display: none; }
+
+
+/* 4. 하단 등록 완료 버튼 (박스 내부 하단에 배치) */
+.btn-submit-all {
+    margin-top: auto; /* 리스트 끝난 후 하단 배치 */
+    align-self: flex-end; /* 우측 정렬 */
+    width: 90px;
+    height: 30px;
+    background: #FF7043;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
