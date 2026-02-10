@@ -205,6 +205,132 @@ def google_callback_view(request):
         return redirect(f'/users/nickname/?access={access_token}&refresh={refresh_token}&next=preference&nickname={encoded_nickname}')
     else:
         return redirect(f'/?access={access_token}&refresh={refresh_token}&nickname={encoded_nickname}')
+# =============================================================
+# 3. 소셜 로그인 (네이버)
+# =============================================================
+
+# 3-1. 네이버 로그인 페이지로 리다이렉트
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def naver_login_view(request):
+    client_id = settings.NAVER_CLIENT_ID
+    redirect_uri = settings.NAVER_REDIRECT_URI
+    state = "STATE_STRING"  # CSRF 방지용 랜덤 문자열 (간단히 고정값 사용)
+
+    # 네이버 인증 페이지 URL 생성
+    naver_auth_url = (
+        f"https://nid.naver.com/oauth2.0/authorize?"
+        f"response_type=code&"
+        f"client_id={client_id}&"
+        f"redirect_uri={redirect_uri}&"
+        f"state={state}"
+    )
+    
+    return redirect(naver_auth_url)
+
+
+# 3-2. 네이버에서 돌아왔을 때 처리 (Callback)
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def naver_callback_view(request):
+    # 1. 네이버가 보내준 "인증 코드" 받기
+    code = request.GET.get('code')
+    state = request.GET.get('state')
+
+    if not code:
+        return Response({"message": "네이버 인증 코드가 없습니다."}, status=400)
+
+    # 2. 인증 코드를 주고 "액세스 토큰" 받아오기
+    token_url = "https://nid.naver.com/oauth2.0/token"
+    token_params = {
+        "grant_type": "authorization_code",
+        "client_id": settings.NAVER_CLIENT_ID,
+        "client_secret": settings.NAVER_CLIENT_SECRET,
+        "code": code,
+        "state": state,
+    }
+    
+    token_res = requests.get(token_url, params=token_params)
+    token_json = token_res.json()
+
+    if "error" in token_json:
+        return Response({"error": token_json.get("error_description")}, status=400)
+
+    naver_access_token = token_json.get("access_token")
+
+    # 3. 액세스 토큰으로 "유저 정보" 가져오기
+    profile_url = "https://openapi.naver.com/v1/nid/me"
+    headers = {"Authorization": f"Bearer {naver_access_token}"}
+    
+    profile_res = requests.get(profile_url, headers=headers)
+    profile_json = profile_res.json()
+    
+    # 네이버는 response 키 안에 실질적인 유저 정보가 들어있음
+    naver_account = profile_json.get("response")
+    
+    if not naver_account:
+        return Response({"error": "네이버 유저 정보를 가져오지 못했습니다."}, status=400)
+
+    email = naver_account.get("email")
+    social_id = naver_account.get("id")  # 네이버의 고유 사용자 ID
+    # 네이버는 닉네임, 프로필 사진 등도 줌 (필요하면 사용)
+    # nickname = naver_account.get("nickname") 
+
+    if not email:
+        return Response({"error": "이메일 동의가 필요합니다."}, status=400)
+
+    # 4. 내 DB에서 회원가입 또는 로그인 처리
+    try:
+        # 4-1. 이메일로 기존 회원 찾기
+        user = User.objects.get(email=email)
+        
+        # 소셜 계정 연결 여부 확인 (없으면 연결)
+        # 이미 구글로 가입했어도 이메일이 같으면 통합됨
+        SocialAccount.objects.get_or_create(
+            user=user,
+            provider='NAVER',
+            defaults={'provider_uid': social_id}
+        )
+
+    except User.DoesNotExist:
+        # 4-2. 회원이 아니면 신규 가입
+        # 닉네임 임시 생성 (예: user_abcdef12)
+        # social_id가 길어서 앞부분만 따옴
+        temp_nickname = f"user_{social_id[:8]}"
+        
+        user = User.objects.create_user(
+            username=email,  # 구글과 동일하게 username=email
+            email=email,
+            password=None,   # 소셜 유저는 비밀번호 없음
+            nickname=temp_nickname
+        )
+        
+        # 소셜 계정 정보 저장
+        SocialAccount.objects.create(
+            user=user,
+            provider='NAVER',
+            provider_uid=social_id
+        )
+
+    # 5. ★ Django 세션 로그인 (하이브리드 핵심 1)
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+    # 6. ★ JWT 토큰 생성 (하이브리드 핵심 2)
+    token = RefreshToken.for_user(user)
+    access_token = str(token.access_token)
+    refresh_token = str(token)
+
+    # ★ 닉네임 인코딩 (한글 깨짐 방지)
+    encoded_nickname = quote(user.nickname)
+
+    # 7. 페이지 이동 로직 (구글 코드와 동일하게 처리)
+    # 신규 가입자(임시 닉네임)라면 -> 닉네임 설정 페이지로
+    if user.nickname.startswith('user_'):
+        return redirect(f'/users/nickname/?access={access_token}&refresh={refresh_token}&next=preference&nickname={encoded_nickname}')
+    else:
+        # 기존 회원 -> 메인 페이지로
+        return redirect(f'/?access={access_token}&refresh={refresh_token}&nickname={encoded_nickname}')
+
 
 # =============================================================
 # 4. 메인 화면 (★ Real DB 연동 완료)
@@ -237,11 +363,16 @@ def main_view(request):
                 'isFavorite': True
             })
 
-    # 3. 내 식재료 (소비기한 임박한 순서 8개)
+    # 3. 내 식재료 (유통기한 임박한 순서 8개)
     ingredients = []
     if user.is_authenticated:
-        # [Logic] is_consumed=False인 것만, expire_at 오름차순(급한거 먼저)
-        ing_qs = UserIngredient.objects.filter(user=user, is_consumed=False).select_related('ingredient').order_by('expire_at')[:8]
+        # [Logic] is_consumed=False인 것만, expire_at 오름차순(급한거 먼저), NULL은 마지막에 배치
+        ing_qs = UserIngredient.objects.filter(
+            user=user, 
+            is_consumed=False
+        ).select_related('ingredient').order_by(
+            F('expire_at').asc(nulls_last=True)
+        )[:8]
         today = date.today()
         
         for item in ing_qs:
