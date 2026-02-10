@@ -137,10 +137,14 @@ async function fetchCategories() {
         container.innerHTML = categories.map((cat, index) => `
             <div class="category-item ${index === 0 ? 'active' : ''}" 
                 onclick="selectCategory(this, ${cat.id})"
-                data-id="${cat.id}">  ${cat.icon_url || ''} ${cat.name}
+                data-id="${cat.id}">
+                
+                ${cat.icon_url ? `<img src="${cat.icon_url}" style="width:18px; height:18px; margin-right:4px; object-fit:contain;">` : ''}
+                
+                ${cat.name}
             </div>
         `).join('');
-
+        
         if (categories.length > 0) {
             currentCategoryId = categories[0].id;
             fetchIngredients(currentCategoryId);
