@@ -22,9 +22,9 @@ router.register(r'api', views.RecipeLogViewSet, basename='log-api')
 urlpatterns = [
     # --- [A] 화면(HTML) 페이지 (프론트엔드 팀원이 만든 구조 유지) ---
     # 사용자가 브라우저로 접속하는 주소입니다.
-    path('', views.log_list_view, name='log_list'),          # http://.../logs/
-    path('create/', views.log_create_view, name='log_create'), # http://.../logs/create/
-    path('<int:pk>/', views.log_detail_view, name='log_detail'), # http://.../logs/10/
+    path('', views.log_list_view, name='list'),          # http://.../logs/
+    path('create/', views.log_create_view, name='create'), # http://.../logs/create/
+    path('<int:pk>/', views.log_detail_view, name='detail'), # http://.../logs/10/
     # (주의: views.py에서 함수 인자를 pk로 받았으므로 <int:pk>로 맞춰줍니다)
 
     # --- [B] 데이터(JSON) API (JS가 통신하는 주소) ---
