@@ -112,80 +112,66 @@
      * @param {Number} maxResults - 최대 결과 개수
      * @returns {Promise} API 응답 데이터
      */
-    async function getRecipeRecommendations(ingredientIds = [], useAll = true, includeSpoonacular = true, maxResults = 20) {
+/**
+     * 레시피 추천 API 호출 (수정됨: 키워드 추가 & 비회원 허용)
+     */
+    async function getRecipeRecommendations(ingredientIds = [], useAll = true, includeSpoonacular = true, maxResults = 20, keyword = '') {
         const token = getAccessToken();
         
-        if (!token) {
-            console.error('로그인이 필요합니다');
-            throw new Error('로그인이 필요합니다');
+        // [수정] 헤더 설정 (토큰이 있을 때만 Authorization 추가)
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
         }
         
-            try {
-            // [수정됨] URL 경로 수정: /api/recipes/ -> /recipes/api/
+        try {
             const response = await fetch('/recipes/api/recommendations/', { 
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // 토큰 필수
-                },
+                headers: headers,
                 body: JSON.stringify({
                     ingredient_ids: ingredientIds,
                     use_all: useAll,
                     include_spoonacular: includeSpoonacular,
-                    max_results: maxResults
+                    max_results: maxResults,
+                    keyword: keyword // [추가] 검색어 전송
                 })
             });
             
             if (!response.ok) {
-                if (response.status === 401) {
+                // 토큰 만료 처리 (로그인 상태였던 경우에만)
+                if (response.status === 401 && token) {
                     const refreshed = await refreshAccessToken();
                     if (refreshed) {
-                        return getRecipeRecommendations(ingredientIds, useAll, includeSpoonacular, maxResults);
-                    } else {
-                        throw new Error('로그인이 만료되었습니다. 다시 로그인해주세요.');
+                        return getRecipeRecommendations(ingredientIds, useAll, includeSpoonacular, maxResults, keyword);
                     }
                 }
                 throw new Error(`API 호출 실패: ${response.status}`);
             }
             
             const data = await response.json();
-            console.log('레시피 추천 성공:', data);
+            console.log('레시피 로드 성공:', data);
             return data;
             
         } catch (error) {
-            console.error('레시피 추천 API 오류:', error);
+            console.error('레시피 API 오류:', error);
             throw error;
         }
     }
-
     /**
      * 레시피 검색 API 호출
      * @param {String} query - 검색 키워드
      * @returns {Promise} API 응답 데이터
      */
+/**
+     * 레시피 검색 API 호출 (수정됨: 추천 API 재사용)
+     */
     async function searchRecipes(query) {
-        try {
-            // [수정됨] URL 경로 수정: /api/recipes/ -> /recipes/api/
-            const response = await fetch(`/recipes/api/search/?q=${encodeURIComponent(query)}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                    // 검색은 로그인 없이도 될 수 있으므로 Authorization 헤더 상황에 따라 처리
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`검색 실패: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            console.log('레시피 검색 성공:', data);
-            return data;
-            
-        } catch (error) {
-            console.error('레시피 검색 API 오류:', error);
-            throw error;
-        }
+        // 검색어(query)를 keyword 파라미터로 넘겨서 통합 API 호출
+        // 재료(ingredientIds)는 빈 배열로 보냄
+        return await getRecipeRecommendations([], false, true, 20, query);
     }
 
     /**
@@ -464,6 +450,9 @@
          * @param {String} type - 'recommend' | 'search'
          * @param {String} query - 검색어 (type이 search일 때)
          */
+        /**
+         * 레시피 데이터 로드 및 렌더링 (수정됨)
+         */
         async function loadRecipes(type, query = '') {
             spinner.classList.add('show');
             resultsContainer.innerHTML = '';
@@ -472,31 +461,24 @@
                 let data;
                 
                 if (type === 'search') {
-                    // 검색 API 호출
-                    data = await searchRecipes(query);
+                    // [수정] 통합된 함수 사용 (검색어 전달)
+                    // getRecipeRecommendations(ids, useAll, spoonacular, max, keyword)
+                    data = await getRecipeRecommendations([], false, true, 20, query);
                 } else {
-                    // 필터에 따른 API 호출 분기
                     if (currentFilter === 'favorites') {
-                        // [TODO] 찜한 레시피 API 호출 (현재는 임시 처리)
-                        // data = await getFavoriteRecipes(); 
                         alert("찜한 레시피 기능은 준비 중입니다.");
                         spinner.classList.remove('show');
                         updateFilterCounts(0);
                         return;
                     } else {
-                        // 'all' 또는 'my-ingredients'는 추천 API 사용
-                        // (ingredient_ids가 비어있으면 전체 보유 재료 기반 추천)
+                        // 일반 추천 (검색어 없음)
                         data = await getRecipeRecommendations([], true, true);
                     }
                 }
-                
-                // 데이터 구조 표준화 (검색 결과 vs 추천 결과)
-                let recipes = [];
+               let recipes = [];
                 if (data.recipes) {
                     recipes = data.recipes;
                 } else if (data.categories) {
-                    // 추천 API는 카테고리별로 오므로 합쳐서 보여줌
-                    // (Figma 디자인은 통짜 리스트이므로 병합)
                     recipes = [
                         ...data.categories.urgent_ready.recipes,
                         ...data.categories.ready.recipes,
@@ -504,7 +486,6 @@
                     ];
                 }
 
-                // 결과 렌더링
                 if (recipes.length === 0) {
                     resultsContainer.innerHTML = `
                         <div class="empty-state">
@@ -519,7 +500,6 @@
                     resultsContainer.innerHTML = html;
                 }
                 
-                // 필터 칩의 숫자(Count) 업데이트
                 updateFilterCounts(recipes.length);
 
             } catch (error) {
@@ -532,7 +512,6 @@
                 spinner.classList.remove('show');
             }
         }
-
         /**
          * 필터 칩의 카운트 숫자 업데이트
          */
