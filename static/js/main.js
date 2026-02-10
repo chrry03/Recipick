@@ -265,11 +265,20 @@
 
         let ingredients = [];
         try {
-            if (container.dataset.ingredients) {
-                ingredients = JSON.parse(container.dataset.ingredients);
+
+            const dataScript = document.getElementById('ingredients-data');
+            if (dataScript) {
+                ingredients = JSON.parse(dataScript.textContent);
+            } else {
+                // fallback: data-attribute 방식
+                const parentContainer = container.closest('.ingredients-container');
+                if (parentContainer && parentContainer.querySelector('[data-ingredients]')) {
+                    ingredients = JSON.parse(parentContainer.querySelector('[data-ingredients]').dataset.ingredients);
+                }
             }
+            console.log('식재료 데이터:', ingredients);
         } catch (e) {
-            console.error('식재료 데이터 파싱 오류:', e, container.dataset.ingredients);
+            console.error('식재료 데이터 파싱 오류:', e);
             ingredients = [];
         }
         
@@ -281,17 +290,57 @@
             return;
         }
 
+        // 유통기한 임박한 순으로 정렬 (ingredients.js의 sortIngredients 로직 참고)
+        ingredients.sort((a, b) => {
+            // daysLeft 값을 숫자로 변환하여 비교
+            const getDaysValue = (daysLeft) => {
+                // null, undefined, 빈 문자열, '-' 처리
+                if (!daysLeft || daysLeft === '-' || daysLeft === null || daysLeft === undefined) return null;
+                if (daysLeft === 'D-Day') return 0;
+                if (typeof daysLeft === 'string' && daysLeft.startsWith('D+')) {
+                    // 지난 것 (D+3 → -3)
+                    return -parseInt(daysLeft.substring(2)) || null;
+                }
+                if (typeof daysLeft === 'string' && daysLeft.startsWith('D-')) {
+                    // 남은 일수 (D-5 → 5)
+                    return parseInt(daysLeft.substring(2)) || null;
+                }
+                return null;
+            };
+            
+            const daysA = getDaysValue(a.daysLeft);
+            const daysB = getDaysValue(b.daysLeft);
+            
+            // 1. 소비기한 비교 (없는 것은 맨 뒤로)
+            if (daysA !== null && daysB === null) return -1; // A는 있고 B는 없음 -> A가 앞
+            if (daysA === null && daysB !== null) return 1;  // A는 없고 B는 있음 -> B가 앞
+            
+            if (daysA !== null && daysB !== null) {
+                if (daysA < daysB) return -1; // 날짜 빠른 순 (임박순)
+                if (daysA > daysB) return 1;
+            }
+            
+            // 2. 날짜가 같거나 둘 다 없으면 -> 이름 가나다순
+            const nameA = a.name || '';
+            const nameB = b.name || '';
+            return nameA.localeCompare(nameB, 'ko');
+        });
+
+        // 8개까지만 표시
+        ingredients = ingredients.slice(0, 8);
+
         ingredients.forEach(ingredient => {
             const btn = document.createElement('button');
+            const daysLeftDisplay = ingredient.daysLeft || '-';
             btn.className = 'ingredient-btn';
-            btn.setAttribute('aria-label', `${ingredient.name} (D-${ingredient.daysLeft})`);
+            btn.setAttribute('aria-label', `${ingredient.name} (${daysLeftDisplay})`);
             btn.innerHTML = `
                 <div class="ingredient-icon">
                     <img src="${escapeHtml(ingredient.image)}" alt="${escapeHtml(ingredient.name)}" loading="lazy">
                 </div>
                 <div class="ingredient-info">
                     <span class="ingredient-name">${escapeHtml(ingredient.name)}</span>
-                    <span class="ingredient-days">D-${ingredient.daysLeft}</span>
+                    <span class="ingredient-days">${escapeHtml(daysLeftDisplay)}</span>
                 </div>
             `;
             btn.addEventListener('click', () => {
