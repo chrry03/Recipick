@@ -4,8 +4,7 @@
     "pk": 1,
     "fields": {
       "name": "채소",
-      "parent": null,
-      "icon_url": "🥬"
+      "icon_url": "/static/images/categories/vegetable.png"
     }
   },
   {
@@ -13,8 +12,7 @@
     "pk": 2,
     "fields": {
       "name": "과일",
-      "parent": null,
-      "icon_url": "🍎"
+      "icon_url": "/static/images/categories/fruits.png"
     }
   },
   {
@@ -22,17 +20,15 @@
     "pk": 3,
     "fields": {
       "name": "육류",
-      "parent": null,
-      "icon_url": "🥩"
+      "icon_url": "/static/images/categories/meat.png"
     }
   },
   {
     "model": "ingredients.ingredientcategory",
     "pk": 4,
     "fields": {
-      "name": "수산",
-      "parent": null,
-      "icon_url": "🐟"
+      "name": "수산물",
+      "icon_url": "/static/images/categories/seafood.png"
     }
   },
   {
@@ -40,17 +36,15 @@
     "pk": 5,
     "fields": {
       "name": "유제품·계란",
-      "parent": null,
-      "icon_url": "🥛"
+      "icon_url": "/static/images/categories/dairy-products.png"
     }
   },
   {
     "model": "ingredients.ingredientcategory",
     "pk": 6,
     "fields": {
-      "name": "두부·콩·단백질",
-      "parent": null,
-      "icon_url": "🌱"
+      "name": "두부·콩",
+      "icon_url": "/static/images/categories/tofu.png"
     }
   },
   {
@@ -58,8 +52,7 @@
     "pk": 7,
     "fields": {
       "name": "곡물",
-      "parent": null,
-      "icon_url": "🌾"
+      "icon_url": "/static/images/categories/grain.png"
     }
   },
   {
@@ -67,8 +60,7 @@
     "pk": 8,
     "fields": {
       "name": "면류",
-      "parent": null,
-      "icon_url": "🍜"
+      "icon_url": "/static/images/categories/noodle.png"
     }
   },
   {
@@ -76,8 +68,7 @@
     "pk": 9,
     "fields": {
       "name": "제빵",
-      "parent": null,
-      "icon_url": "🍞"
+      "icon_url": "/static/images/categories/breads.png"
     }
   },
   {
@@ -85,8 +76,7 @@
     "pk": 10,
     "fields": {
       "name": "양념",
-      "parent": null,
-      "icon_url": "🧂"
+      "icon_url": "/static/images/categories/seasoning.png"
     }
   },
   {
@@ -94,8 +84,7 @@
     "pk": 11,
     "fields": {
       "name": "조미료·소스",
-      "parent": null,
-      "icon_url": "🥫"
+      "icon_url": "/static/images/categories/sauce.png"
     }
   },
   {
@@ -103,8 +92,7 @@
     "pk": 12,
     "fields": {
       "name": "견과·씨앗",
-      "parent": null,
-      "icon_url": "🥜"
+      "icon_url": "/static/images/categories/seeds.png"
     }
   },
   {
@@ -112,8 +100,7 @@
     "pk": 13,
     "fields": {
       "name": "건조식품",
-      "parent": null,
-      "icon_url": "🌬️"
+      "icon_url": "/static/images/categories/dry-food.png"
     }
   },
   {
@@ -121,8 +108,7 @@
     "pk": 14,
     "fields": {
       "name": "가공식품",
-      "parent": null,
-      "icon_url": "🥫"
+      "icon_url": "/static/images/categories/processed-food.png"
     }
   },
   {
@@ -130,26 +116,16 @@
     "pk": 15,
     "fields": {
       "name": "음료",
-      "parent": null,
-      "icon_url": "🥤"
+      "icon_url": "/static/images/categories/soda.png"
     }
   },
+
   {
     "model": "ingredients.ingredientcategory",
     "pk": 16,
     "fields": {
-      "name": "기타",
-      "parent": null,
-      "icon_url": "📦"
-    }
-  },
-  {
-    "model": "ingredients.ingredientcategory",
-    "pk": 17,
-    "fields": {
       "name": "직접 추가",
-      "parent": null,
-      "icon_url": "➕"
+      "icon_url": "/static/images/categories/add-button.png"
     }
   }
 ]
