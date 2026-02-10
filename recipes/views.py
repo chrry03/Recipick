@@ -146,7 +146,8 @@ def get_recipe_recommendations(request):
     keyword = request.data.get('keyword', '').strip() 
     
     # API 사용 여부 (기본값 True)
-    include_spoonacular = request.data.get('include_spoonacular', True)
+    include_spoonacular = False
+    #include_spoonacular = request.data.get('include_spoonacular', True)
 
     # 3. 식재료 필터링
     if use_all:
