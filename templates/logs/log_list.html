@@ -9,30 +9,26 @@
 
 {% block content %}
 <div class="app-container">
-    <!-- Header -->
     {% include 'header.html' %}
 
-    <!-- Month Selector -->
     <div class="month-selector">
-        <button class="month-nav prev" id="prevMonth" aria-label="이전 달">&lt;</button>
-        <h2 class="current-month" id="currentMonth">{{ current_month|default:"1" }}월</h2>
-        <button class="month-nav next" id="nextMonth" aria-label="다음 달">&gt;</button>
+        <a href="?year={{ prev_year }}&month={{ prev_month }}" class="month-nav prev" aria-label="이전 달">&lt;</a>
+        <h2 class="current-month">{{ current_month }}월</h2>
+        <a href="?year={{ next_year }}&month={{ next_month }}" class="month-nav next" aria-label="다음 달">&gt;</a>
     </div>
 
-    <!-- Divider -->
     <div class="divider"></div>
 
-    <!-- Recipe Log List -->
-    <div class="recipe-list" id="recipeList">
+    <div class="recipe-list">
         {% for log in logs %}
-        <div class="recipe-item" data-log-id="{{ log.id }}">
+        <div class="recipe-item" onclick="location.href='{% url 'logs:detail' log.id %}'" style="cursor: pointer;">
             <div class="date-time">
                 <div class="date">{{ log.day }}일</div>
                 <div class="time">{{ log.time }}</div>
             </div>
             <div class="recipe-image {% if not log.image %}placeholder{% endif %}">
                 {% if log.image %}
-                    <img src="{{ log.image }}" alt="{{ log.recipe_name }}" onerror="this.parentElement.classList.add('placeholder'); this.remove();">
+                    <img src="{{ log.image }}" alt="{{ log.recipe_name }}">
                 {% else %}
                     <img src="{% static 'images/Recipick_logo.png' %}" alt="Recipick 로고" class="placeholder-logo">
                 {% endif %}
@@ -41,18 +37,15 @@
                 <h3 class="recipe-title">{{ log.recipe_name }}</h3>
                 <div class="rating">
                     <span class="rating-label">난이도:</span>
-                    <span class="stars">{{ log.difficulty_stars|safe }}</span>
+                    <span class="stars">{{ log.difficulty_stars }}</span>
                 </div>
                 <div class="rating">
                     <span class="rating-label">만족도:</span>
-                    <span class="stars">{{ log.satisfaction_stars|safe }}</span>
+                    <span class="stars">{{ log.satisfaction_stars }}</span>
                 </div>
             </div>
         </div>
-        </a>
-        {% if not forloop.last %}
         <div class="divider-dashed"></div>
-        {% endif %}
         {% empty %}
         <div class="empty-state">
             <p class="empty-message">등록된 일지가 없습니다.</p>
@@ -60,12 +53,10 @@
         {% endfor %}
     </div>
 
-    <!-- Instagram Share Button -->
-    <button class="floating-btn" id="instagramShareBtn" aria-label="인스타그램 공유">
-        <img src="{% static 'images/insta_share_btn.png' %}" alt="인스타그램 공유" width="56" height="56">
+    <button class="floating-btn" id="instagramShareBtn">
+        <img src="{% static 'images/insta_share_btn.png' %}" alt="공유" width="56" height="56">
     </button>
 
-    <!-- Bottom Navigation -->
     {% include 'base_with_navbar.html' %}
 </div>
 {% endblock %}
