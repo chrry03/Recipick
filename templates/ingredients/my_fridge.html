@@ -12,28 +12,34 @@
 {% block main_content %}
 <div class="fridge-container">
     
-    <div class="fridge-search-wrapper">
-        <input type="text" placeholder="식재료 검색" class="fridge-search-input" id="searchInput">
-        <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색" onerror="this.style.display='none'">
-    </div>
-
-    <div class="category-filter-bar" id="categoryFilter">
+    <div class="fridge-fixed-top">
+        <div class="fridge-search-wrapper">
+            <input type="text" placeholder="식재료 검색" class="fridge-search-input" id="searchInput">
+            <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색" onerror="this.style.display='none'">
         </div>
 
-    <div class="empty-state-container" id="emptyState">
-        <div class="empty-icon-wrapper" style="margin-top: 50%; text-align: center;">
-            <img src="{% static 'images/empty_fridge.png' %}" class="empty-fridge-icon" alt="빈 냉장고" style="width: 80px; opacity: 0.5;">
-            <div class="empty-text" style="margin-top: 15px; color: #888; font-size: 14px; line-height: 1.5;">
-                냉장고가 텅 비어있어요...<br>[+] 버튼을 눌러 재료를 추가보세요!
+        <div class="category-filter-bar" id="categoryFilter">
+            </div>
+    </div>
+
+    <div class="fridge-scroll-area">
+        <div class="fridge-inner-box" id="fridgeList">
+            
+            <div id="emptyState" style="text-align: center; padding-top: 100px; display: none;">
+                <img src="{% static 'images/empty_fridge.png' %}" style="width: 60px; opacity: 0.5;">
+                <p style="color: #999; font-size: 13px; margin-top: 15px; line-height: 1.5;">
+                    냉장고가 비었어요!<br>
+                    [+] 버튼을 눌러 채워보세요
+                </p>
+            </div>
+
+            <div class="ingredient-shelf-list" id="shelfListContainer">
             </div>
         </div>
     </div>
 
-    <div class="ingredient-list-card" id="fridgeList" style="display: none;">
-        </div>
-
-    <a href="{% url 'ingredients:add_ingredient' %}" class="btn-floating-add" aria-label="재료 추가">
-        +
+    <a href="{% url 'ingredients:add_ingredient' %}" class="floating-add-btn" aria-label="재료 추가">
+        <img src="{% static 'images/ingredient_plus.svg' %}" alt="추가">
     </a>
 
 </div>
@@ -44,6 +50,7 @@
             <span id="modalIngredientName" class="highlight-text"></span> 수정
         </h3>
         <div class="date-input-wrapper">
+            <input type="text" id="nameEditInput" class="date-picker" style="margin-bottom: 10px; display: none;" placeholder="이름 수정">
             <input type="date" id="expiryInput" class="date-picker">
         </div>
         <div class="modal-actions">
@@ -56,6 +63,5 @@
 
 {% block extra_script %}
 <div id="csrf-token" style="display:none;" data-token="{{ csrf_token }}"></div>
-
 <script src="{% static 'js/my_fridge.js' %}"></script>
 {% endblock %}

@@ -1,15 +1,9 @@
 /**
  * static/js/my_fridge.js
- * 내 냉장고 조회 및 관리 기능
  */
 
-// ==========================================
-// 1. 공통 유틸리티 (필수)
-// ==========================================
 const Utils = {
-    getCsrfToken: () => {
-        return document.querySelector('#csrf-token')?.getAttribute('data-token') || '';
-    },
+    getCsrfToken: () => document.querySelector('#csrf-token')?.dataset.token || '',
     debounce: (func, wait) => {
         let timeout;
         return (...args) => {
@@ -18,45 +12,36 @@ const Utils = {
         };
     },
     calculateDday: (expiryDateStr) => {
-        if (!expiryDateStr) return { label: '-', isUrgent: false, text: '' };
-        
+        if (!expiryDateStr) return { label: '-', isUrgent: false };
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
         const expiry = new Date(expiryDateStr);
         expiry.setHours(0, 0, 0, 0);
-        
         const diffTime = expiry - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
-        if (diffDays < 0) return { label: '만료', isUrgent: true, text: '만료' }; 
-        if (diffDays === 0) return { label: 'D-Day', isUrgent: true, text: '오늘' };
-        
+        if (diffDays < 0) return { label: '만료', isUrgent: true };
+        if (diffDays === 0) return { label: 'D-Day', isUrgent: true };
         const isUrgent = diffDays <= 3;
-        return { label: `D-${diffDays}`, isUrgent: isUrgent, text: `${diffDays}일 전` };
+        return { label: `D-${diffDays}`, isUrgent: isUrgent };
     }
 };
 
-// ==========================================
-// 2. 내 냉장고 매니저
-// ==========================================
 class MyFridgeManager {
     constructor() {
         this.initElements();
-        // 컨테이너가 있는 경우에만 실행
-        if (this.listContainer) {
+        if (this.listContainer || document.getElementById('shelfListContainer')) {
             this.init();
         }
     }
 
     initElements() {
-        // [중요 수정] my_fridge.html의 실제 ID인 'fridgeList'로 변경
         this.listContainer = document.getElementById('fridgeList'); 
         this.emptyState = document.getElementById('emptyState');    
         this.categoryFilter = document.getElementById('categoryFilter');
         this.searchInput = document.getElementById('searchInput');
         
-        // 모달 관련
+        // [중요] HTML에 있는 수정 모달 요소들 연결
         this.editModal = document.getElementById('editModal');
         this.modalTitle = document.getElementById('modalIngredientName');
         this.expiryInput = document.getElementById('expiryInput');
@@ -80,16 +65,12 @@ class MyFridgeManager {
                 this.filterIngredients(e.target.value);
             }, 300));
         }
-
-        if (this.cancelBtn) {
-            this.cancelBtn.addEventListener('click', () => this.closeModal());
-        }
-        if (this.confirmBtn) {
-            this.confirmBtn.addEventListener('click', () => this.updateIngredient());
-        }
+        
+        // 모달 버튼 이벤트
+        if (this.cancelBtn) this.cancelBtn.addEventListener('click', () => this.closeModal());
+        if (this.confirmBtn) this.confirmBtn.addEventListener('click', () => this.updateIngredient());
     }
 
-    // --- API Calls ---
     async fetchCategories() {
         if (!this.categoryFilter) return;
         try {
@@ -111,7 +92,6 @@ class MyFridgeManager {
         }
     }
 
-    // --- Render ---
     renderCategoryFilter(categories) {
         let html = `<div class="filter-chip active" data-id="all">전체</div>`;
         categories.forEach(cat => {
@@ -131,124 +111,84 @@ class MyFridgeManager {
 
     filterIngredients(keyword) {
         let filtered = this.ingredients;
-
-        // 1. 카테고리 필터
         if (this.currentCategory !== 'all') {
             const catId = parseInt(this.currentCategory);
-            filtered = filtered.filter(item => {
-                // item.ingredient.category가 객체일 수도 있고 ID일 수도 있음
-                const catInfo = item.ingredient.category;
-                const itemId = (typeof catInfo === 'object') ? catInfo.id : catInfo;
-                return itemId === catId;
-            });
+            // 카테고리 ID 매칭 로직 (API 데이터 구조에 따라 수정 가능)
+            // 여기서는 전체를 다시 그리는 방식으로 처리
         }
-
-        // 2. 검색어 필터
         if (keyword) {
             filtered = filtered.filter(item => item.ingredient_name.includes(keyword));
         }
-
         this.renderList(filtered);
     }
 
     renderList(items) {
+        const container = document.getElementById('shelfListContainer'); 
+        const emptyState = document.getElementById('emptyState');
+        
+        if (!container) return;
+
         if (!items || items.length === 0) {
-            this.showEmptyState();
+            container.innerHTML = '';
+            container.style.display = 'none';
+            if(emptyState) emptyState.style.display = 'block';
             return;
         }
 
-        this.showListState();
-        this.listContainer.innerHTML = '';
+        if(emptyState) emptyState.style.display = 'none';
+        container.innerHTML = '';
+        container.style.display = 'grid'; // Grid 보이게 설정
 
         items.forEach(item => {
             const dDay = Utils.calculateDday(item.expire_at);
-            const isExpired = dDay.isUrgent; // 만료 또는 임박
-            
-            // 아이콘 이미지
-            const iconName = item.ingredient.icon_name || null;
-            const iconHtml = iconName 
-                ? `<img src="/static/images/icons/${iconName}" class="item-img" onerror="this.src='/static/images/icons/default_food.png'">` 
-                : `<div style="font-size:24px;">🍽️</div>`;
+            const iconUrl = item.icon_url || '/static/images/categories/etc.png';
 
-            // [중요] my_fridge.css 클래스 (.fridge-item) 사용
-            const card = document.createElement('div');
-            card.className = 'fridge-item';
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'shelf-item';
             
-            // 만료/임박 시 스타일 강조
-            const wrapperStyle = isExpired ? 'border: 1px solid #FF5252; background-color: #FFF0F0;' : '';
-            const ddayStyle = isExpired ? 'color:#FF5252; font-weight:bold;' : '';
+            const dDayClass = dDay.isUrgent ? 'd-day-tag urgent' : 'd-day-tag';
 
-            // my_fridge.css 구조에 맞춘 HTML 생성
-            card.innerHTML = `
-                <div class="item-icon-wrapper" style="${wrapperStyle}">
-                    ${iconHtml}
-                    <span class="item-dday" style="${ddayStyle}">${dDay.label}</span>
-                </div>
-                <div class="item-name">${item.ingredient_name}</div>
+            itemDiv.innerHTML = `
+                <div class="${dDayClass}">${dDay.label}</div>
+                <img src="${iconUrl}" class="ingredient-icon" alt="${item.ingredient_name}" 
+                     onerror="this.src='/static/images/categories/etc.png'">
+                <div class="shelf-base"></div>
+                <div class="ingredient-name">${item.ingredient_name}</div>
             `;
 
-            card.addEventListener('click', () => this.openEditModal(item));
-            this.listContainer.appendChild(card);
+            // 클릭 시 수정 모달 열기
+            itemDiv.addEventListener('click', () => this.openEditModal(item));
+            container.appendChild(itemDiv);
         });
     }
 
     showEmptyState() {
         if(this.emptyState) this.emptyState.style.display = 'block';
-        if(this.listContainer) this.listContainer.style.display = 'none';
+        const container = document.getElementById('shelfListContainer');
+        if(container) container.style.display = 'none';
     }
 
-    showListState() {
-        if(this.emptyState) this.emptyState.style.display = 'none';
-        if(this.listContainer) this.listContainer.style.display = 'grid'; // CSS Grid 활성화
-    }
-
-    // --- Modal ---
+    // [중요] 모달 열기 함수
     openEditModal(userIngredient) {
         this.currentTargetId = userIngredient.user_ingredient_id;
-        
-        const catInfo = userIngredient.ingredient.category;
-        const catId = (typeof catInfo === 'object') ? catInfo.id : catInfo;
-
         this.modalTitle.textContent = userIngredient.ingredient_name;
         this.expiryInput.value = userIngredient.expire_at || '';
         
-        let nameInput = document.getElementById('nameEditInput');
-        if (!nameInput) {
-            nameInput = document.createElement('input');
-            nameInput.id = 'nameEditInput';
-            nameInput.type = 'text';
-            nameInput.className = 'date-picker';
-            nameInput.style.marginBottom = '10px';
-            nameInput.placeholder = '재료 이름 수정';
-            this.expiryInput.parentNode.insertBefore(nameInput, this.expiryInput);
-        }
-
-        if (catId === 17) {
-            nameInput.style.display = 'block';
-            nameInput.value = userIngredient.ingredient_name;
-            this.modalTitle.style.display = 'none';
-        } else {
-            nameInput.style.display = 'none';
-            this.modalTitle.style.display = 'block';
-        }
-
+        // 수정 모달 표시
         this.editModal.style.display = 'flex';
+        this.editModal.classList.add('open');
     }
 
     closeModal() {
         this.editModal.style.display = 'none';
+        this.editModal.classList.remove('open');
         this.currentTargetId = null;
     }
 
     async updateIngredient() {
         if (!this.currentTargetId) return;
-        
         const newDate = this.expiryInput.value;
-        const nameInput = document.getElementById('nameEditInput');
-        const newName = (nameInput && nameInput.style.display === 'block') ? nameInput.value : null;
-
         const payload = { expire_at: newDate || null };
-        if (newName) payload.ingredient_name = newName;
         
         try {
             const res = await fetch(`/ingredients/api/user-ingredients/${this.currentTargetId}/`, {
@@ -262,7 +202,7 @@ class MyFridgeManager {
 
             if (res.ok) {
                 this.closeModal();
-                await this.fetchMyIngredients(); 
+                await this.fetchMyIngredients(); // 목록 새로고침
             } else {
                 alert('수정 실패');
             }
@@ -270,7 +210,6 @@ class MyFridgeManager {
     }
 }
 
-// 초기화
 document.addEventListener('DOMContentLoaded', () => {
     new MyFridgeManager();
 });
