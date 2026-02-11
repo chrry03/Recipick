@@ -1,6 +1,5 @@
 /**
  * static/js/add_ingredients.js
- * 식재료 검색 및 추가 기능 (전체 탭 제거 및 수정 완료)
  */
 
 const Utils = {
@@ -24,6 +23,7 @@ class IngredientAdder {
         if (this.container) this.init();
     }
 
+    // [중요] HTML의 ID와 정확히 매칭
     initElements() {
         this.container = document.getElementById('ingredientGrid'); 
         this.categorySidebar = document.getElementById('categoryListContainer');
@@ -31,6 +31,7 @@ class IngredientAdder {
         this.submitBtn = document.getElementById('submitBtn');
         this.countBadge = document.getElementById('countBadge');
 
+        // 소비기한 모달
         this.dateModal = document.getElementById('dateModal');
         this.modalIngredientName = document.getElementById('modalIngredientName');
         this.expiryInput = document.getElementById('expiryInput');
@@ -38,11 +39,13 @@ class IngredientAdder {
         this.modalConfirmBtn = document.getElementById('confirmBtn');
         this.modalCancelBtn = document.getElementById('cancelBtn');
 
+        // 직접 추가 모달
         this.directAddModal = document.getElementById('directAddModal');
         this.customInput = document.getElementById('customIngredientInput');
         this.directAddConfirmBtn = document.getElementById('directAddConfirmBtn');
         this.directAddCancelBtn = document.getElementById('directAddCancelBtn');
 
+        // 성공 모달
         this.successModal = document.getElementById('successModal');
         this.successConfirmBtn = document.getElementById('successConfirmBtn');
     }
@@ -51,18 +54,19 @@ class IngredientAdder {
         this.attachEventListeners();
         await this.fetchOwnedIngredients(); 
         await this.fetchCategories();       
-        // 초기 로드는 카테고리 로드 후 첫 번째 카테고리로 진행
     }
 
     attachEventListeners() {
+        // 검색
         if (this.searchInput) {
             this.searchInput.addEventListener('input', Utils.debounce((e) => {
                 this.fetchIngredients(this.currentCategory, e.target.value);
             }, 300));
         }
 
-        this.modalCancelBtn.addEventListener('click', () => this.closeModal(this.dateModal));
-        this.modalConfirmBtn.addEventListener('click', () => this.confirmSelection());
+        // 소비기한 모달 버튼 연결
+        if (this.modalCancelBtn) this.modalCancelBtn.addEventListener('click', () => this.closeModal(this.dateModal));
+        if (this.modalConfirmBtn) this.modalConfirmBtn.addEventListener('click', () => this.confirmSelection());
         
         if (this.noExpiryCheck) {
             this.noExpiryCheck.addEventListener('change', (e) => {
@@ -71,6 +75,7 @@ class IngredientAdder {
             });
         }
 
+        // 직접 추가 모달 버튼 연결
         if (this.directAddCancelBtn) {
             this.directAddCancelBtn.addEventListener('click', () => this.closeModal(this.directAddModal));
         }
@@ -78,6 +83,7 @@ class IngredientAdder {
             this.directAddConfirmBtn.addEventListener('click', () => this.confirmDirectAdd());
         }
 
+        // 성공 모달 확인 버튼 -> 냉장고로 이동
         if (this.successConfirmBtn) {
             this.successConfirmBtn.addEventListener('click', () => {
                 const myFridgeUrl = document.querySelector('[data-my-fridge-url]')?.dataset.myFridgeUrl || '/ingredients/my-fridge/';
@@ -85,12 +91,13 @@ class IngredientAdder {
             });
         }
 
+        // 등록 완료 버튼
         if (this.submitBtn) {
             this.submitBtn.addEventListener('click', () => this.submitAll());
         }
     }
 
-    // --- API Calls ---
+    // --- API Calls (기존과 동일) ---
     async fetchOwnedIngredients() {
         try {
             const res = await fetch('/ingredients/api/user-ingredients/?include_expired=true');
@@ -98,9 +105,7 @@ class IngredientAdder {
                 const data = await res.json();
                 const results = Array.isArray(data) ? data : (data.results || []);
                 this.ownedMap = {};
-                results.forEach(ui => { 
-                    this.ownedMap[ui.ingredient] = ui.user_ingredient_id; 
-                });
+                results.forEach(ui => { this.ownedMap[ui.ingredient] = ui.user_ingredient_id; });
             }
         } catch (err) { console.error(err); }
     }
@@ -109,30 +114,27 @@ class IngredientAdder {
         try {
             const res = await fetch('/ingredients/api/categories/'); 
             const data = await res.json();
-            // 데이터 구조 확인 (results 안에 있는지 그냥 배열인지)
             const categories = Array.isArray(data) ? data : (data.results || []);
             this.renderCategories(categories);
             
-            // [추가] 카테고리 로드 후 첫 번째 카테고리 자동 선택 및 로드
             if (categories.length > 0) {
                 const firstCat = categories[0];
-                // 카테고리 ID가 id 또는 category_id 일 수 있음
                 const firstId = firstCat.id || firstCat.category_id;
-                
-                // 첫 번째 카테고리 활성화 UI 처리
-                const firstBtn = this.categorySidebar.querySelector(`.category-item[data-id="${firstId}"]`);
-                if(firstBtn) firstBtn.classList.add('active');
-                
                 this.currentCategory = firstId;
                 this.fetchIngredients(firstId);
+                
+                // 첫 번째 카테고리 활성화 표시
+                setTimeout(() => {
+                    const btn = this.categorySidebar.querySelector(`.category-item[data-id="${firstId}"]`);
+                    if(btn) btn.classList.add('active');
+                }, 100);
             }
         } catch (err) { console.error(err); }
     }
 
     async fetchIngredients(categoryId = '', keyword = '') {
-        this.container.innerHTML = '<div class="loading-msg">로딩 중...</div>';
+        this.container.innerHTML = '<div class="loading-msg" style="text-align:center; padding:20px; color:#999; font-size:12px;">로딩 중...</div>';
         try {
-            // [수정 완료] URL에서 'api/list/' 제거
             let url = `/ingredients/?`; 
             if (categoryId) url += `category_id=${categoryId}&`;
             if (keyword) url += `keyword=${encodeURIComponent(keyword)}`;
@@ -143,26 +145,26 @@ class IngredientAdder {
             this.renderIngredients(Array.isArray(data) ? data : (data.results || []));
         } catch (err) {
             console.error(err);
-            this.container.innerHTML = '<div class="loading-msg" style="margin-top:20px;">목록 로드 실패<br><span style="font-size:11px; color:#ccc;">(잠시 후 다시 시도해주세요)</span></div>';
+            this.container.innerHTML = '<div class="loading-msg">로드 실패</div>';
         }
     }
 
     // --- Render ---
     renderCategories(categories) {
         let html = '';
-        
-        // [수정] '전체' 탭 제거함
-        
         categories.forEach(cat => {
-            // 카테고리 ID 처리 (id 또는 category_id)
             const catId = cat.id || cat.category_id;
-            html += `<div class="category-item" data-id="${catId}">${cat.name}</div>`;
+            const iconHtml = cat.icon_url 
+                ? `<img src="${cat.icon_url}" class="category-icon" alt="${cat.name}" onerror="this.style.display='none'">` 
+                : '';
+
+            html += `<div class="category-item" data-id="${catId}">
+                        ${iconHtml}
+                        <span class="category-name">${cat.name}</span>
+                     </div>`;
         });
         
-        // 직접 추가 버튼
-        html += `<div class="category-item direct-add-btn" style="color: #FF7043; font-weight:bold;">
-                    <span style="margin-right:5px;">+</span> 직접 추가
-                 </div>`;
+        html += `<div class="category-item direct-add-btn" style="justify-content: center; font-weight:bold;">+ 직접 추가</div>`;
         
         this.categorySidebar.innerHTML = html;
 
@@ -183,7 +185,7 @@ class IngredientAdder {
     renderIngredients(ingredients) {
         this.container.innerHTML = '';
         if (!ingredients || ingredients.length === 0) {
-            this.container.innerHTML = '<div class="loading-msg">검색 결과가 없습니다.</div>';
+            this.container.innerHTML = '<div style="text-align:center; padding:20px; color:#999; font-size:12px;">검색 결과가 없습니다.</div>';
             return;
         }
 
@@ -193,56 +195,48 @@ class IngredientAdder {
     }
 
     createCardElement(ing) {
-        const masterId = ing.id; // 이제 serializer에서 id를 보내주므로 undefined가 아님!
+        const masterId = ing.id;
         const isOwned = this.ownedMap.hasOwnProperty(masterId);
         const isSelected = this.selectedItems.hasOwnProperty(masterId);
 
         const card = document.createElement('div');
         card.className = `ingredient-item ${isOwned || isSelected ? 'added' : ''}`;
         
-        const iconHtml = ing.icon 
-            ? `<img src="/static/images/icons/${ing.icon}" class="grid-icon" onerror="this.style.display='none'">` 
-            : '';
-
         card.innerHTML = `
             <div class="checkbox-icon"></div>
-            ${iconHtml}
             <span class="ingredient-name">${ing.name_ko}</span>
         `;
 
         card.addEventListener('click', () => this.handleItemClick(ing, card));
-        
-        if (typeof ing.id === 'string' && ing.id.startsWith('custom_')) {
-            this.container.prepend(card);
-        } else {
-            this.container.appendChild(card);
-        }
+        this.container.appendChild(card);
     }
 
-    // --- Logic ---
+    // --- Interaction Logic ---
     handleItemClick(ingredient, cardElement) {
         const masterId = ingredient.id;
         
+        // 이미 보유 중인 경우 삭제 로직
         if (this.ownedMap[masterId]) {
             if (confirm('냉장고에서 삭제하시겠습니까?')) {
                 this.deleteUserIngredient(this.ownedMap[masterId]).then(ok => {
-                    if (ok) { delete this.ownedMap[masterId]; cardElement.classList.remove('added'); }
+                    if (ok) { 
+                        delete this.ownedMap[masterId]; 
+                        cardElement.classList.remove('added'); 
+                    }
                 });
             }
             return;
         }
         
+        // 이미 선택한 경우 (취소)
         if (this.selectedItems[masterId]) {
             delete this.selectedItems[masterId];
             cardElement.classList.remove('added');
             this.updateCount();
-            
-            if (typeof masterId === 'string' && masterId.startsWith('custom_')) {
-                cardElement.remove();
-            }
             return;
         }
         
+        // 새로 선택 -> 날짜 입력 모달 열기
         this.openDateModal(ingredient, cardElement);
     }
 
@@ -250,11 +244,11 @@ class IngredientAdder {
         this.currentTarget = { ingredient, cardElement };
         this.modalIngredientName.textContent = ingredient.name_ko;
         
+        // 기본값: 오늘 + 7일
         const date = new Date();
         date.setDate(date.getDate() + 7); 
         this.expiryInput.valueAsDate = date;
         this.expiryInput.disabled = false;
-        
         if(this.noExpiryCheck) this.noExpiryCheck.checked = false;
         
         this.dateModal.classList.add('open');
@@ -267,8 +261,7 @@ class IngredientAdder {
     }
 
     closeModal(modal) {
-        const target = modal || this.dateModal;
-        target.classList.remove('open');
+        if(modal) modal.classList.remove('open');
         this.currentTarget = null;
     }
 
@@ -279,9 +272,10 @@ class IngredientAdder {
         let dateVal = this.expiryInput.value;
         if (this.noExpiryCheck.checked || !dateVal) dateVal = null;
 
+        // 선택 목록에 추가
         this.selectedItems[ingredient.id] = {
+            id: ingredient.id,
             name: ingredient.name_ko,
-            category: ingredient.category_name || '기타',
             expiry_date: dateVal
         };
 
@@ -290,13 +284,11 @@ class IngredientAdder {
         this.closeModal(this.dateModal);
     }
 
-    // [직접 추가] 백엔드 저장 로직
     async confirmDirectAdd() {
         const name = this.customInput.value.trim();
         if (!name) return;
         
         try {
-            // 1. 백엔드에 새 식재료 생성 요청
             const res = await fetch('/ingredients/api/custom/', {
                 method: 'POST',
                 headers: {
@@ -307,19 +299,14 @@ class IngredientAdder {
             });
 
             if (!res.ok) throw new Error('저장 실패');
-
-            // 2. 생성된 진짜 식재료 데이터 받기
             const newIngredient = await res.json(); 
 
-            // 3. 모달 닫기
             this.closeModal(this.directAddModal);
-
-            // 4. 화면에 카드 추가 및 즉시 선택 모달 열기
-            this.createCardElement(newIngredient);
-            const newCard = this.container.firstChild; 
-            newCard.classList.add('added');
             
-            // [중요] 생성된 재료로 소비기한 입력창 바로 띄우기
+            // 리스트에 추가하고 바로 선택 모드 진입
+            this.createCardElement(newIngredient);
+            const newCard = this.container.lastChild; 
+            newCard.classList.add('added');
             this.openDateModal(newIngredient, newCard);
 
         } catch (err) {
@@ -347,6 +334,7 @@ class IngredientAdder {
         const items = Object.values(this.selectedItems);
         
         if (items.length === 0) { 
+            // 선택된 게 없으면 그냥 이동
             const myFridgeUrl = document.querySelector('[data-my-fridge-url]')?.dataset.myFridgeUrl || '/ingredients/my-fridge/';
             window.location.href = myFridgeUrl;
             return; 
@@ -354,6 +342,7 @@ class IngredientAdder {
         
         try {
             const addUrl = document.querySelector('[data-add-ingredient-url]')?.dataset.addIngredientUrl || '/ingredients/add/';
+            
             const promises = items.map(item => 
                 fetch(addUrl, {
                     method: 'POST',
@@ -361,11 +350,16 @@ class IngredientAdder {
                         'Content-Type': 'application/json', 
                         'X-CSRFToken': Utils.getCsrfToken() 
                     },
-                    body: JSON.stringify({ added: [item] })
+                    body: JSON.stringify({ 
+                        ingredient_id: item.id,
+                        expire_at: item.expiry_date
+                    })
                 })
             );
+            
             await Promise.all(promises);
             this.successModal.classList.add('open');
+            
         } catch (err) { 
             console.error(err);
             alert('등록 중 오류가 발생했습니다.'); 

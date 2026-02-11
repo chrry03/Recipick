@@ -356,6 +356,13 @@ def my_fridge_view(request):
         cat_name = ui.ingredient.category.name if ui.ingredient.category else '기타'
         category_counts[cat_name] = category_counts.get(cat_name, 0) + 1
         
+        # [추가] 카테고리 아이콘 URL을 템플릿으로 전달
+        if ui.ingredient.category and ui.ingredient.category.icon_url:
+            ui.display_icon = ui.ingredient.category.icon_url
+        else:
+            # 카테고리가 없거나 아이콘이 없는 경우 기본 이미지 (예: 기타)
+            ui.display_icon = '/static/images/categories/etc.png'
+
         # D-Day 태그 생성
         if ui.expire_at:
             delta = (ui.expire_at - today).days

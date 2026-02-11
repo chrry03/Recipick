@@ -4,15 +4,14 @@ from datetime import date
 
 class IngredientCategorySerializer(serializers.ModelSerializer):
     """식재료 카테고리 시리얼라이저"""
-    
     subcategories = serializers.SerializerMethodField()
-    # 모델의 프로퍼티 이름인 display_icon을 사용
-    icon = serializers.CharField(source='display_icon', read_only=True)
+    # [수정] 프론트엔드가 'icon_url'을 찾으므로 이름을 맞춰줍니다.
+    icon_url = serializers.CharField(source='display_icon', read_only=True)
     
     class Meta:
         model = IngredientCategory
         fields = [
-            'category_id', 'name', 'parent', 'icon', 
+            'category_id', 'name', 'parent', 'icon_url',  # icon -> icon_url 변경
             'is_parent', 'full_path', 'subcategories'
         ]
     
@@ -23,45 +22,35 @@ class IngredientCategorySerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """식재료 마스터 시리얼라이저 (수정됨)"""
-    
-    # [핵심 수정 1] 프론트엔드가 'id'를 찾으므로 ingredient_id를 'id'로 내보냅니다.
+    """식재료 마스터 시리얼라이저"""
     id = serializers.IntegerField(source='ingredient_id', read_only=True)
-    
     category_name = serializers.CharField(source='category.name', read_only=True)
-    
-    # [핵심 수정 2] 모델에 icon_url 필드는 없고, icon 프로퍼티가 있습니다. source를 'icon'으로 변경!
-    icon = serializers.CharField(source='icon', read_only=True)
-    
-    all_names = serializers.SerializerMethodField()
+    # [수정] 여기도 icon_url로 통일
+    icon_url = serializers.CharField(source='icon', read_only=True)
     
     class Meta:
         model = IngredientMaster
         fields = [
-            'id', # [수정] id 필드 추가
-            'ingredient_id', 'name_ko', 'name_en', 'category', 
-            'category_name', 'aliases', 'icon', 'all_names'
+            'id', 'ingredient_id', 'name_ko', 'name_en', 'category', 
+            'category_name', 'aliases', 'icon_url' # icon -> icon_url 변경
         ]
-    
-    def get_all_names(self, obj):
-        return obj.get_all_names()
 
 
 class UserIngredientSerializer(serializers.ModelSerializer):
     """사용자 식재료 시리얼라이저"""
-    
     ingredient_name = serializers.CharField(source='ingredient.name_ko', read_only=True)
     category_name = serializers.CharField(source='ingredient.category.name', read_only=True)
     days_until_expiry = serializers.IntegerField(read_only=True)
     expiry_status = serializers.CharField(source='get_expiry_status', read_only=True)
-    icon = serializers.CharField(source='ingredient.icon', read_only=True)
+    # [수정] 여기도 icon_url로 통일
+    icon_url = serializers.CharField(source='ingredient.icon', read_only=True)
     urgency_score = serializers.IntegerField(source='get_urgency_score', read_only=True)
     
     class Meta:
         model = UserIngredient
         fields = [
             'user_ingredient_id', 'ingredient', 'ingredient_name', 
-            'category_name', 'icon', 'expire_at', 'days_until_expiry', 
+            'category_name', 'icon_url', 'expire_at', 'days_until_expiry', 
             'expiry_status', 'urgency_score', 'is_consumed', 
             'created_at', 'updated_at'
         ]

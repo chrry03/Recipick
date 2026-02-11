@@ -4,7 +4,7 @@
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/add_ingredients.css' %}">
 <style>
-    /* JS 호환성을 위한 추가 스타일 (CSS 파일에 넣어도 되지만 안전장치로 둠) */
+    /* 모달 스타일 */
     .modal-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.5); display: none;
@@ -126,9 +126,11 @@
 {% endblock main_content %}
 
 {% block extra_script %}
-<div data-add-ingredient-url="{% url 'ingredients:add_ingredient' %}" 
+<div id="csrf-token" 
+     data-token="{{ csrf_token }}" 
+     data-add-ingredient-url="{% url 'ingredients:add_ingredient' %}" 
      data-my-fridge-url="{% url 'ingredients:my_fridge' %}" 
-     data-csrf-token="{{ csrf_token }}" 
      style="display: none;"></div>
+
 <script src="{% static 'js/add_ingredients.js' %}"></script>
 {% endblock %}
