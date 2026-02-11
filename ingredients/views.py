@@ -151,7 +151,7 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         """
         식재료 등록 (개선된 버전)
-        
+
         Request Body:
         {
             "ingredient_id": 123,  // 기존 식재료 ID (선택)
@@ -160,6 +160,19 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
             "is_direct_input": false  // 직접 입력 여부
         }
         """
+
+        # [추가] 0. 식재료 개수 제한 (100개)
+        current_count = UserIngredient.objects.filter(
+            user=request.user, 
+            is_consumed=False
+        ).count()
+        
+        if current_count >= 100:
+            return Response(
+                {'error': '식재료는 최대 100개까지만 등록 가능합니다. 소진 처리 후 다시 등록해주세요.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         ingredient_id = request.data.get('ingredient_id')
         ingredient_name = request.data.get('ingredient_name')
         is_direct_input = request.data.get('is_direct_input', False)
