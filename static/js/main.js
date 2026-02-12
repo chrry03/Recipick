@@ -332,7 +332,7 @@
         });
 
         // 8개까지만 표시
-        ingredients = ingredients.slice(0, 8);
+        //ingredients = ingredients.slice(0, 8);
 
         ingredients.forEach(ingredient => {
             const btn = document.createElement('button');
