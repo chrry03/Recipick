@@ -489,8 +489,32 @@
 .big-logo-text { width: 254px; height: auto; }
 .btn-login-center { margin-top: 20px; }
 
-/* 알림 관련 스타일 (필요 시 복구) */
-/* .notification-container 제거 -> .app-container로 대체 */
+/* 알림(Notification)
+
+/* 메인 컨테이너 */
+.notification-container {
+    position: relative;
+    width: 100%;
+    max-width: 448px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding-bottom: 6rem;
+    overflow: hidden;
+}
+
+/* 배경 */
+.background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: linear-gradient(180deg, #f5ede0 0%, #f6f3ee 100%);
+    border-radius: 0;
+    z-index: -1;
+}
+
+/* 빈 메시지 (알림이 없을 때) */
 .empty-notification {
     position: absolute;
     left: 50%;
@@ -498,7 +522,17 @@
     transform: translateX(-50%);
     width: 100%;
 }
-.empty-message { font-size: 15px; line-height: 28px; color: #a5a5a4; text-align: center; }
+
+.empty-message {
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 15px;
+    line-height: 28px;
+    color: #a5a5a4;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* 헤더 그룹 */
 .header-group {
     position: absolute;
     left: 50%;
@@ -508,6 +542,58 @@
     max-width: calc(100% - 54px);
     height: 66px;
 }
+
+/* 뒤로가기 버튼 */
+.back-button {
+    position: absolute;
+    width: 23px;
+    height: 21px;
+    left: 3.13%;
+    top: 3.13%;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+}
+
+.back-arrow {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* 헤더 타이틀 */
+.header-title {
+    position: absolute;
+    left: 50%;
+    top: 5px;
+    transform: translateX(-50%);
+    font-family: 'MemomentKkukkukk', 'Noto Sans KR', sans-serif;
+    font-size: 30px;
+    line-height: 16px;
+    color: #555;
+    text-align: center;
+    font-weight: normal;
+    white-space: nowrap;
+}
+
+/* 구분선 */
+.divider-line {
+    position: absolute;
+    left: 50%;
+    top: 118px;
+    transform: translateX(-50%);
+    width: 324px;
+    max-width: calc(100% - 40px);
+    height: 1px;
+}
+
+.divider-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* 알림 리스트 컨테이너 */
 .notifications-list {
     position: absolute;
     left: 50%;
@@ -516,6 +602,8 @@
     width: 337px;
     max-width: calc(100% - 40px);
 }
+
+/* 알림 아이템 컨테이너 */
 .notification-item-container {
     position: relative;
     background-color: #f2f2f2;
@@ -529,15 +617,103 @@
     align-items: center;
     padding: 0 15px;
 }
-.notification-icon { width: 29px; height: 29px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.icon-image { width: 100%; height: 100%; object-fit: cover; }
+
+/* 당근 아이콘 */
+.notification-icon {
+    width: 29px;
+    height: 29px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.icon-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+/* 알림 메시지 */
 .notification-message {
     flex: 1;
     margin-left: 15px;
+    font-family: 'Gowun Dodum', sans-serif;
     font-size: 15px;
+    line-height: 28px;
     color: #000000;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.more-button { font-size: 15px; color: #555; margin-left: 10px; cursor: pointer; }
+
+/* 더보기 버튼 */
+.more-button {
+    font-size: 15px;
+    color: #555;
+    margin-left: 10px;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.more-button:hover {
+    opacity: 0.7;
+}
+
+/* 옵션 메뉴 */
+.options-menu {
+    position: absolute;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    min-width: 120px;
+    overflow: hidden;
+}
+
+.option-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.2s;
+    font-family: 'Gowun Dodum', sans-serif;
+}
+
+.option-item:hover {
+    background-color: #f5f5f5;
+}
+
+.option-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.option-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.option-item:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 400px) {
+    .notification-container {
+        width: 100%;
+        max-width: 377px;
+    }
+    
+    .background {
+        width: 100%;
+    }
+    
+    .notification-item-container {
+        width: calc(100% - 40px);
+    }
+}
