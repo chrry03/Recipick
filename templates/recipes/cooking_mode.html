@@ -29,7 +29,7 @@
     </div>
 
     <div class="mask-group">
-        {% if step_data.image %}
+        {% if step_data and step_data.image %}
             <div class="image-container">
                 <img src="{{ step_data.image }}" 
                      alt="{{ recipe.title }} - 단계 {{ current_step }}" 
