@@ -145,3 +145,18 @@
     }
 
 })();
+
+// ★ [추가] 삭제 버튼 클릭 시 실행되는 함수 (전역)
+window.deleteLog = function() {
+    if (confirm('정말 이 일지를 삭제하시겠습니까?')) {
+        const form = document.getElementById('deleteForm');
+        if (form) {
+            form.submit(); // 숨겨진 폼 제출 (POST 요청)
+        } else {
+            alert("삭제 처리 중 오류가 발생했습니다.");
+        }
+    }
+    // 메뉴 닫기
+    const menu = document.getElementById('optionsMenu');
+    if(menu) menu.style.display = 'none';
+};

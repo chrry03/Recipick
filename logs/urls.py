@@ -13,4 +13,7 @@ urlpatterns = [
     
     # 3. 상세 페이지 (http://127.0.0.1:8000/logs/10/)
     path('<int:pk>/', views.log_detail_view, name='detail'),
+
+    path('<int:pk>/update/', views.log_update_view, name='update'),
+    path('<int:pk>/delete/', views.log_delete_view, name='delete'),
 ]

@@ -137,3 +137,52 @@ def log_create_view(request):
         'recipe_name': recipe_name
     }
     return render(request, 'logs/log_create.html', context)
+
+# =============================================================
+# 4. 일지 수정 (GET: 기존 데이터 채운 폼, POST: 수정 반영)
+# =============================================================
+@login_required(login_url='/users/login/')
+def log_update_view(request, pk):
+    # 내 일지인지 확인 (남의 것은 404)
+    log = get_object_or_404(RecipeLog, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        # 기존 instance를 넣어줘야 '수정' 모드로 동작함
+        serializer = RecipeLogCreateSerializer(data=request.POST, instance=log)
+        
+        # 이미지 파일 처리
+        if 'image' in request.FILES:
+            data = request.POST.copy()
+            data['image'] = request.FILES['image']
+            serializer = RecipeLogCreateSerializer(data=data, instance=log)
+
+        if serializer.is_valid():
+            serializer.save()
+            messages.success(request, "일지가 수정되었습니다.")
+            return redirect('logs:detail', pk=log.pk)
+        else:
+            messages.error(request, f"수정 오류: {serializer.errors}")
+    
+    # GET 요청: 기존 데이터를 화면에 뿌려줌
+    context = {
+        'log': log, # 기존 일지 객체
+        'recipe_name': log.recipe.title,
+        'recipe_id': log.recipe.recipe_id,
+        'is_edit': True # 템플릿에서 '작성' vs '수정' 구분용
+    }
+    return render(request, 'logs/log_create.html', context)
+
+# =============================================================
+# 5. 일지 삭제 (POST 요청만 허용)
+# =============================================================
+@login_required(login_url='/users/login/')
+def log_delete_view(request, pk):
+    log = get_object_or_404(RecipeLog, pk=pk, user=request.user)
+    
+    if request.method == 'POST':
+        log.delete()
+        messages.success(request, "일지가 삭제되었습니다.")
+        return redirect('logs:list')
+    
+    # 만약 주소창에 직접 쳐서 GET으로 들어오면 상세페이지로 튕겨냄 (안전장치)
+    return redirect('logs:detail', pk=pk)
