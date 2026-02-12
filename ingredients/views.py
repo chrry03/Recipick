@@ -36,7 +36,7 @@ from ingredients.utils.mapper import IngredientMapper
 from .models import IngredientMaster, IngredientCategory 
 from .serializers import IngredientSerializer
 
-
+# [1] 직접 추가 생성 API 수정
 @api_view(['POST'])
 def create_custom_ingredient(request):
     name = request.data.get('name')
@@ -44,23 +44,22 @@ def create_custom_ingredient(request):
     if not name:
         return Response({'error': '이름을 입력해주세요.'}, status=400)
 
-    # 1. '직접 추가' 카테고리 찾기 (IngredientCategory 사용)
+    # DB에서 '직접 추가' 카테고리를 찾습니다. (fixtures에 있으므로 무조건 있음)
     try:
-        category, _ = IngredientCategory.objects.get_or_create(name='직접 추가')
-    except Exception as e:
-        print(f"카테고리 생성 오류: {e}")
-        category = None
+        category = IngredientCategory.objects.get(name='직접 추가')
+    except IngredientCategory.DoesNotExist:
+        # 만약 없으면 생성 (안전장치)
+        category = IngredientCategory.objects.create(name='직접 추가', icon_url='/static/images/categories/add-button.png')
 
-    # 2. 식재료 생성 (IngredientMaster 사용)
-    # 모델에 icon_name 필드가 없으므로 defaults에서 제외했습니다.
+    # 식재료 생성 (이미 있으면 가져오기)
     ingredient, created = IngredientMaster.objects.get_or_create(
         name_ko=name,
         defaults={
-            'category': category
+            'category': category,
+            'name_en': None # 필요한 경우
         }
     )
     
-    # 3. Serializer를 통해 프론트엔드 포맷(json)으로 변환
     serializer = IngredientSerializer(ingredient)
     return Response(serializer.data)
 
@@ -71,6 +70,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = IngredientMaster.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny]
+    # [핵심 수정 1] 페이지네이션 비활성화 (20개 제한 해제)
+    pagination_class = None 
     filter_backends = [filters.SearchFilter]
     search_fields = ['name_ko', 'name_en', 'aliases']
     
@@ -95,6 +96,11 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
         keyword = request.query_params.get('keyword', '')
         if not keyword:
             return Response([])
+        
+        # [핵심 수정 2] 검색 제한 늘리기 (10 -> 50)
+        suggestions = IngredientMapper.suggest_matches(keyword, limit=50)
+        serializer = self.get_serializer(suggestions, many=True)
+        return Response(serializer.data)
         
         # IngredientMapper 사용
         suggestions = IngredientMapper.suggest_matches(keyword, limit=10)
@@ -129,6 +135,8 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
     """사용자 보유 식재료 관리"""
     serializer_class = UserIngredientSerializer
     permission_classes = [IsAuthenticated]
+    # [핵심 수정] 내 냉장고 목록 페이지네이션 해제 (20개 제한 풀기!)
+    pagination_class = None
     
     def get_queryset(self):
         return UserIngredient.objects.filter(
@@ -393,77 +401,128 @@ def my_fridge_view(request):
     }
     return render(request, 'ingredients/my_fridge.html', context)
 
-
 @login_required
 def add_ingredient_view(request):
     """
-    식재료 추가 페이지
+    식재료 추가 페이지 (Bulk Insert 및 개수 제한 로직 적용)
     """
     # [POST] 데이터 저장
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             
+            # 1. 현재 냉장고에 있는 식재료 개수 확인
+            current_count = UserIngredient.objects.filter(
+                user=request.user, 
+                is_consumed=False
+            ).count()
+            
+            # 2. 남은 자리 계산 (예: 99개면 1자리 남음)
+            available_slots = 100 - current_count
+            
+            # -----------------------------------------------------------
+            # [CASE A] 대량 추가 (Bulk) - JS에서 ingredients 리스트로 보낼 때
+            # -----------------------------------------------------------
+            if 'ingredients' in data:
+                items = data['ingredients']
+                
+                # 자리가 아예 없는 경우
+                if available_slots <= 0:
+                    return JsonResponse({
+                        'success': False, 
+                        'message': '냉장고가 이미 가득 찼습니다! (100/100)\n소진 처리를 먼저 해주세요.'
+                    })
+
+                # [핵심] 남은 자리만큼만 자르기 (Slicing)
+                # 예: 5개 요청왔는데 자리가 1개면, items[:1]만 저장
+                items_to_save = items[:available_slots]
+                items_rejected = items[available_slots:] # 잘린 친구들
+                
+                saved_count = 0
+                
+                for item in items_to_save:
+                    ing_id = item.get('ingredient_id')
+                    exp_at = item.get('expire_at')
+                    
+                    try:
+                        ingredient = IngredientMaster.objects.get(ingredient_id=ing_id)
+                        expire_date = parse_date(exp_at) if exp_at else None
+                        
+                        # 저장 (중복 체크 없이 생성하거나, 필요시 get_or_create 사용)
+                        UserIngredient.objects.create(
+                            user=request.user,
+                            ingredient=ingredient,
+                            expire_at=expire_date,
+                            is_consumed=False
+                        )
+                        saved_count += 1
+                    except IngredientMaster.DoesNotExist:
+                        continue
+
+                # 결과 리턴
+                if len(items_rejected) > 0:
+                    # 부분 성공 (Partial Success)
+                    msg = f"냉장고 용량 부족으로 {saved_count}개만 저장되었습니다.\n(나머지 {len(items_rejected)}개는 저장되지 않음)"
+                    return JsonResponse({'success': True, 'partial': True, 'message': msg})
+                else:
+                    # 완벽 성공
+                    return JsonResponse({'success': True, 'partial': False, 'message': f'{saved_count}개 식재료 등록 완료'})
+
+            # -----------------------------------------------------------
+            # [CASE B] 단일 추가 (기존 로직 유지 / 직접 추가 모달용)
+            # -----------------------------------------------------------
+            if available_slots <= 0:
+                return JsonResponse({'success': False, 'message': '냉장고가 꽉 찼어요! (최대 100개)'})
+
             ingredient_id = data.get('ingredient_id')
             ingredient_name = data.get('ingredient_name')
             is_direct_input = data.get('is_direct_input', False)
             expire_at = data.get('expire_at')
             
-            # 식재료 처리
+            # 식재료 찾기 또는 생성
             if ingredient_id:
                 try:
                     ingredient = IngredientMaster.objects.get(ingredient_id=ingredient_id)
                 except IngredientMaster.DoesNotExist:
-                    return JsonResponse({'success': False, 'message': '존재하지 않는 식재료입니다'})
+                    return JsonResponse({'success': False, 'message': '존재하지 않는 식재료 ID입니다'})
             
             elif ingredient_name and is_direct_input:
-                # 직접 추가
+                try:
+                    custom_cat = IngredientCategory.objects.get(name='직접 추가')
+                    target_cat_id = custom_cat.category_id
+                except IngredientCategory.DoesNotExist:
+                    custom_cat = IngredientCategory.objects.create(name='직접 추가', icon_url='/static/images/categories/add-button.png')
+                    target_cat_id = custom_cat.category_id
+
                 ingredient = IngredientMapper.get_or_create_user_ingredient(
                     user_input_name=ingredient_name,
-                    category_id=17
+                    category_id=target_cat_id 
                 )
             else:
-                return JsonResponse({'success': False, 'message': '식재료 정보가 필요합니다'})
+                return JsonResponse({'success': False, 'message': '식재료 정보가 부족합니다'})
             
             # 중복 확인
             existing = UserIngredient.objects.filter(
-                user=request.user,
-                ingredient=ingredient,
-                is_consumed=False
+                user=request.user, ingredient=ingredient, is_consumed=False
             ).first()
             
             if existing:
-                return JsonResponse({
-                    'success': False,
-                    'message': '이미 등록된 식재료입니다'
-                })
+                return JsonResponse({'success': False, 'message': '이미 냉장고에 있는 재료입니다'})
             
-            # 소비기한 파싱
-            expire_date = None
-            if expire_at:
-                try:
-                    expire_date = parse_date(expire_at)
-                except (ValueError, TypeError):
-                    return JsonResponse({'success': False, 'message': '잘못된 날짜 형식입니다'})
+            expire_date = parse_date(expire_at) if expire_at else None
             
-            # 생성
-            user_ingredient = UserIngredient.objects.create(
-                user=request.user,
-                ingredient=ingredient,
-                expire_at=expire_date,
-                is_consumed=False
+            # 최종 저장
+            UserIngredient.objects.create(
+                user=request.user, ingredient=ingredient, expire_at=expire_date, is_consumed=False
             )
             
-            return JsonResponse({
-                'success': True,
-                'message': '식재료가 등록되었습니다',
-                'ingredient_id': user_ingredient.user_ingredient_id
-            })
+            return JsonResponse({'success': True, 'message': '식재료가 등록되었습니다'})
             
         except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'message': '잘못된 요청입니다'})
+            return JsonResponse({'success': False, 'message': '잘못된 요청 형식입니다'})
         except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)})
+            print(f"Error: {e}")
+            return JsonResponse({'success': False, 'message': f'서버 오류: {str(e)}'})
     
     # [GET] 식재료 목록 제공
     # 사용자가 이미 보유한 식재료 ID 목록
@@ -497,7 +556,7 @@ def add_ingredient_view(request):
         
         category_counts[cat_name] = category_counts.get(cat_name, 0) + 1
     
-    # 카테고리 리스트
+    # 카테고리 리스트 # [수정] .exclude(name='직접 추가')를 제거하여 모든 카테고리를 가져옵니다.
     all_categories_db = IngredientCategory.objects.all().order_by('category_id')
     final_categories = [{'id': None, 'name': '전체', 'count': len(master_list)}]
     
@@ -548,8 +607,9 @@ def ingredient_list_view(request):
         ingredients = ingredients.filter(category_id=category_id)
     
     if keyword:
+        # [핵심 수정 3] 검색 제한 늘리기 (20 -> 100) 또는 제거
         # IngredientMapper 사용
-        suggestions = IngredientMapper.suggest_matches(keyword, limit=20)
+        suggestions = IngredientMapper.suggest_matches(keyword, limit=100)
         ingredients = suggestions
     
     data = []
@@ -564,7 +624,7 @@ def ingredient_list_view(request):
             "category_name": cat_name,
             "icon_url": ing.category.icon_url if ing.category else None
         })
-    return Response(data)
+    return Response(data)   
 
 
 @api_view(['GET'])
@@ -576,8 +636,8 @@ def search_ingredient_view(request):
     if not keyword:
         return Response([])
     
-    # IngredientMapper 사용
-    suggestions = IngredientMapper.suggest_matches(keyword, limit=10)
+    # [핵심 수정 4] 여기도 제한 늘리기 (10 -> 50)
+    suggestions = IngredientMapper.suggest_matches(keyword, limit=50)
     
     data = []
     for ing in suggestions:

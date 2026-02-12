@@ -31,18 +31,17 @@
     <main class="detail-content">
         <div class="recipe-info-section">
             <div class="recipe-image-wrapper">
+                <div class="bookmark" aria-hidden="true"></div>
                 {% if log.image %}
                     <img src="{{ log.image }}" alt="{{ log.recipe_name }}" class="recipe-image">
                 {% else %}
-                    <div class="recipe-image placeholder">
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#999" stroke-width="2"/><path d="M2 17L12 22L22 17" stroke="#999" stroke-width="2"/><path d="M2 12L12 17L22 12" stroke="#999" stroke-width="2"/></svg>
-                    </div>
+                    <img src="{% static 'images/Recipick_logo.png' %}" alt="Recipick 로고" class="recipe-image placeholder">
                 {% endif %}
             </div>
             <div class="recipe-details">
                 <h2 class="recipe-name">{{ log.recipe_name }}</h2>
-                <p class="difficulty">난이도: {{ log.difficulty }}</p>
-                <p class="satisfaction">만족도: {{ log.satisfaction }}</p>
+                <p class="difficulty">난이도: <span class="stars">{{ log.difficulty }}</span></p>
+                <p class="satisfaction">만족도: <span class="stars">{{ log.satisfaction }}</span></p>
                 
                 <div class="ingredients-section">
                     <h3>&lt;재료&gt;</h3>
@@ -74,9 +73,9 @@
         </div>
     </main>
 
-    <button class="floating-btn" id="instagramShareBtn">
+    <!-- <button class="floating-btn" id="instagramShareBtn">
         <img src="{% static 'images/insta_share_btn.png' %}" alt="공유" width="56" height="56">
-    </button>
+    </button> 인스타공유버튼-->
 </div>
 {% include 'base_with_navbar.html' %}
 {% endblock %}

@@ -1,17 +1,15 @@
 """
-Recipes Views (통합 개선 버전)
+Recipes Views (한글 번역 + 단계별 표시 완전 통합 버전)
 
-주요 개선사항:
+주요 기능:
 1. Spoonacular + 한식 레시피 완전 통합
-2. 추천 알고리즘 미세 조정
-3. 소비기한 임박 처리 개선
-4. 동점자 처리 로직
-5. 에러 처리 강화
+2. 한글 번역 자동 적용 (display_title, display_steps)
+3. 추천 알고리즘 미세 조정
+4. 소비기한 임박 처리 개선
+5. 단계별 요리 모드 (한글 우선)
+6. 에러 처리 강화
 """
 
-"""
-Recipes Views (통합 개선 버전)
-"""
 from datetime import date, timedelta
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -32,17 +30,17 @@ from recipes.serializers import (
 from ingredients.models import UserIngredient
 
 # [핵심] utils.py에서 함수 가져오기 (에러 방지 및 로직 분리)
-# 이 부분이 없으면 '우유' 에러나 'API 402' 에러가 발생합니다.
 from .utils import (
     search_recipes_from_db, 
     search_recipes_from_spoonacular, 
     calculate_final_recommendations
 )
 
+
 # ==================== ViewSets ==================== #
 
 class RecipeViewSet(viewsets.ReadOnlyModelViewSet):
-    """레시피 조회 ViewSet"""
+    """레시피 조회 ViewSet (한글 번역 우선)"""
     queryset = Recipe.objects.filter(is_active=True)
     permission_classes = [AllowAny]
     
@@ -63,9 +61,11 @@ class RecipeViewSet(viewsets.ReadOnlyModelViewSet):
         if difficulty:
             queryset = queryset.filter(difficulty=difficulty)
         
+        # ============ 한글 번역된 레시피 우선 정렬 (NEW!) ============
+        queryset = queryset.order_by('-is_translated', '-created_at')
+        
         return queryset.prefetch_related('recipe_ingredients__ingredient')
     
-    # ViewSet 내 액션으로도 추천 기능을 제공하고 싶다면 아래처럼 연결
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def recommendations(self, request):
         return get_recipe_recommendations(request)
@@ -86,19 +86,35 @@ class FavoriteRecipeViewSet(viewsets.ModelViewSet):
         recipe_id = request.data.get('recipe_id')
         
         if not recipe_id:
-            return Response({'error': 'recipe_id가 필요합니다'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': 'recipe_id가 필요합니다'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         try:
             recipe = Recipe.objects.get(recipe_id=recipe_id)
         except Recipe.DoesNotExist:
-            return Response({'error': '존재하지 않는 레시피입니다'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {'error': '존재하지 않는 레시피입니다'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
         
         # 중복 확인
-        existing = FavoriteRecipe.objects.filter(user=request.user, recipe=recipe).first()
-        if existing:
-            return Response({'message': '이미 찜한 레시피입니다'}, status=status.HTTP_200_OK)
+        existing = FavoriteRecipe.objects.filter(
+            user=request.user, 
+            recipe=recipe
+        ).first()
         
-        favorite = FavoriteRecipe.objects.create(user=request.user, recipe=recipe)
+        if existing:
+            return Response(
+                {'message': '이미 찜한 레시피입니다'}, 
+                status=status.HTTP_200_OK
+            )
+        
+        favorite = FavoriteRecipe.objects.create(
+            user=request.user, 
+            recipe=recipe
+        )
         serializer = self.get_serializer(favorite)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
@@ -107,7 +123,10 @@ class FavoriteRecipeViewSet(viewsets.ModelViewSet):
         """찜 취소"""
         recipe_id = request.data.get('recipe_id')
         if not recipe_id:
-            return Response({'error': 'recipe_id가 필요합니다'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': 'recipe_id가 필요합니다'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         deleted_count = FavoriteRecipe.objects.filter(
             user=request.user,
@@ -117,7 +136,10 @@ class FavoriteRecipeViewSet(viewsets.ModelViewSet):
         if deleted_count > 0:
             return Response({'message': '찜이 취소되었습니다'})
         else:
-            return Response({'error': '찜한 레시피가 아닙니다'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {'error': '찜한 레시피가 아닙니다'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 
 # ==================== API Views (Function Based) ==================== #
@@ -126,7 +148,12 @@ class FavoriteRecipeViewSet(viewsets.ModelViewSet):
 @permission_classes([AllowAny])
 def get_recipe_recommendations(request):
     """
-    통합 레시피 추천 API (utils.py 연동 완료)
+    통합 레시피 추천 API (한글 번역 + utils.py 연동)
+    
+    주요 기능:
+    1. 한글/영문 레시피 통합 검색
+    2. Spoonacular API 활성화
+    3. 한글 우선 반환
     """
     # 1. 로그인 여부에 따라 user 처리
     if request.user.is_authenticated:
@@ -145,9 +172,8 @@ def get_recipe_recommendations(request):
     max_results = request.data.get('max_results', 20)
     keyword = request.data.get('keyword', '').strip() 
     
-    # API 사용 여부 (기본값 True)
-    include_spoonacular = False
-    #include_spoonacular = request.data.get('include_spoonacular', True)
+    # ============ Spoonacular API 활성화 (수정!) ============
+    include_spoonacular = request.data.get('include_spoonacular', True)
 
     # 3. 식재료 필터링
     if use_all:
@@ -176,8 +202,12 @@ def get_recipe_recommendations(request):
             'recipes': [] 
         })
     
-    selected_ingredient_ids = list(selected_ingredients.values_list('ingredient_id', flat=True))
-    user_ingredients_dict = {ui.ingredient_id: ui for ui in selected_ingredients}
+    selected_ingredient_ids = list(
+        selected_ingredients.values_list('ingredient_id', flat=True)
+    )
+    user_ingredients_dict = {
+        ui.ingredient_id: ui for ui in selected_ingredients
+    }
     
     # ==========================================
     # 4. DB 검색 (utils.py 함수 사용)
@@ -185,12 +215,19 @@ def get_recipe_recommendations(request):
     db_recipes_by_ing = []
     if selected_ingredient_ids:
         # utils.py 함수가 '우유' 같은 문자열 에러를 방지합니다.
-        db_recipes_by_ing = list(search_recipes_from_db(selected_ingredient_ids, user))
+        db_recipes_by_ing = list(
+            search_recipes_from_db(selected_ingredient_ids, user)
+        )
 
-    # 키워드 검색
+    # ============ 한글/영문 키워드 검색 (수정!) ============
     db_recipes_by_keyword = []
     if keyword:
-        db_recipes_by_keyword = list(Recipe.objects.filter(title__icontains=keyword))
+        db_recipes_by_keyword = list(
+            Recipe.objects.filter(
+                Q(title__icontains=keyword) | 
+                Q(title_ko__icontains=keyword)
+            )
+        )
 
     # 결과 합치기
     combined_db = db_recipes_by_keyword + db_recipes_by_ing
@@ -239,13 +276,16 @@ def get_recipe_recommendations(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_recipe_detail(request, recipe_id):
-    """레시피 상세 조회 API"""
+    """레시피 상세 조회 API (한글 우선)"""
     try:
         recipe = Recipe.objects.prefetch_related(
             'recipe_ingredients__ingredient'
         ).get(recipe_id=recipe_id)
     except Recipe.DoesNotExist:
-        return Response({'error': '존재하지 않는 레시피입니다'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {'error': '존재하지 않는 레시피입니다'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
     
     user_ingredient_ids = []
     if request.user.is_authenticated:
@@ -271,7 +311,7 @@ def recipe_list_view(request):
 
 
 def recipe_detail_view(request, recipe_id):
-    """레시피 상세 페이지"""
+    """레시피 상세 페이지 (한글 우선 표시)"""
     try:
         recipe = Recipe.objects.prefetch_related(
             'recipe_ingredients__ingredient'
@@ -302,38 +342,77 @@ def recipe_detail_view(request, recipe_id):
     
     is_favorited = False
     if request.user.is_authenticated:
-        is_favorited = FavoriteRecipe.objects.filter(user=request.user, recipe=recipe).exists()
+        is_favorited = FavoriteRecipe.objects.filter(
+            user=request.user, 
+            recipe=recipe
+        ).exists()
     
-    context = {'recipe': recipe, 'recipe_ingredients': recipe_ingredients, 'is_favorited': is_favorited}
+    context = {
+        'recipe': recipe, 
+        'recipe_ingredients': recipe_ingredients, 
+        'is_favorited': is_favorited
+    }
     return render(request, 'recipes/recipe_detail.html', context)
 
 
 def cooking_mode_view(request, recipe_id):
-    """조리 모드 페이지"""
+    """
+    조리 모드 페이지 (한글 단계 우선 표시)
+    
+    주요 기능:
+    1. display_steps() 사용 (한글 우선)
+    2. 단계별 타이머 정보 포함
+    3. 1-based index 처리
+    """
     try:
         recipe = Recipe.objects.get(recipe_id=recipe_id)
     except Recipe.DoesNotExist:
         return render(request, 'recipes/recipe_not_found.html', status=404)
 
-    instructions = list(recipe.instructions) if recipe.instructions else []
+    # ============ 한글 단계 우선 (수정!) ============
+    # get_display_steps()는 이미 한글 instruction_ko 우선으로 반환합니다.
+    instructions = recipe.get_display_steps()
+    
+    # 백업: steps 필드가 없으면 빈 리스트
+    if not instructions:
+        instructions = []
+    
     total_steps = max(1, len(instructions))
 
+    # 현재 단계 (1-based)
     try:
         current_step = max(1, min(int(request.GET.get('step', 1)), total_steps))
     except (TypeError, ValueError):
         current_step = 1
 
-    # 현재 단계 데이터 (1-based index)
+    # 현재 단계 데이터
     step_data = None
     if instructions and 1 <= current_step <= len(instructions):
         step_data = instructions[current_step - 1]
+        
+        # step_data는 이미 dict 형태:
+        # {
+        #     'number': 1,
+        #     'instruction': '한글 조리법',
+        #     'timer_seconds': 60
+        # }
         if isinstance(step_data, dict):
-            # step 번호가 없으면 순서대로 1,2,3...
             step_data = dict(step_data)
+            
+            # step 번호가 없으면 순서대로 부여
             if 'step' not in step_data:
                 step_data['step'] = current_step
+            
+            # instruction을 description으로 복사 (템플릿 호환)
+            if 'instruction' in step_data and 'description' not in step_data:
+                step_data['description'] = step_data['instruction']
         else:
-            step_data = {'step': current_step, 'description': str(step_data), 'image': None}
+            # dict가 아닌 경우 (비정상)
+            step_data = {
+                'step': current_step, 
+                'description': str(step_data), 
+                'image': None
+            }
 
     context = {
         'recipe': recipe,
@@ -347,21 +426,32 @@ def cooking_mode_view(request, recipe_id):
 def cooking_complete_view(request, recipe_id):
     """조리 완료 페이지"""
     try:
-        recipe = Recipe.objects.prefetch_related('recipe_ingredients__ingredient').get(recipe_id=recipe_id)
+        recipe = Recipe.objects.prefetch_related(
+            'recipe_ingredients__ingredient'
+        ).get(recipe_id=recipe_id)
     except Recipe.DoesNotExist:
         return render(request, 'recipes/recipe_not_found.html', status=404)
 
-    # 다 쓴 재료 체크하기: 레시피에 적힌 재료 목록 (이름·수량 표기)
-    recipe_ingredients = recipe.recipe_ingredients.select_related('ingredient').order_by('recipe_ingredient_id')
+    # 다 쓴 재료 체크하기: 레시피에 적힌 재료 목록
+    recipe_ingredients = recipe.recipe_ingredients.select_related(
+        'ingredient'
+    ).order_by('recipe_ingredient_id')
+    
     ingredients = []
     for ri in recipe_ingredients:
-        ingredients.append({'id': ri.ingredient.ingredient_id, 'name': ri.ingredient.name_ko})
+        ingredients.append({
+            'id': ri.ingredient.ingredient_id, 
+            'name': ri.ingredient.name_ko
+        })
 
     user_ingredients = []
     if request.user.is_authenticated:
         user_ingredients = UserIngredient.objects.filter(
             user=request.user,
-            ingredient_id__in=recipe.recipe_ingredients.values_list('ingredient_id', flat=True),
+            ingredient_id__in=recipe.recipe_ingredients.values_list(
+                'ingredient_id', 
+                flat=True
+            ),
             is_consumed=False
         ).select_related('ingredient')
 

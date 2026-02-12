@@ -150,12 +150,17 @@ class IngredientAdder {
     }
 
     // --- Render ---
-    renderCategories(categories) {
+renderCategories(categories) {
         let html = '';
+        
         categories.forEach(cat => {
+            // [수정] '직접 추가'를 제외하던 if문을 삭제했습니다. 이제 화면에 그려집니다!
+            
             const catId = cat.id || cat.category_id;
             const iconHtml = cat.icon_url 
-                ? `<img src="${cat.icon_url}" class="category-icon" alt="${cat.name}" onerror="this.style.display='none'">` 
+                ? `<img src="${cat.icon_url}" class="category-icon" alt="${cat.name}" 
+                        style="width: 20px; height: 20px; margin-right: 6px; object-fit: contain;"
+                        onerror="this.style.display='none'">` 
                 : '';
 
             html += `<div class="category-item" data-id="${catId}">
@@ -164,16 +169,23 @@ class IngredientAdder {
                      </div>`;
         });
         
-        html += `<div class="category-item direct-add-btn" style="justify-content: center; font-weight:bold;">+ 직접 추가</div>`;
+        // [유지] 맨 아래에 '신규 생성용' 버튼을 별도로 붙입니다.
+        html += `<div class="category-item direct-add-btn" style="justify-content: center; font-weight:bold; color: #FF7043;">
+                    <span style="margin-right:5px;">+</span> 직접 추가
+                 </div>`;
         
         this.categorySidebar.innerHTML = html;
 
+        // 이벤트 리스너 연결
         this.categorySidebar.querySelectorAll('.category-item').forEach(item => {
             item.addEventListener('click', () => {
+                // 1. 하단 '+ 직접 추가' 버튼 클릭 시 -> 입력 모달 열기
                 if (item.classList.contains('direct-add-btn')) {
                     this.openDirectAddModal();
                     return;
                 }
+
+                // 2. 일반 카테고리(직접 추가 포함) 클릭 시 -> 해당 목록 불러오기
                 this.categorySidebar.querySelector('.active')?.classList.remove('active');
                 item.classList.add('active');
                 this.currentCategory = item.dataset.id;
@@ -333,8 +345,8 @@ class IngredientAdder {
     async submitAll() {
         const items = Object.values(this.selectedItems);
         
+        // 1. 선택된 게 없으면 그냥 이동
         if (items.length === 0) { 
-            // 선택된 게 없으면 그냥 이동
             const myFridgeUrl = document.querySelector('[data-my-fridge-url]')?.dataset.myFridgeUrl || '/ingredients/my-fridge/';
             window.location.href = myFridgeUrl;
             return; 
@@ -343,26 +355,49 @@ class IngredientAdder {
         try {
             const addUrl = document.querySelector('[data-add-ingredient-url]')?.dataset.addIngredientUrl || '/ingredients/add/';
             
-            const promises = items.map(item => 
-                fetch(addUrl, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'X-CSRFToken': Utils.getCsrfToken() 
-                    },
-                    body: JSON.stringify({ 
-                        ingredient_id: item.id,
-                        expire_at: item.expiry_date
-                    })
-                })
-            );
+            // [수정] 한 번에 묶어서 보내기 (Bulk Insert)
+            // views.py에서 'ingredients' 키를 확인하도록 수정했으므로 이 형식을 따라야 함
+            const payload = {
+                ingredients: items.map(item => ({
+                    ingredient_id: item.id,
+                    expire_at: item.expiry_date
+                }))
+            };
+
+            // 요청은 딱 한 번만 보냅니다.
+            const res = await fetch(addUrl, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'X-CSRFToken': Utils.getCsrfToken() 
+                },
+                body: JSON.stringify(payload)
+            });
             
-            await Promise.all(promises);
+            const data = await res.json();
+            
+            // 2. 아예 실패한 경우 (서버 에러 or 이미 꽉 참)
+            if (!res.ok || (data.success === false && !data.partial)) {
+                alert(data.message || '등록에 실패했습니다.');
+                return; // 페이지 이동 안 함
+            }
+
+            // 3. 부분 성공 (Partial Success) - 99개 중 1개 들어가고 4개 튕김
+            if (data.partial) {
+                alert(data.message); // "1개만 저장되었습니다..." 메시지 출력
+                
+                // 부분적으로라도 저장되었으니 내 냉장고로 이동
+                const myFridgeUrl = document.querySelector('[data-my-fridge-url]')?.dataset.myFridgeUrl || '/ingredients/my-fridge/';
+                window.location.href = myFridgeUrl;
+                return;
+            }
+
+            // 4. 완벽 성공
             this.successModal.classList.add('open');
             
         } catch (err) { 
             console.error(err);
-            alert('등록 중 오류가 발생했습니다.'); 
+            alert('시스템 오류가 발생했습니다.'); 
         }
     }
 }
