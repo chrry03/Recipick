@@ -3749,6 +3749,17 @@
   },
   {
     "model": "ingredients.ingredientmaster",
+    "pk": 1406,
+    "fields": {
+      "name_ko": "김치",
+      "name_en": "kimchi",
+      "category": 14,
+      "aliases": ["김치", "kimchi", "kimchee", "gimchi", "gimchee"],
+      "created_at": "2025-02-01T08:30:00Z"
+    }
+  },
+  {
+    "model": "ingredients.ingredientmaster",
     "pk": 1501,
     "fields": {
       "name_ko": "물",
