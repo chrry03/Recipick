@@ -35,13 +35,13 @@
                 if (y > upperThreshold) {
                     mainHeader.classList.add('scrolled');
                     isScrolled = true;
-                    console.log('헤더 축소/ 스크롤 위치:', y, 'px');
+                    // console.log('헤더 축소/ 스크롤 위치:', y, 'px');
                 }
             } else {
                 if (y <= lowerThreshold) {
                     mainHeader.classList.remove('scrolled');
                     isScrolled = false;
-                    console.log('헤더 확장/ 스크롤 위치:', y, 'px');
+                    // console.log('헤더 확장/ 스크롤 위치:', y, 'px');
                 }
             }
         }, 16);
@@ -50,21 +50,14 @@
 
     // 상수 정의
     const CAROUSEL_MAX_VISIBILITY = 3;
+    const CAROUSEL_MAX_CARDS = 6;
     const DIARY_SCROLL_AMOUNT = 150;
     const CAROUSEL_DEFAULT_INDEX = 2;
 
     // 전역 변수
     let activeRecipeIndex = CAROUSEL_DEFAULT_INDEX;
     let recipes = [];
-
-    /**
-     * 난이도에 따른 별 표시 생성
-     * @param {number} difficulty - 난이도 (1-5)
-     * @returns {string} 별 표시 문자열
-     */
-    function getStars(difficulty) {
-        return '★☆☆☆☆'.split('').map((s, i) => (i < difficulty ? '★' : '☆')).join('');
-    }
+    let carouselDisplayCount = CAROUSEL_MAX_CARDS; // 캐러셀에 표시할 카드 수 (최대 6)
 
     /**
      * 레시피 캐러셀 초기화
@@ -78,14 +71,24 @@
             return;
         }
 
+        // 기존 카드·도트 제거 후 다시 생성
+        carousel.innerHTML = '';
+        dotsContainer.innerHTML = '';
+
         // 레시피 데이터가 없으면 종료
         if (!recipes || recipes.length === 0) {
             carousel.innerHTML = '<p class="empty-state">추천 레시피가 없습니다.</p>';
             return;
         }
 
-        // 카드 생성
-        recipes.forEach((recipe, index) => {
+        // 카드 생성 (최대 6개만 표시)
+        carouselDisplayCount = Math.min(CAROUSEL_MAX_CARDS, recipes.length);
+        if (activeRecipeIndex >= carouselDisplayCount) {
+            activeRecipeIndex = Math.max(0, carouselDisplayCount - 1);
+        }
+        const difficultyMap = { 'EASY': '쉬움', 'NORMAL': '보통', 'DIFFICULT': '어려움' };
+        recipes.slice(0, CAROUSEL_MAX_CARDS).forEach((recipe, index) => {
+            const difficultyText = difficultyMap[recipe.difficulty] || '보통';
             const cardContainer = document.createElement('div');
             cardContainer.className = 'card-container';
             cardContainer.innerHTML = `
@@ -95,20 +98,22 @@
                         <img src="${escapeHtml(recipe.image)}" alt="${escapeHtml(recipe.name)}" loading="lazy">
                     </div>
                     <div class="recipe-info">
-                        <p>난이도: ${getStars(recipe.difficulty || 1)}</p>
+                        <p>난이도: ${escapeHtml(difficultyText)}</p>
                         <p>예상 조리시간: ${escapeHtml(recipe.cookingTime || 'N/A')}</p>
                     </div>
                 </div>
             `;
             carousel.appendChild(cardContainer);
-            
-            // 도트 생성
+        });
+
+        // 도트 생성 (최대 6개만)
+        for (let i = 0; i < carouselDisplayCount; i++) {
             const dot = document.createElement('button');
             dot.className = 'carousel-dot';
-            dot.setAttribute('aria-label', `${index + 1}번째 레시피`);
-            dot.addEventListener('click', () => setActiveRecipe(index));
+            dot.setAttribute('aria-label', `${i + 1}번째 레시피`);
+            dot.addEventListener('click', () => setActiveRecipe(i));
             dotsContainer.appendChild(dot);
-        });
+        }
         
         // 네비게이션 버튼 생성
         createCarouselNavigation(carousel);
@@ -131,7 +136,7 @@
         rightBtn.className = 'carousel-nav right';
         rightBtn.setAttribute('aria-label', '다음 레시피');
         rightBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>';
-        rightBtn.addEventListener('click', () => setActiveRecipe(Math.min(recipes.length - 1, activeRecipeIndex + 1)));
+        rightBtn.addEventListener('click', () => setActiveRecipe(Math.min(carouselDisplayCount - 1, activeRecipeIndex + 1)));
         
         carousel.appendChild(leftBtn);
         carousel.appendChild(rightBtn);
@@ -142,7 +147,7 @@
      * @param {number} index - 레시피 인덱스
      */
     function setActiveRecipe(index) {
-        if (index < 0 || index >= recipes.length) return;
+        if (index < 0 || index >= carouselDisplayCount) return;
         activeRecipeIndex = index;
         updateCarousel();
     }
@@ -204,7 +209,7 @@
         
         // 네비게이션 버튼 표시/숨김
         if (leftBtn) leftBtn.style.display = activeRecipeIndex > 0 ? 'flex' : 'none';
-        if (rightBtn) rightBtn.style.display = activeRecipeIndex < recipes.length - 1 ? 'flex' : 'none';
+        if (rightBtn) rightBtn.style.display = activeRecipeIndex < carouselDisplayCount - 1 ? 'flex' : 'none';
     }
 
     /**

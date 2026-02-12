@@ -314,8 +314,33 @@ def cooking_mode_view(request, recipe_id):
         recipe = Recipe.objects.get(recipe_id=recipe_id)
     except Recipe.DoesNotExist:
         return render(request, 'recipes/recipe_not_found.html', status=404)
-    
-    context = {'recipe': recipe}
+
+    instructions = list(recipe.instructions) if recipe.instructions else []
+    total_steps = max(1, len(instructions))
+
+    try:
+        current_step = max(1, min(int(request.GET.get('step', 1)), total_steps))
+    except (TypeError, ValueError):
+        current_step = 1
+
+    # 현재 단계 데이터 (1-based index)
+    step_data = None
+    if instructions and 1 <= current_step <= len(instructions):
+        step_data = instructions[current_step - 1]
+        if isinstance(step_data, dict):
+            # step 번호가 없으면 순서대로 1,2,3...
+            step_data = dict(step_data)
+            if 'step' not in step_data:
+                step_data['step'] = current_step
+        else:
+            step_data = {'step': current_step, 'description': str(step_data), 'image': None}
+
+    context = {
+        'recipe': recipe,
+        'total_steps': total_steps,
+        'current_step': current_step,
+        'step_data': step_data,
+    }
     return render(request, 'recipes/cooking_mode.html', context)
 
 
@@ -325,7 +350,13 @@ def cooking_complete_view(request, recipe_id):
         recipe = Recipe.objects.prefetch_related('recipe_ingredients__ingredient').get(recipe_id=recipe_id)
     except Recipe.DoesNotExist:
         return render(request, 'recipes/recipe_not_found.html', status=404)
-    
+
+    # 다 쓴 재료 체크하기: 레시피에 적힌 재료 목록 (이름·수량 표기)
+    recipe_ingredients = recipe.recipe_ingredients.select_related('ingredient').order_by('recipe_ingredient_id')
+    ingredients = []
+    for ri in recipe_ingredients:
+        ingredients.append({'id': ri.ingredient.ingredient_id, 'name': ri.ingredient.name_ko})
+
     user_ingredients = []
     if request.user.is_authenticated:
         user_ingredients = UserIngredient.objects.filter(
@@ -333,6 +364,10 @@ def cooking_complete_view(request, recipe_id):
             ingredient_id__in=recipe.recipe_ingredients.values_list('ingredient_id', flat=True),
             is_consumed=False
         ).select_related('ingredient')
-    
-    context = {'recipe': recipe, 'user_ingredients': user_ingredients}
+
+    context = {
+        'recipe': recipe,
+        'ingredients': ingredients,
+        'user_ingredients': user_ingredients,
+    }
     return render(request, 'recipes/cooking_complete.html', context)
