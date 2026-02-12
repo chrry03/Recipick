@@ -91,6 +91,7 @@
             const difficultyText = difficultyMap[recipe.difficulty] || '보통';
             const cardContainer = document.createElement('div');
             cardContainer.className = 'card-container';
+            cardContainer.style.cursor = 'pointer';
             cardContainer.innerHTML = `
                 <div class="carousel-card">
                     <h3>${escapeHtml(recipe.name)}</h3>
@@ -103,6 +104,11 @@
                     </div>
                 </div>
             `;
+            cardContainer.addEventListener('click', () => {
+                if (index === activeRecipeIndex) {
+                    window.location.href = '/recipes/' + recipe.id + '/cooking/';
+                }
+            });
             carousel.appendChild(cardContainer);
         });
 
@@ -229,6 +235,7 @@
         favoriteRecipes.forEach(recipe => {
             const card = document.createElement('div');
             card.className = 'recipe-card';
+            card.style.cursor = 'pointer';
             card.innerHTML = `
                 <div class="recipe-image-small">
                     <img src="${escapeHtml(recipe.image)}" alt="${escapeHtml(recipe.name)}" loading="lazy">
@@ -240,6 +247,12 @@
                     </svg>
                 </button>
             `;
+            
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('.favorite-btn')) {
+                    window.location.href = '/recipes/' + recipe.id + '/cooking/';
+                }
+            });
             
             const favoriteBtn = card.querySelector('.favorite-btn');
             favoriteBtn.addEventListener('click', (e) => {
