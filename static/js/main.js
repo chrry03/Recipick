@@ -35,13 +35,13 @@
                 if (y > upperThreshold) {
                     mainHeader.classList.add('scrolled');
                     isScrolled = true;
-                    // console.log('헤더 축소/ 스크롤 위치:', y, 'px'); 스크롤 위치치콘솔 로그
+                    console.log('헤더 축소/ 스크롤 위치:', y, 'px');
                 }
             } else {
                 if (y <= lowerThreshold) {
                     mainHeader.classList.remove('scrolled');
                     isScrolled = false;
-                    // console.log('헤더 확장/ 스크롤 위치:', y, 'px'); 스크롤 위치 콘솔 로그
+                    console.log('헤더 확장/ 스크롤 위치:', y, 'px');
                 }
             }
         }, 16);
