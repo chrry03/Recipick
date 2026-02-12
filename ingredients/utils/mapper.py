@@ -392,6 +392,10 @@ class IngredientMapper:
         'vegetable stock': '채소 육수',
         'chicken broth': '닭육수',
         'beef broth': '소고기 육수',
+        'kimchi': '김치',
+        'kimchee': '김치',
+        'gimchi': '김치',
+        'gimchee': '김치',
         
         # ==================== 음료 ====================
         'water': '물',
