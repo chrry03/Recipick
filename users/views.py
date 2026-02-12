@@ -1,3 +1,4 @@
+import json
 import requests
 from django.conf import settings
 
@@ -520,10 +521,10 @@ def main_view(request):
                 'image': display_image
             })
 
-    # Context에 담기
+    # Context에 담기 (recipeData는 JSON 문자열로 전달해 템플릿에서 파싱 오류 방지)
     context = {
-        'recommended_recipes': recommended_recipes,
-        'favorite_recipes': favorite_recipes,
+        'recommended_recipes': json.dumps(recommended_recipes, ensure_ascii=False),
+        'favorite_recipes': json.dumps(favorite_recipes, ensure_ascii=False),
         'ingredients': ingredients,
         'diary_entries': diary_entries,
     }
