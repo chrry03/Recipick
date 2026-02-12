@@ -1,0 +1,254 @@
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Gothic&display=swap');
+
+@font-face {
+    font-family: 'MemomentKkukkukk';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2205@1.0/MemomentKkukkukk.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --primary-color: #FF7043;
+    --text-color: #555555;
+    --card-bg: #FFFFFF;
+    --info-bg: #EFEFEF;
+}
+
+/* ==========================================================================
+   [레이아웃] 레시피 리스트 컨테이너
+   ========================================================================== */
+.recipe-list-container {
+    width: 100%;
+    /* [수정] 좌우 패딩 제거 (base 템플릿의 content-wrapper가 이미 20px를 줌) */
+    /* 상단 20px, 하단 100px(탭바 공간) */
+    padding: 20px 0 100px 0; 
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ==========================================================================
+   [상단] 검색창 (날씬하게)
+   ========================================================================== */
+.list-search-wrapper {
+    position: relative;
+    width: 100%;
+    height: 34px; /* 높이 고정 (기본값보다 얇게) */
+    margin-bottom: 20px;
+}
+
+.list-search-input {
+    width: 100%;
+    height: 100%;
+    background: #F5F0E7;
+    border: none;
+    border-radius: 20px;
+    padding-left: 40px;
+    padding-right: 15px;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 13px; /* 글자 크기 조정 */
+    color: #555;
+    outline: none;
+    box-shadow: inset 1px 1px 2px rgba(216, 211, 203, 0.2), 
+                inset -1px -1px 2px rgba(255, 255, 255, 0.9), 
+                inset -1px 1px 3px rgba(216, 211, 203, 0.9);
+}
+
+.list-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    opacity: 0.6;
+}
+
+/* 필터 바 */
+.list-filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 25px;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 5px;
+    justify-content: flex-start; 
+}
+.list-filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+    flex: 0 0 auto;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #E0E0E0;
+    border: none;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 12px;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-chip.active {
+    background: #E67E52;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(230, 126, 82, 0.4);
+}
+
+.list-loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 30px;
+    color: #999;
+    width: 100%;
+}
+.list-loading-spinner.show { display: block; }
+
+/* ==========================================================================
+   [핵심] 레시피 카드 그리드
+   ========================================================================== */
+.recipe-card-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 100%; 
+}
+
+.recipe-list-card {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: 18px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 20px 15px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    border: 1px solid #f5f5f5;
+    width: 100%; 
+    box-sizing: border-box; 
+    margin: 0 auto; 
+}
+
+.recipe-list-card:hover { transform: translateY(-3px); }
+
+/* 카드 헤더 (제목 + 찜) */
+.card-header-row {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+    min-height: 30px;
+}
+
+.card-title {
+    font-family: 'MemomentKkukkukk', sans-serif;
+    font-size: 22px;
+    color: #444;
+    margin: 0;
+    line-height: 1.2;
+    text-align: center;
+    padding: 0 30px;
+}
+
+.card-like-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+}
+.card-like-btn.active { color: #FFD983; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+.card-like-btn.inactive { color: #E0E0E0; }
+
+/* 이미지 영역 */
+.card-image-wrap {
+    width: 100%;
+    height: 190px;
+    border-radius: 15px;
+    overflow: hidden;
+    background: #ddd;
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.15);
+    margin-bottom: 15px;
+}
+.card-img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 정보 박스 */
+.card-info-box { display: flex; flex-direction: column; gap: 8px; }
+
+.info-item-row {
+    display: flex; align-items: center;
+    background: var(--info-bg);
+    border-radius: 8px;
+    min-height: 32px;
+    padding: 6px 12px;
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05);
+}
+
+.info-key {
+    width: 75px;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 12px;
+    color: #666;
+    font-weight: bold;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.info-val {
+    flex: 1;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 13px;
+    color: #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 10px;
+    border-left: 1px solid rgba(0,0,0,0.05);
+}
+.val-missing { color: #FF7043; }
+
+/* 빈 상태 메시지 */
+.list-empty-state {
+    text-align: center;
+    padding: 60px 0;
+    width: 100%;
+}
+.list-empty-state img { width: 60px; opacity: 0.4; margin-bottom: 15px; }
+.list-empty-state p { color: #999; font-size: 14px; }
+
+/* 로딩 애니메이션 컨테이너 (기존 코드) */
+.list-loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 30px;
+    color: #999;
+    width: 100%;
+}
+.list-loading-spinner.show { display: block; }
+
+/* [추가] 모래시계 아이콘 스타일 */
+.spinner-icon {
+    font-size: 19px;      /* 아이콘 크기 (조절 가능) */
+    margin-bottom: 15px;  /* 텍스트와의 간격 (이걸로 조절하세요!) */
+    display: inline-block; /* 회전 애니메이션 등을 위해 block 속성 부여 */
+    animation: spin 2s infinite linear; /* (선택사항) 빙글빙글 돌리기 */
+}
+
+/* (선택사항) 텍스트 스타일 */
+.list-loading-spinner p {
+    margin: 0;
+    font-size: 14px;
+    color: #888;
+}
+
+/* (선택사항) 빙글빙글 도는 애니메이션 */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

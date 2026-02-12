@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/recipes.css' %}">
+<link rel="stylesheet" href="{% static 'css/recipes_list.css' %}">
 {% endblock extra_head %}
 
 {% block header %}
@@ -10,36 +10,44 @@
 {% endblock header %}
 
 {% block main_content %}
-<div class="app-container">
-    <div class="recipe-list-wrapper">
-        <div class="search-wrapper">
-            <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색">
-            <input type="text" id="recipe-search-input" class="search-input" placeholder="레시피 검색" aria-label="레시피 검색">
-        </div>
-        
-        <div class="filter-bar">
-            <button class="filter-chip active" data-filter="all">전체<span class="count">(0)</span></button>
-            <button class="filter-chip" data-filter="favorites">찜한 레시피<span class="count">(0)</span></button>
-            <button class="filter-chip" data-filter="my-ingredients">내 재료만<span class="count">(0)</span></button>
-        </div>
-        
-        <div class="loading-spinner" id="loading-spinner">
-            <div class="spinner-icon">⏳</div>
-            <p>맛있는 레시피를 찾고 있어요...</p>
-        </div>
-        
-        <div id="recipe-recommendations" class="recipe-grid-area">
-            {% if not user.is_authenticated %}
-            <div class="empty-state">
-                <p>로그인 후 맞춤 레시피를 추천받아보세요!</p>
-                <a href="{% url 'users:login' %}" class="login-link">로그인하기</a>
-            </div>
-            {% endif %}
-        </div>
+<div class="recipe-list-container">
+    
+    <div class="list-search-wrapper"> <img src="{% static 'images/search.png' %}" class="list-search-icon" alt="검색">
+        <input type="text" 
+               id="recipe-search-input" 
+               class="list-search-input" 
+               placeholder="레시피 검색"
+               aria-label="레시피 검색">
     </div>
+    
+    <div class="list-filter-bar"> <button class="filter-chip active" data-filter="all">
+            전체<span class="count">(0)</span>
+        </button>
+        <button class="filter-chip" data-filter="favorites">
+            찜한 레시피<span class="count">(0)</span>
+        </button>
+        <button class="filter-chip" data-filter="my-ingredients">
+            내 재료만<span class="count">(0)</span>
+        </button>
+    </div>
+    
+    <div class="list-loading-spinner" id="loading-spinner">
+        <div class="spinner-icon">⏳</div>
+        <p>맛있는 레시피를 찾고 있어요...</p>
+    </div>
+    
+    <div id="recipe-recommendations" class="recipe-card-grid">
+        {% if not user.is_authenticated %}
+        <div class="list-empty-state">
+            <p>로그인 후 맞춤 레시피를 추천받아보세요!</p>
+            <a href="{% url 'users:login' %}" style="color:#FF7043; font-weight:bold;">로그인하기</a>
+        </div>
+        {% endif %}
+    </div>
+
 </div>
 {% endblock main_content %}
 
 {% block extra_script %}
-<script src="{% static 'js/recipes.js' %}"></script>
+<script src="{% static 'js/recipes_list.js' %}"></script>
 {% endblock extra_script %}
