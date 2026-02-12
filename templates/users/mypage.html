@@ -10,50 +10,36 @@
 {% endblock %}
 
 {% block main_content %}
-<div class="scroll-container">
-    <div class="container-mw">
-        
-        {% include 'header.html' %}
+<div class="app-container">
+    {% include 'header.html' %}
 
-        <div class="mypage-wrapper">
-    
-            {% if user.is_authenticated %}
-                <div id="logged-in-view">
-                    
-                    <div class="profile-card-new">
-                        <div class="profile-icon-area">
-                            <img src="{% static 'images/Recipick_logo.png' %}" alt="Profile Icon">
-                        </div>
-                        <div class="profile-info-area">
-                            <h2 id="display-nickname" class="profile-nickname-text">{{ user_data.nickname }}</h2>
-                            <a href="{% url 'users:nickname' %}" class="profile-edit-link-text">닉네임 변경</a>
-                        </div>
+    <div class="mypage-wrapper">
+        {% if user.is_authenticated %}
+            <div id="logged-in-view">
+                <div class="profile-card-new">
+                    <div class="profile-icon-area">
+                        <img src="{% static 'images/Recipick_logo.png' %}" alt="Profile Icon">
                     </div>
-
-                    <div class="mypage-btn-group">
-                        <a href="{% url 'users:preference' %}" class="btn-mw btn-primary-mypage">취향 재설정</a>
-                        <button type="button" id="btn-logout" class="btn-mw btn-gray-mypage">로그아웃</button>
+                    <div class="profile-info-area">
+                        <h2 id="display-nickname" class="profile-nickname-text">{{ user_data.nickname }}</h2>
+                        <a href="{% url 'users:nickname' %}" class="profile-edit-link-text">닉네임 변경</a>
                     </div>
-
-                    <a href="#" id="btn-withdraw" class="withdraw-link">탈퇴하기</a>
-
                 </div>
-
-            {% else %}
-                <div id="logged-out-view">
-                    
-                    <div class="big-logo-area">
-                        <img src="{% static 'images/Recipick_logo.png' %}" class="big-logo-icon" alt="Recipick">
-                        <img src="{% static 'images/Recipick_logo_text.png' %}" class="big-logo-text" alt="Recipick Text">
-                    </div>
-                    
-                    <a href="{% url 'users:login' %}" class="btn-mw btn-primary-mypage btn-login-center">로그인</a>
-
+                <div class="mypage-btn-group">
+                    <a href="{% url 'users:preference' %}" class="btn-mw btn-primary-mypage">취향 재설정</a>
+                    <button type="button" id="btn-logout" class="btn-mw btn-gray-mypage">로그아웃</button>
                 </div>
-            {% endif %}
-
-        </div>
-
+                <a href="#" id="btn-withdraw" class="withdraw-link">탈퇴하기</a>
+            </div>
+        {% else %}
+            <div id="logged-out-view">
+                <div class="big-logo-area">
+                    <img src="{% static 'images/Recipick_logo.png' %}" class="big-logo-icon" alt="Recipick">
+                    <img src="{% static 'images/Recipick_logo_text.png' %}" class="big-logo-text" alt="Recipick Text">
+                </div>
+                <a href="{% url 'users:login' %}" class="btn-mw btn-primary-mypage btn-login-center">로그인</a>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock main_content %}

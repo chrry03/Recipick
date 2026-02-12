@@ -7,15 +7,10 @@
 
 {% block extra_script %}
     <script src="{% static 'js/users.js' %}"></script>
-    
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // 주소창의 파라미터(?next=...) 확인
             const urlParams = new URLSearchParams(window.location.search);
-            
-            // 'next' 파라미터가 있으면 알림 띄우기
             if (urlParams.has('next')) {
-                // 약간의 지연 시간을 주어 페이지 로드 후 뜨게 함 (선택사항)
                 setTimeout(() => {
                     alert("로그인이 필요한 서비스입니다.\n로그인 후 이용해주세요. 🔒");
                 }, 100);
@@ -25,38 +20,36 @@
 {% endblock %}
 
 {% block content %}
-<div class="scroll-container">
-    <div class="container-mw">
-        <div class="logo-area">
-            <img src="{% static 'images/Recipick_logo.png' %}" class="logo-img-top" alt="Recipick Top">
-            <img src="{% static 'images/Recipick_logo_text.png' %}" class="logo-img-bottom" alt="Recipick Bottom">
-        </div>
-
-        <form id="login-form" class="form-group-mw">
-            <div class="form-group-mw">
-                <input type="email" id="email" placeholder="이메일" class="input-mw" required>
-            </div>
-            <div class="form-group-mw">
-                <input type="password" id="password" placeholder="비밀번호" class="input-mw" required>
-            </div>
-            <button type="submit" class="btn-mw btn-primary-mw" style="margin-top: 20px;">로그인</button>
-        </form>
-
-        <a href="{% url 'users:signup' %}" class="btn-mw link-btn-mw">회원가입</a>
-        
-        <div class="social-container-mw">
-            <a href="{% url 'users:google_login' %}" class="btn-social-custom google-mw">
-                <img src="{% static 'images/btn_google.png' %}" alt="구글 로그인">
-            </a>
-            <a href="#" class="btn-social-custom naver-mw">
-                <img src="{% static 'images/btn_naver.png' %}" alt="네이버 로그인">
-            </a>
-            <a href="#" class="btn-social-custom kakao-mw">
-                <img src="{% static 'images/btn_kakao.png' %}" alt="카카오 로그인">
-            </a>
-        </div>
-
-        <a href="{% url 'root' %}" class="btn-guest-mw">비회원으로 사용하기</a>
+<div class="app-container">
+    <div class="logo-area">
+        <img src="{% static 'images/Recipick_logo.png' %}" class="logo-img-top" alt="Recipick Top">
+        <img src="{% static 'images/Recipick_logo_text.png' %}" class="logo-img-bottom" alt="Recipick Bottom">
     </div>
+
+    <form id="login-form" class="form-group-mw">
+        <div class="form-group-mw">
+            <input type="email" id="email" placeholder="이메일" class="input-mw" required>
+        </div>
+        <div class="form-group-mw">
+            <input type="password" id="password" placeholder="비밀번호" class="input-mw" required>
+        </div>
+        <button type="submit" class="btn-mw btn-primary-mw" style="margin-top: 20px;">로그인</button>
+    </form>
+
+    <a href="{% url 'users:signup' %}" class="btn-mw link-btn-mw">회원가입</a>
+    
+    <div class="social-container-mw">
+        <a href="{% url 'users:google_login' %}" class="btn-social-custom google-mw">
+            <img src="{% static 'images/btn_google.png' %}" alt="구글 로그인">
+        </a>
+        <a href="#" class="btn-social-custom naver-mw">
+            <img src="{% static 'images/btn_naver.png' %}" alt="네이버 로그인">
+        </a>
+        <a href="#" class="btn-social-custom kakao-mw">
+            <img src="{% static 'images/btn_kakao.png' %}" alt="카카오 로그인">
+        </a>
+    </div>
+
+    <a href="{% url 'root' %}" class="btn-guest-mw">비회원으로 사용하기</a>
 </div>
 {% endblock %}
