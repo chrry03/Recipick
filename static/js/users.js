@@ -279,6 +279,8 @@ function syncAllergyToBanned() {
 }
 
 async function finishPreference(level) {
+    // 토큰 확인 로직은 authFetch가 내부적으로 처리하지만, 
+    // UX상 여기서 먼저 체크하고 보내는 건 유지해도 좋습니다.
     const token = localStorage.getItem('access_token');
     const csrftoken = getCookie('csrftoken');
 
@@ -295,11 +297,12 @@ async function finishPreference(level) {
     };
 
     try {
-        const response = await fetch('/users/mypage/', {
+        // ★ fetch 대신 authFetch 사용!
+        const response = await authFetch('/users/mypage/', {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
+                // 'Authorization': ...  <-- 삭제! (authFetch가 알아서 최신 토큰 넣음)
                 'X-CSRFToken': csrftoken
             },
             body: JSON.stringify(payload)
@@ -309,16 +312,10 @@ async function finishPreference(level) {
             alert("취향 설정이 완료되었습니다! 메인으로 이동합니다.");
             window.location.href = "/"; 
         } else {
-            if (response.status === 401) {
-                alert("로그인 정보가 만료되었습니다. 다시 로그인해주세요.");
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('refresh_token');
-                window.location.href = '/users/login/';
-            } else {
-                const errorData = await response.json();
-                console.error("저장 실패:", errorData);
-                alert("저장에 실패했습니다. (" + response.status + ")");
-            }
+            // ★ 401 체크 로직 삭제함 (authFetch가 이미 재발급 시도했거나 강제 로그아웃 시켰음)
+            const errorData = await response.json();
+            console.error("저장 실패:", errorData);
+            alert("저장에 실패했습니다. (" + response.status + ")");
         }
     } catch (error) {
         console.error("통신 오류:", error);
@@ -470,15 +467,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 const tempEmail = localStorage.getItem('temp_email');
                 const tempPw = localStorage.getItem('temp_pw');
                 const urlParams = new URLSearchParams(window.location.search);
-                const nextStep = urlParams.get('next');
+                // URL 파라미터가 없으면 localStorage 확인 (소셜 로그인 경우)
+                const nextStep = urlParams.get('next') || localStorage.getItem('next_step');
 
                 if (tempEmail && tempPw) {
+                    // [일반 회원가입] - 인증 필요 없음 (그대로 fetch 유지)
                     const signupRes = await fetch('/users/signup/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
                         body: JSON.stringify({ email: tempEmail, password: tempPw, nickname: nickname })
                     });
                     const signupData = await signupRes.json();
+                    
                     if (signupRes.status === 201) {
                         alert('가입 완료!');
                         localStorage.removeItem('temp_email');
@@ -496,42 +496,35 @@ document.addEventListener('DOMContentLoaded', function() {
                         alert(signupData.message || '가입 실패');
                     }
                 } else {
-                    // [소셜 로그인 / 기존 회원] 로직
-                    const token = localStorage.getItem('access_token');
-
-                    // ★ [수정] URL이 아니라 아까 저장해둔 localStorage에서 꺼내봅니다.
-                    // (일반 회원가입은 URL에 남아있을 수 있으니 둘 다 체크하는 OR 연산자 사용)
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const nextStep = localStorage.getItem('next_step') || urlParams.get('next');
+                    // [소셜 로그인 / 기존 회원 정보 수정] - ★ 인증 필요 (authFetch 사용!)
                     
-                    if(token) {
-                        const updateRes = await fetch('/users/mypage/', {
-                            method: 'PATCH',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`,
-                                'X-CSRFToken': csrftoken
-                            },
-                            body: JSON.stringify({ nickname: nickname })
-                        });
+                    // authFetch가 토큰 확인 및 갱신을 알아서 하므로 토큰 체크 로직 생략 가능
+                    const updateRes = await authFetch('/users/mypage/', {
+                        method: 'PATCH',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            // 'Authorization': ... (authFetch가 알아서 넣음)
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ nickname: nickname })
+                    });
 
-                        if(updateRes.ok) {
-                            alert('변경 완료');
-                            localStorage.setItem('user_nickname', nickname);
+                    if(updateRes.ok) {
+                        alert('변경 완료');
+                        localStorage.setItem('user_nickname', nickname);
 
-                            // 사용한 'next_step'은 지워주는 센스 (청소)
-                            localStorage.removeItem('next_step');
-                            
-                            // ★ [수정] next 파라미터가 'preference'면 취향 설정으로, 아니면 메인으로!
-                            if (nextStep === 'preference') {
-                                window.location.href = '/users/preference/';
-                            } else {
-                                window.location.href = '/'; // 보통 닉네임만 바꾸면 메인으로 가는 게 자연스러움
-                            }
+                        // 사용한 'next_step'은 지워주는 센스 (청소)
+                        localStorage.removeItem('next_step');
+                        
+                        // next 파라미터에 따라 이동
+                        if (nextStep === 'preference') {
+                            window.location.href = '/users/preference/';
+                        } else {
+                            window.location.href = '/'; 
                         }
                     } else {
-                        alert("로그인 정보가 없습니다.");
-                        window.location.href = '/users/login/';
+                        // authFetch가 401(만료) 처리는 다 했으므로, 여기까지 왔다면 다른 에러임
+                        alert("정보 수정 실패");
                     }
                 }
             } catch (e) {
@@ -567,12 +560,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         const refresh = localStorage.getItem('refresh_token');
                         const csrftoken = getCookie('csrftoken');
 
-                        await fetch('/users/logout/', {
+                        // ★ [수정] fetch -> authFetch (토큰 만료 시 자동 갱신 후 로그아웃 시도)
+                        await authFetch('/users/logout/', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-CSRFToken': csrftoken,
-                                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                                // 'Authorization' 헤더는 authFetch가 자동으로 넣으므로 삭제
                             },
                             body: JSON.stringify({ refresh: refresh })
                         });
@@ -580,6 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     } catch (error) {
                         console.error("로그아웃 요청 중 오류:", error);
                     } finally {
+                        // 서버 응답과 상관없이 내 브라우저의 흔적은 무조건 지운다 (UX 최적화)
                         localStorage.removeItem('access_token');
                         localStorage.removeItem('refresh_token');
                         localStorage.removeItem('user_nickname');
@@ -588,7 +583,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
-        }
+        }   
 
         const withdrawBtn = document.getElementById('btn-withdraw');
         if (withdrawBtn) {
@@ -599,40 +594,58 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
-                const token = localStorage.getItem('access_token');
                 const csrftoken = getCookie('csrftoken');
                 
+                // ★ [수정] 내부 함수도 authFetch를 쓰도록 변경
                 const requestWithdraw = async (password) => {
-                    return fetch('/users/mypage/', {
+                    return authFetch('/users/mypage/', {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`,
                             'X-CSRFToken': csrftoken
+                            // 'Authorization' 삭제 (authFetch가 처리)
                         },
                         body: JSON.stringify({ password: password })
                     });
                 };
 
                 try {
+                    // 1. 비밀번호 없이 1차 시도
                     let response = await requestWithdraw(null);
 
+                    // 2. 만약 비밀번호가 필요하다는 응답(400)이 오면?
                     if (response.status === 400) {
+                        // 응답 본문을 읽기 위해 clone()을 쓰거나, 
+                        // 에러 메시지 확인 후 다시 요청할 때 response 변수를 덮어쓰므로 주의
                         const data = await response.json();
+                        
                         if (data.message === "비밀번호를 입력해주세요.") {
                             const password = prompt("본인 확인을 위해 비밀번호를 입력해주세요.");
-                            if(!password) return;
+                            if(!password) return; // 취소 누르면 종료
+                            
+                            // 비밀번호 담아서 2차 시도
                             response = await requestWithdraw(password);
+                        } else {
+                            // 비밀번호 문제가 아닌 다른 400 에러라면 알림 띄우기
+                            alert(data.message || '탈퇴 실패');
+                            return;
                         }
                     }
 
-                    if (response.status === 204) {
+                    // 3. 최종 성공 확인 (204 No Content)
+                    if (response.status === 204 || response.ok) {
                         alert('탈퇴가 완료되었습니다.');
                         localStorage.clear();
                         window.location.href = '/users/login/';
                     } else {
-                        const errData = await response.json();
-                        alert(errData.message || '탈퇴 처리에 실패했습니다.');
+                        // 2차 시도에서도 실패한 경우 (비밀번호 틀림 등)
+                        // 이미 위에서 body를 읽었을 수 있으므로 안전하게 처리
+                        try {
+                            const errData = await response.json();
+                            alert(errData.message || '탈퇴 처리에 실패했습니다.');
+                        } catch (jsonErr) {
+                            alert('탈퇴 처리에 실패했습니다.');
+                        }
                     }
                 } catch (err) {
                     console.error("탈퇴 요청 오류:", err);
