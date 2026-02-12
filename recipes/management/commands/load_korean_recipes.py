@@ -153,7 +153,7 @@ class Command(BaseCommand):
         return instructions
     
     def add_ingredients_to_recipe(self, recipe, ingredients_text):
-        """재료를 레시피에 추가"""
+        """재료를 레시피에 추가 (자동 생성 포함!)"""
         # 재료 파싱 (예: "양파 1개, 마늘 3쪽, 간장 2큰술")
         ingredient_parts = re.split(r'[,·]', ingredients_text)
         
@@ -170,6 +170,19 @@ class Command(BaseCommand):
                 
                 # 식재료 매핑
                 ingredient = IngredientMapper.find_ingredient(ing_name)
+                
+                # ============ 개선: 매핑 안 되면 자동 생성! ============
+                if not ingredient:
+                    try:
+                        # '직접 추가' 카테고리(17)에 자동 생성
+                        ingredient = IngredientMapper.get_or_create_user_ingredient(
+                            user_input_name=ing_name,
+                            category_id=17
+                        )
+                        self.stdout.write(f'   ➕ 식재료 자동 생성: {ing_name}')
+                    except Exception as e:
+                        self.stdout.write(self.style.WARNING(f'   ⚠️  생성 실패: {ing_name} - {str(e)}'))
+                        continue
                 
                 if ingredient:
                     # 이미 추가된 재료인지 확인
