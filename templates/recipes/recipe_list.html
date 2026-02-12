@@ -10,43 +10,33 @@
 {% endblock header %}
 
 {% block main_content %}
-<div class="recipe-list-container">
-    
-    <div class="search-wrapper">
-        <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색">
-        <input type="text" 
-               id="recipe-search-input" 
-               class="search-input" 
-               placeholder="레시피 검색"
-               aria-label="레시피 검색">
-    </div>
-    
-    <div class="filter-bar">
-        <button class="filter-chip active" data-filter="all">
-            전체<span class="count">(0)</span>
-        </button>
-        <button class="filter-chip" data-filter="favorites">
-            찜한 레시피<span class="count">(0)</span>
-        </button>
-        <button class="filter-chip" data-filter="my-ingredients">
-            내 재료만<span class="count">(0)</span>
-        </button>
-    </div>
-    
-    <div class="loading-spinner" id="loading-spinner">
-        <div class="spinner-icon">⏳</div>
-        <p>맛있는 레시피를 찾고 있어요...</p>
-    </div>
-    
-    <div id="recipe-recommendations" class="recipe-grid-area">
-        {% if not user.is_authenticated %}
-        <div class="empty-state">
-            <p>로그인 후 맞춤 레시피를 추천받아보세요!</p>
-            <a href="{% url 'users:login' %}" class="login-link">로그인하기</a>
+<div class="app-container">
+    <div class="recipe-list-wrapper">
+        <div class="search-wrapper">
+            <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색">
+            <input type="text" id="recipe-search-input" class="search-input" placeholder="레시피 검색" aria-label="레시피 검색">
         </div>
-        {% endif %}
+        
+        <div class="filter-bar">
+            <button class="filter-chip active" data-filter="all">전체<span class="count">(0)</span></button>
+            <button class="filter-chip" data-filter="favorites">찜한 레시피<span class="count">(0)</span></button>
+            <button class="filter-chip" data-filter="my-ingredients">내 재료만<span class="count">(0)</span></button>
+        </div>
+        
+        <div class="loading-spinner" id="loading-spinner">
+            <div class="spinner-icon">⏳</div>
+            <p>맛있는 레시피를 찾고 있어요...</p>
+        </div>
+        
+        <div id="recipe-recommendations" class="recipe-grid-area">
+            {% if not user.is_authenticated %}
+            <div class="empty-state">
+                <p>로그인 후 맞춤 레시피를 추천받아보세요!</p>
+                <a href="{% url 'users:login' %}" class="login-link">로그인하기</a>
+            </div>
+            {% endif %}
+        </div>
     </div>
-
 </div>
 {% endblock main_content %}
 
