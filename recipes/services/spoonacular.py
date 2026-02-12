@@ -1,62 +1,94 @@
+"""
+Spoonacular API Service (번역 통합 버전)
+
+주요 기능:
+1. Spoonacular API에서 레시피 검색
+2. 레시피 상세 정보 조회
+3. 자동 한글 번역
+4. DB 저장
+"""
 import requests
 from django.conf import settings
-from django.core.cache import cache
-import json
-import re
+from recipes.models import Recipe, RecipeIngredient
+from ingredients.utils.mapper import IngredientMapper
+from .translator import RecipeTranslator
+import time
 
 
 class SpoonacularService:
-    """Spoonacular API 연동 서비스"""
-    
-    BASE_URL = 'https://api.spoonacular.com'
+    """Spoonacular API 서비스 (번역 포함)"""
     
     def __init__(self):
-        self.api_key = settings.SPOONACULAR_API_KEY
-        if not self.api_key:
-            raise ValueError("SPOONACULAR_API_KEY가 설정되지 않았습니다.")
+        self.api_key = getattr(settings, 'SPOONACULAR_API_KEY', '')
+        self.base_url = 'https://api.spoonacular.com'
+        self.translator = RecipeTranslator()
     
-    def search_recipes_by_ingredients(self, ingredients, number=10):
+    def search_recipes(self, 
+                      query=None,
+                      cuisine=None,
+                      diet=None,
+                      intolerances=None,
+                      ingredients=None,
+                      number=10,
+                      offset=0):
         """
-        재료 기반 레시피 검색
+        레시피 검색
         
         Args:
-            ingredients: 재료 이름 리스트 (영어)
+            query: 검색어
+            cuisine: 요리 종류 (korean, italian, chinese 등)
+            diet: 식단 유형 (vegetarian, vegan 등)
+            intolerances: 알러지 (gluten, dairy 등)
+            ingredients: 재료 목록
             number: 결과 개수
+            offset: 페이지 오프셋
         
         Returns:
             레시피 목록
         """
-        # 캐시 키 생성
-        cache_key = f"spoon_search_{'_'.join(sorted(ingredients))}_{number}"
-        cached_result = cache.get(cache_key)
+        if not self.api_key:
+            print("❌ SPOONACULAR_API_KEY가 설정되지 않았습니다.")
+            return []
         
-        if cached_result:
-            print(f"✓ 캐시에서 레시피 검색 결과 반환: {cache_key}")
-            return cached_result
+        url = f"{self.base_url}/recipes/complexSearch"
         
-        # API 호출
-        url = f"{self.BASE_URL}/recipes/findByIngredients"
         params = {
             'apiKey': self.api_key,
-            'ingredients': ','.join(ingredients),
             'number': number,
-            'ranking': 2,  # Maximize used ingredients
-            'ignorePantry': True
+            'offset': offset,
+            'addRecipeInformation': True,
+            'fillIngredients': True
         }
+        
+        if query:
+            params['query'] = query
+        if cuisine:
+            params['cuisine'] = cuisine
+        if diet:
+            params['diet'] = diet
+        if intolerances:
+            params['intolerances'] = intolerances
+        if ingredients:
+            if isinstance(ingredients, list):
+                ingredients = ','.join(ingredients)
+            params['includeIngredients'] = ingredients
         
         try:
             response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            results = response.json()
             
-            # 캐시 저장 (30분)
-            cache.set(cache_key, results, 60 * 30)
+            if response.status_code == 402:
+                print("❌ API 일일 사용량 초과 (402)")
+                return []
             
-            print(f"✓ Spoonacular API: {len(results)}개 레시피 검색 성공")
-            return results
+            if response.status_code != 200:
+                print(f"❌ API 오류: {response.status_code}")
+                return []
             
-        except requests.exceptions.RequestException as e:
-            print(f"✗ Spoonacular API 검색 실패: {e}")
+            data = response.json()
+            return data.get('results', [])
+            
+        except Exception as e:
+            print(f"❌ 검색 실패: {str(e)}")
             return []
     
     def get_recipe_information(self, recipe_id):
@@ -69,157 +101,205 @@ class SpoonacularService:
         Returns:
             레시피 상세 정보
         """
-        # 캐시 키
-        cache_key = f"spoon_recipe_{recipe_id}"
-        cached_result = cache.get(cache_key)
+        url = f"{self.base_url}/recipes/{recipe_id}/information"
         
-        if cached_result:
-            print(f"✓ 캐시에서 레시피 상세 반환: {recipe_id}")
-            return cached_result
-        
-        # API 호출
-        url = f"{self.BASE_URL}/recipes/{recipe_id}/information"
         params = {
             'apiKey': self.api_key,
-            'includeNutrition': True
+            'includeNutrition': False
         }
         
         try:
             response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            result = response.json()
             
-            # 캐시 저장 (1시간)
-            cache.set(cache_key, result, 60 * 60)
+            if response.status_code != 200:
+                return None
             
-            print(f"✓ Spoonacular API: 레시피 {recipe_id} 상세 조회 성공")
-            return result
+            return response.json()
             
-        except requests.exceptions.RequestException as e:
-            print(f"✗ Spoonacular API 상세 조회 실패: {e}")
+        except Exception as e:
+            print(f"❌ 상세 조회 실패: {str(e)}")
             return None
     
-    def save_recipe_to_db(self, recipe_id):
+    def save_recipe_to_db(self, recipe_data, translate=True):
         """
-        Spoonacular 레시피를 DB에 저장
+        레시피를 DB에 저장 (번역 포함)
         
         Args:
-            recipe_id: Spoonacular 레시피 ID
+            recipe_data: Spoonacular API 응답 데이터
+            translate: 한글 번역 여부 (기본 True)
         
         Returns:
-            Recipe 객체 또는 None
+            Recipe 객체
         """
-        from recipes.models import Recipe, RecipeIngredient
-        from ingredients.models import IngredientMaster
-        from ingredients.utils.mapper import IngredientMapper
+        external_id = f"spoon_{recipe_data['id']}"
         
-        # 이미 DB에 있는지 확인
-        try:
-            existing_recipe = Recipe.objects.get(external_id=f"spoonacular_{recipe_id}")
-            print(f"✓ 레시피 {recipe_id}는 이미 DB에 존재")
-            return existing_recipe
-        except Recipe.DoesNotExist:
-            pass
-        
-        # API에서 상세 정보 가져오기
-        recipe_data = self.get_recipe_information(recipe_id)
-        if not recipe_data:
+        # 중복 확인
+        if Recipe.objects.filter(external_id=external_id).exists():
+            print(f"⏭️  중복: {recipe_data.get('title')}")
             return None
         
-        # Recipe 객체 생성
-        recipe = Recipe(
-            external_id=f"spoonacular_{recipe_id}",
-            title=recipe_data.get('title', 'Unknown Recipe'),  # ← name이 아닌 title
-            image_url=recipe_data.get('image', ''),
-            source='spoonacular',
-            ready_minutes=recipe_data.get('readyInMinutes', 0),  # ← cooking_time이 아닌 ready_minutes
-            servings=recipe_data.get('servings', 1),
-        )
+        # 난이도 계산
+        steps = recipe_data.get('analyzedInstructions', [])
+        total_steps = sum(len(inst.get('steps', [])) for inst in steps)
         
-        # 난이도 자동 계산
-        recipe.difficulty = self._estimate_difficulty(recipe_data)  # ← difficulty_level이 아닌 difficulty
+        if total_steps <= 5:
+            difficulty = 'EASY'
+        elif total_steps <= 10:
+            difficulty = 'NORMAL'
+        else:
+            difficulty = 'DIFFICULT'
         
         # 조리 단계 추출
-        instructions = self._extract_instructions(recipe_data)
-        recipe.instructions = instructions  # JSON 필드라서 자동 변환
+        steps_data = []
+        for instruction_group in steps:
+            for step in instruction_group.get('steps', []):
+                steps_data.append({
+                    'number': step.get('number'),
+                    'instruction': step.get('step'),
+                    'timer_seconds': None
+                })
         
-        recipe.save()
+        # ============ 번역 (NEW!) ============
+        title_ko = None
+        instructions_ko = None
+        is_translated = False
         
-        # 재료 매핑 및 저장
-        for ingredient_data in recipe_data.get('extendedIngredients', []):
-            ing_name = ingredient_data.get('name', '')
-            
-            # 식재료 매핑
-            ingredient = IngredientMapper.find_ingredient(ing_name)
-            
-            if ingredient:
-                RecipeIngredient.objects.create(
-                    recipe=recipe,
-                    ingredient=ingredient,
-                    ingredient_name=ingredient_data.get('original', ing_name),
-                    is_optional=False
-                )
-            else:
-                print(f"⚠️  '{ing_name}' 식재료를 찾을 수 없음")
+        if translate:
+            print(f"🌐 번역 중: {recipe_data.get('title')}")
+            try:
+                translation = self.translator.translate_full_recipe({
+                    'title': recipe_data.get('title'),
+                    'instructions': recipe_data.get('instructions', ''),
+                    'steps': steps_data
+                })
+                
+                title_ko = translation.get('title_ko')
+                instructions_ko = translation.get('instructions_ko')
+                steps_data = translation.get('steps', steps_data)
+                is_translated = True
+                
+                print(f"✅ 번역 완료: {title_ko}")
+                
+            except Exception as e:
+                print(f"⚠️ 번역 실패: {str(e)}")
         
-        # 재료 개수 업데이트
-        recipe.update_ingredient_counts()
+        # 레시피 생성
+        recipe = Recipe.objects.create(
+            external_id=external_id,
+            source='spoonacular',
+            title=recipe_data.get('title'),
+            title_ko=title_ko,
+            instructions=recipe_data.get('instructions', ''),
+            instructions_ko=instructions_ko,
+            is_translated=is_translated,
+            image_url=recipe_data.get('image', ''),
+            ready_minutes=recipe_data.get('readyInMinutes', 0),
+            servings=recipe_data.get('servings', 4),
+            difficulty=difficulty,
+            steps=steps_data,
+            source_url=recipe_data.get('sourceUrl', ''),
+            raw_data=recipe_data,
+            is_active=True
+        )
         
-        print(f"✓ 레시피 {recipe_id} DB 저장 완료: {recipe.title}")
+        # 재료 저장
+        self._save_recipe_ingredients(recipe, recipe_data)
+        
         return recipe
     
-    def _clean_html(self, html_text):
-        """HTML 태그 제거"""
-        if not html_text:
-            return ''
-        # HTML 태그 제거
-        clean_text = re.sub(r'<[^>]+>', '', html_text)
-        # 엔티티 변환
-        clean_text = clean_text.replace('&nbsp;', ' ')
-        clean_text = clean_text.replace('&amp;', '&')
-        return clean_text.strip()
+    def _save_recipe_ingredients(self, recipe, recipe_data):
+        """레시피 재료 저장"""
+        for ingredient_data in recipe_data.get('extendedIngredients', []):
+            # IngredientMapper로 매핑
+            ing_name = ingredient_data.get('name', '')
+            ing_master = IngredientMapper.find_ingredient(ing_name)
+            
+            if ing_master:
+                RecipeIngredient.objects.create(
+                    recipe=recipe,
+                    ingredient=ing_master,
+                    quantity=ingredient_data.get('amount', 0),
+                    unit=ingredient_data.get('unit', ''),
+                    name_override=ingredient_data.get('original', '')
+                )
     
-    def _extract_instructions(self, recipe_data):
-        """조리 단계 추출"""
-        instructions = []
+    def fetch_and_save_recipes(self, 
+                               cuisine='korean',
+                               limit=50,
+                               translate=True,
+                               delay=0.5):
+        """
+        레시피 일괄 수집 및 저장 (번역 포함)
         
-        # analyzedInstructions 사용
-        analyzed = recipe_data.get('analyzedInstructions', [])
-        if analyzed and len(analyzed) > 0:
-            steps = analyzed[0].get('steps', [])
-            for step in steps:
-                instructions.append({
-                    'step': step.get('number', 0),
-                    'description': step.get('step', '')  # ← text가 아닌 description
-                })
-        else:
-            # instructions 필드 사용 (HTML 형식)
-            raw_instructions = recipe_data.get('instructions', '')
-            if raw_instructions:
-                clean_instructions = self._clean_html(raw_instructions)
-                # 문장 단위로 분리
-                sentences = clean_instructions.split('.')
-                for i, sentence in enumerate(sentences, 1):
-                    sentence = sentence.strip()
-                    if sentence:
-                        instructions.append({
-                            'step': i,
-                            'description': sentence
-                        })
+        Args:
+            cuisine: 요리 종류
+            limit: 수집 개수
+            translate: 번역 여부
+            delay: API 호출 간격 (초)
         
-        return instructions
-    
-    def _estimate_difficulty(self, recipe_data):
-        """난이도 추정 (DifficultyLevel enum 반환)"""
-        from recipes.models import DifficultyLevel
+        Returns:
+            (수집된 개수, 중복 개수, 오류 개수)
+        """
+        collected = 0
+        skipped = 0
+        errors = 0
         
-        # 조리 시간과 재료 개수로 추정
-        cooking_time = recipe_data.get('readyInMinutes', 0)
-        ingredient_count = len(recipe_data.get('extendedIngredients', []))
+        print(f"🔍 {cuisine} 레시피 수집 시작 (최대 {limit}개)")
         
-        if cooking_time <= 20 and ingredient_count <= 5:
-            return DifficultyLevel.EASY
-        elif cooking_time <= 40 and ingredient_count <= 10:
-            return DifficultyLevel.NORMAL
-        else:
-            return DifficultyLevel.DIFFICULT
+        for offset in range(0, limit, 10):
+            # 검색
+            results = self.search_recipes(
+                cuisine=cuisine,
+                number=min(10, limit - collected),
+                offset=offset
+            )
+            
+            if not results:
+                break
+            
+            for recipe_data in results:
+                try:
+                    # 상세 정보 조회
+                    detail = self.get_recipe_information(recipe_data['id'])
+                    
+                    if not detail:
+                        errors += 1
+                        continue
+                    
+                    # DB 저장 (번역 포함)
+                    recipe = self.save_recipe_to_db(detail, translate=translate)
+                    
+                    if recipe:
+                        collected += 1
+                        display_title = recipe.get_display_title()
+                        print(f"✅ [{collected}] {display_title}")
+                    else:
+                        skipped += 1
+                    
+                    # API 제한 방지
+                    time.sleep(delay)
+                    
+                except Exception as e:
+                    errors += 1
+                    print(f"❌ 오류: {str(e)}")
+                    continue
+            
+            # 페이지 단위 대기
+            if collected < limit:
+                time.sleep(2)
+        
+        print(f"\n✨ 완료! 수집: {collected}개 / 중복: {skipped}개 / 오류: {errors}개")
+        
+        return collected, skipped, errors
+
+
+# ============ 편의 함수 ============
+
+def search_and_save_recipes(cuisine='korean', limit=50, translate=True):
+    """레시피 검색 및 저장 (편의 함수)"""
+    service = SpoonacularService()
+    return service.fetch_and_save_recipes(
+        cuisine=cuisine,
+        limit=limit,
+        translate=translate
+    )

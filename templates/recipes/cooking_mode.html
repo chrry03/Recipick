@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ recipe.title }} - 단계 {{ current_step }}{% endblock %}
+{# ============ 한글 제목 우선 표시 (수정!) ============ #}
+{% block title %}{{ recipe.get_display_title }} - 단계 {{ current_step }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/recipes.css' %}">
@@ -14,25 +15,36 @@
      data-total-steps="{{ total_steps }}"
      data-current-step="{{ current_step }}">
     
-    
-
+    {# 단계 번호 #}
     <div class="step-number" aria-label="현재 단계">
-        <p>{{ current_step }}</p>
+        <p>{{ current_step }} / {{ total_steps }}</p>
     </div>
 
+    {# ============ 한글 조리법 표시 (수정!) ============ #}
     <div class="description" role="article">
         {% if step_data %}
+            {# step_data.description에 한글 조리법이 들어있음 #}
             <p>{{ step_data.description|linebreaksbr }}</p>
+            
+            {# 타이머 정보가 있으면 표시 #}
+            {% if step_data.timer_seconds %}
+            <div class="timer-info">
+                ⏱️ 타이머: {{ step_data.timer_seconds|floatformat:0 }}초
+                ({{ step_data.timer_seconds|floatformat:0|divisibleby:60|yesno:"약,약" }} 
+                {% widthratio step_data.timer_seconds 60 1 %}분)
+            </div>
+            {% endif %}
         {% else %}
             <p class="no-step-data">단계 정보가 없습니다.</p>
         {% endif %}
     </div>
 
+    {# 이미지 영역 #}
     <div class="mask-group">
-        {% if step_data and step_data.image %}
+        {% if step_data.image %}
             <div class="image-container">
                 <img src="{{ step_data.image }}" 
-                     alt="{{ recipe.title }} - 단계 {{ current_step }}" 
+                     alt="{{ recipe.get_display_title }} - 단계 {{ current_step }}" 
                      loading="lazy"
                      class="step-image"
                      data-fallback-display="none">
@@ -40,7 +52,7 @@
         {% elif recipe.image_url %}
             <div class="image-container">
                 <img src="{{ recipe.image_url }}" 
-                     alt="{{ recipe.title }} - 단계 {{ current_step }}" 
+                     alt="{{ recipe.get_display_title }} - 단계 {{ current_step }}" 
                      loading="lazy"
                      class="step-image"
                      data-fallback-display="none">
@@ -56,7 +68,11 @@
                 </div>
             </div>
         {% endif %}
+        
+        {# 타이머 앱 #}
         <div id="timer-app"></div>
+        
+        {# 타이머 추가 버튼 #}
         <div class="timer-add-buttons">
             <button type="button" class="timer-add-btn" data-seconds="30" aria-label="30초 추가">
                 +30초
@@ -70,8 +86,7 @@
         </div>
     </div>
 
-    
-
+    {# 네비게이션 버튼 #}
     <nav class="nav-buttons" aria-label="단계 네비게이션">
         {% if current_step == 1 %}
         <button type="button" 
