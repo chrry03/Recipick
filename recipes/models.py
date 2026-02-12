@@ -305,9 +305,10 @@ class Recipe(models.Model):
         # 재료 점수 = (보유비율 × 0.7) + (부족패널티 × 0.3)
         ingredient_score = (match_ratio * 0.7) + (missing_penalty * 0.3)
         
-        # 2. 유통기한 점수 (25%)
+        # 2. 유통기한 점수 (40% - 증가!) - 임박 재료 강조
         expiry_score = 0
         urgent_count = 0
+        very_urgent_count = 0  # D-2 이하
         
         for ri in recipe_ingredients:
             if ri.ingredient_id in user_ingredients_dict:
@@ -316,19 +317,29 @@ class Recipe(models.Model):
                     days_left = (ui.expire_at - date.today()).days
                     
                     if days_left <= 2:
-                        expiry_score += 100
+                        # 매우 긴급 (D-2 이하)
+                        expiry_score += 120  # 100 → 120 증가
                         urgent_count += 1
+                        very_urgent_count += 1
                     elif days_left <= 5:
-                        expiry_score += 70
+                        # 긴급 (D-3~5)
+                        expiry_score += 80  # 70 → 80 증가
+                        urgent_count += 1
                     elif days_left <= 10:
-                        expiry_score += 40
+                        # 주의 (D-6~10)
+                        expiry_score += 45  # 40 → 45 증가
                     else:
+                        # 여유 (D-11 이상)
                         expiry_score += 20
                 else:
+                    # 유통기한 미입력
                     expiry_score += 20
         
         if matched > 0:
             expiry_score = expiry_score / matched
+            # 매우 긴급 재료가 있으면 추가 보너스 (최대 130점까지)
+            if very_urgent_count > 0:
+                expiry_score = min(130, expiry_score + (very_urgent_count * 5))
         else:
             expiry_score = 0
         
@@ -346,10 +357,10 @@ class Recipe(models.Model):
         # 4. 개인화 점수 (5%)
         personalization_score = 50  # 기본값
         
-        # 총점 계산
+        # 총점 계산 (유통기한 가중치 증가: 25% → 40%, 재료 매칭: 60% → 45%)
         total_score = (
-            ingredient_score * 0.60 +
-            expiry_score * 0.25 +
+            ingredient_score * 0.45 +
+            expiry_score * 0.40 +
             difficulty_score * 0.10 +
             personalization_score * 0.05
         )
