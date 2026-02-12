@@ -41,8 +41,8 @@
             <div class="rating-row">
                 <span class="rating-label">난이도:</span>
                 <div class="stars difficulty-stars" id="difficultyStars">
-                    <button type="button" class="star-btn {% if log.perceived_difficulty == 'EASY' %}active{% endif %}" data-value="EASY">★</button>
-                    <button type="button" class="star-btn {% if log.perceived_difficulty == 'NORMAL' %}active{% endif %}" data-value="NORMAL">★</button>
+                    <button type="button" class="star-btn {% if log.perceived_difficulty %}active{% endif %}" data-value="EASY">★</button>   
+                    <button type="button" class="star-btn {% if log.perceived_difficulty == 'NORMAL' or log.perceived_difficulty == 'DIFFICULT' %}active{% endif %}" data-value="NORMAL">★</button>    
                     <button type="button" class="star-btn {% if log.perceived_difficulty == 'DIFFICULT' %}active{% endif %}" data-value="DIFFICULT">★</button>
                 </div>
             </div>
