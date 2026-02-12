@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}일지 작성 - Recipick{% endblock %}
+{% block title %}{% if is_edit %}일지 수정{% else %}일지 작성{% endif %} - Recipick{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/logs.css' %}">
@@ -17,7 +17,7 @@
                 <path d="M22 10.5H1M1 10.5L11 1M1 10.5L11 20" stroke="#555555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
-        <h1 class="page-title">오늘 요리는 어떠셨나요?</h1>
+        <h1 class="page-title">{% if is_edit %}일지 수정하기{% else %}오늘 요리는 어떠셨나요?{% endif %}</h1>
     </div>
 
     <form id="log-create-form" method="POST" enctype="multipart/form-data">
@@ -25,11 +25,14 @@
         <input type="hidden" name="recipe" value="{{ recipe_id }}">
 
         <div class="image-upload-wrapper">
-            <div class="image-upload" id="imageUpload">
+            <div class="image-upload" id="imageUpload" {% if log.image %}style="display:none;"{% endif %}>
                 <img src="{% static 'images/image_upload.svg' %}" alt="이미지 업로드" class="camera-icon">
             </div>
             <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
-            <img class="image-preview" id="imagePreview" alt="업로드된 사진" style="display: none;">
+            
+            <img class="image-preview" id="imagePreview" alt="업로드된 사진" 
+                 src="{% if log.image %}{{ log.image.url }}{% endif %}" 
+                 style="{% if log.image %}display: block;{% else %}display: none;{% endif %}">
         </div>
 
         <div class="cooking-info">
@@ -38,36 +41,32 @@
             <div class="rating-row">
                 <span class="rating-label">난이도:</span>
                 <div class="stars difficulty-stars" id="difficultyStars">
-                    <button type="button" class="star-btn" data-value="1">★</button>
-                    <button type="button" class="star-btn" data-value="2">★</button>
-                    <button type="button" class="star-btn" data-value="3">★</button>
-                    <button type="button" class="star-btn" data-value="4">★</button>
-                    <button type="button" class="star-btn" data-value="5">★</button>
+                    <button type="button" class="star-btn {% if log.perceived_difficulty %}active{% endif %}" data-value="EASY">★</button>   
+                    <button type="button" class="star-btn {% if log.perceived_difficulty == 'NORMAL' or log.perceived_difficulty == 'DIFFICULT' %}active{% endif %}" data-value="NORMAL">★</button>    
+                    <button type="button" class="star-btn {% if log.perceived_difficulty == 'DIFFICULT' %}active{% endif %}" data-value="DIFFICULT">★</button>
                 </div>
             </div>
-            <input type="hidden" id="difficultyRating" name="difficulty" required>
+            <input type="hidden" id="difficultyRating" name="difficulty" value="{{ log.perceived_difficulty|default:'' }}" required>
             
             <div class="rating-row">
                 <span class="rating-label">만족도:</span>
                 <div class="stars satisfaction-stars" id="satisfactionStars">
-                    <button type="button" class="star-btn" data-value="1">★</button>
-                    <button type="button" class="star-btn" data-value="2">★</button>
-                    <button type="button" class="star-btn" data-value="3">★</button>
-                    <button type="button" class="star-btn" data-value="4">★</button>
-                    <button type="button" class="star-btn" data-value="5">★</button>
+                    {% for i in "12345" %}
+                        <button type="button" class="star-btn {% if log.rating >= forloop.counter %}active{% endif %}" data-value="{{ forloop.counter }}">★</button>
+                    {% endfor %}
                 </div>
             </div>
-            <input type="hidden" id="satisfactionRating" name="rating" required>
+            <input type="hidden" id="satisfactionRating" name="rating" value="{{ log.rating|default:'' }}" required>
         </div>
 
         <div class="memo-header">&lt;메모&gt;</div>
         <div class="memo-container">
-            <textarea class="memo-input" name="memo" placeholder="후기를 남겨주세요."></textarea>
+            <textarea class="memo-input" name="memo" placeholder="후기를 남겨주세요.">{{ log.memo|default:'' }}</textarea>
         </div>
 
-        <input type="date" id="cookedAt" name="cooked_at" class="date-input-hidden">
+        <input type="date" id="cookedAt" name="cooked_at" class="date-input-hidden" value="{{ log.cooked_at|date:'Y-m-d' }}">
 
-        <button type="submit" class="submit-btn" id="submitBtn">작성하기</button>
+        <button type="submit" class="submit-btn" id="submitBtn">{% if is_edit %}수정 완료{% else %}작성하기{% endif %}</button>
     </form>
 </div>
 {% endblock %}
