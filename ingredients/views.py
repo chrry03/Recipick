@@ -67,7 +67,7 @@ def create_custom_ingredient(request):
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """식재료 마스터 데이터 조회 (검색, 필터링)"""
-    queryset = IngredientMaster.objects.all()
+    queryset = IngredientMaster.objects.all().order_by('name_ko')
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny]
     # [핵심 수정 1] 페이지네이션 비활성화 (20개 제한 해제)
@@ -534,10 +534,7 @@ def add_ingredient_view(request):
     )
     
     # 모든 식재료 조회
-    all_ingredients = IngredientMaster.objects.select_related('category').order_by(
-        'category__category_id',
-        'name_ko'
-    )
+    all_ingredients = IngredientMaster.objects.select_related('category').order_by('name_ko')
     
     # 데이터 가공
     master_list = []
@@ -601,7 +598,8 @@ def ingredient_list_view(request):
     category_id = request.GET.get('category_id')
     keyword = request.GET.get('keyword')
     
-    ingredients = IngredientMaster.objects.all().select_related('category')
+    # [수정] .order_by('name_ko') 추가하여 가나다 순 정렬
+    ingredients = IngredientMaster.objects.all().select_related('category').order_by('name_ko')
     
     if category_id:
         ingredients = ingredients.filter(category_id=category_id)
