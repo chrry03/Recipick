@@ -36,12 +36,12 @@ class MyFridgeManager {
     }
 
     initElements() {
+        // ... (기존 요소 연결 코드 그대로 유지) ...
         this.listContainer = document.getElementById('fridgeList'); 
         this.emptyState = document.getElementById('emptyState');    
         this.categoryFilter = document.getElementById('categoryFilter');
         this.searchInput = document.getElementById('searchInput');
         
-        // [중요] HTML에 있는 수정 모달 요소들 연결
         this.editModal = document.getElementById('editModal');
         this.modalTitle = document.getElementById('modalIngredientName');
         this.expiryInput = document.getElementById('expiryInput');
@@ -49,13 +49,13 @@ class MyFridgeManager {
         this.cancelBtn = document.getElementById('cancelBtn');
 
         this.ingredients = []; 
-        this.currentCategory = 'all';
+        this.currentCategory = 'all'; // 현재 선택된 카테고리
         this.currentTargetId = null;
     }
 
     async init() {
         this.attachEventListeners();
-        await this.fetchCategories();
+        // [수정] fetchCategories()는 제거합니다. (재료 데이터 기반으로 생성하므로)
         await this.fetchMyIngredients();
     }
 
@@ -84,12 +84,68 @@ class MyFridgeManager {
         try {
             const res = await fetch('/ingredients/api/user-ingredients/?include_expired=true');
             const data = await res.json();
+            
+            // 데이터 저장
             this.ingredients = Array.isArray(data) ? data : (data.results || []);
-            this.renderList(this.ingredients);
+            
+            // [핵심] 재료 데이터를 기반으로 카테고리 필터 생성
+            this.generateCategoryChips();
+            
+            // 리스트 렌더링
+            this.filterIngredients(this.searchInput.value);
+            
         } catch (err) { 
             console.error(err); 
             this.showEmptyState();
         }
+    }
+
+    // [신규 기능] 현재 재료에 있는 카테고리만 추출하여 칩 생성
+    generateCategoryChips() {
+        if (!this.categoryFilter) return;
+
+        // 1. 카테고리별 개수 계산
+        const counts = {};
+        this.ingredients.forEach(item => {
+            // API에서 category_name을 받아온다고 가정 (UserIngredientSerializer 확인됨)
+            const catName = item.category_name || '기타';
+            counts[catName] = (counts[catName] || 0) + 1;
+        });
+
+        // 2. 카테고리 이름 정렬 (가나다순)
+        const sortedCategories = Object.keys(counts).sort();
+
+        // 3. HTML 생성
+        // (1) 전체 탭
+        let html = `
+            <button class="filter-chip active" data-cat="all">
+                전체(${this.ingredients.length})
+            </button>
+        `;
+
+        // (2) 개별 카테고리 탭
+        sortedCategories.forEach(catName => {
+            html += `
+                <button class="filter-chip" data-cat="${catName}">
+                    ${catName}(${counts[catName]})
+                </button>
+            `;
+        });
+
+        this.categoryFilter.innerHTML = html;
+
+        // 4. 클릭 이벤트 연결
+        this.categoryFilter.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                // 활성화 스타일 변경
+                this.categoryFilter.querySelector('.active')?.classList.remove('active');
+                chip.classList.add('active');
+                
+                // 필터링 실행
+                this.currentCategory = chip.dataset.cat;
+                this.filterIngredients(this.searchInput.value);
+            });
+        });
     }
 
     renderCategoryFilter(categories) {
@@ -108,17 +164,23 @@ class MyFridgeManager {
             });
         });
     }
-
+// [수정] 필터링 로직 (ID 대신 이름 사용)
     filterIngredients(keyword) {
         let filtered = this.ingredients;
+
+        // 1. 카테고리 필터링
         if (this.currentCategory !== 'all') {
-            const catId = parseInt(this.currentCategory);
-            // 카테고리 ID 매칭 로직 (API 데이터 구조에 따라 수정 가능)
-            // 여기서는 전체를 다시 그리는 방식으로 처리
+            filtered = filtered.filter(item => {
+                const catName = item.category_name || '기타';
+                return catName === this.currentCategory;
+            });
         }
+
+        // 2. 검색어 필터링
         if (keyword) {
             filtered = filtered.filter(item => item.ingredient_name.includes(keyword));
         }
+
         this.renderList(filtered);
     }
 

@@ -28,7 +28,7 @@
     position: relative;
     width: 314px;
     height: 32px;
-    margin: 0 auto 10px; /* 아래 여백 줄임 */
+    margin: 0 auto 20px; /* 아래 여백 줄임 */
 }
 
 .fridge-search-input {
@@ -91,6 +91,56 @@
     color: #fff;
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(255, 112, 67, 0.3);
+}
+
+/* 3. 카테고리 필터 (가로 스크롤 & 디자인 적용) */
+.category-filter-bar {
+    width: 100%;
+    display: flex;
+    gap: 8px; /* 버튼 사이 간격 */
+    padding: 0 24px 10px 24px; /* 좌우 여백 및 하단 여백 */
+    overflow-x: auto; /* 가로 스크롤 허용 */
+    white-space: nowrap; /* 줄바꿈 방지 */
+    
+    /* 스크롤바 숨김 (크롬, 사파리, 오페라) */
+    scrollbar-width: none; /* 파이어폭스 */
+    -ms-overflow-style: none; /* IE, 엣지 */
+}
+.category-filter-bar::-webkit-scrollbar { display: none; }
+
+/* 필터 칩 버튼 스타일 */
+.filter-chip {
+    flex: 0 0 auto; /* 크기 고정 (찌그러짐 방지) */
+    height: 32px;
+    padding: 0 16px;
+    
+    /* 기본 상태 (회색) */
+    background: #E0E0E0; 
+    border-radius: 20px; /* 둥근 알약 모양 */
+    border: none;
+    
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 13px;
+    color: #555555;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* 활성화 상태 (주황색) */
+.filter-chip.active {
+    background: #FF7043;
+    color: #FFFFFF;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(255, 112, 67, 0.3); /* 그림자 효과 */
+}
+
+/* 호버 효과 */
+.filter-chip:hover {
+    filter: brightness(0.95);
 }
 
 /* 3. 스크롤 영역 (냉장고 박스 위치 잡기) */
