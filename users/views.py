@@ -4,6 +4,7 @@ from django.conf import settings
 
 from datetime import date
 from django.shortcuts import render, redirect
+from django.templatetags.static import static
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.db.models import F
 
@@ -511,8 +512,8 @@ def main_view(request):
     if user.is_authenticated:
         log_qs = RecipeLog.objects.filter(user=user).select_related('recipe').order_by('-cooked_at')[:5]
         for log in log_qs:
-            # 일지 이미지가 있으면 쓰고, 없으면 레시피 썸네일 사용
-            display_image = log.image.url if log.image else log.recipe.image_url
+            # 일지 이미지가 있으면 쓰고, 없으면 Recipick 로고 사용
+            display_image = log.image.url if log.image else static('images/Recipick_logo.png')
             
             diary_entries.append({
                 'id': log.recipe_log_id,

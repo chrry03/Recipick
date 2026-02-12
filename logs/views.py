@@ -32,8 +32,8 @@ def log_list_view(request):
     # 3. 템플릿에서 쓰기 좋게 데이터 가공 (별점 숫자 -> 별 문자)
     display_logs = []
     for log in logs:
-        # 난이도 문자열 변환 (EASY -> 1개, NORMAL -> 2개...)
-        diff_score = {'EASY':1, 'NORMAL':2, 'DIFFICULT':3}.get(log.perceived_difficulty, 1)
+        # 난이도 문자열 변환 (EASY -> 2개, NORMAL -> 3개, DIFFICULT -> 4개, 5개 별 기준)
+        diff_score = {'EASY':2, 'NORMAL':3, 'DIFFICULT':4}.get(log.perceived_difficulty, 3)
         
         display_logs.append({
             'id': log.recipe_log_id,
@@ -42,8 +42,8 @@ def log_list_view(request):
             'recipe_name': log.recipe.title,
             # 이미지가 있으면 URL, 없으면 None
             'image': log.image.url if log.image else None,
-            # 화면에 바로 뿌릴 별 문자열 (예: ★★★☆☆)
-            'difficulty_stars': '★' * diff_score + '☆' * (3 - diff_score), # 난이도는 3점 만점 기준
+            # 화면에 바로 뿌릴 별 문자열 (예: ★★★☆☆) - 5개 별 기준
+            'difficulty_stars': '★' * diff_score + '☆' * (5 - diff_score),
             'satisfaction_stars': '★' * log.rating + '☆' * (5 - log.rating),
         })
 
@@ -75,7 +75,8 @@ def log_detail_view(request, pk):
     """
     log = get_object_or_404(RecipeLog, pk=pk)
     
-    # 템플릿용 데이터 정리
+    # 템플릿용 데이터 정리 (난이도·만족도 모두 5개 별 표시)
+    diff_score = {'EASY':2, 'NORMAL':3, 'DIFFICULT':4}.get(log.perceived_difficulty, 3)
     context = {
         'log': {
             'id': log.recipe_log_id,
@@ -83,8 +84,8 @@ def log_detail_view(request, pk):
             'time': log.created_at.strftime('%H:%M'),
             'recipe_name': log.recipe.title,
             'recipe_image': log.recipe.image_url, # 레시피 원본 썸네일
-            'difficulty': log.get_perceived_difficulty_display(), # '쉬움', '보통' 등으로 자동 변환
-            'satisfaction': '★' * log.rating,
+            'difficulty': '★' * diff_score + '☆' * (5 - diff_score),
+            'satisfaction': '★' * log.rating + '☆' * (5 - log.rating),
             'ingredients': "재료 정보 없음", # (추후 RecipeIngredient 연결 필요)
             'recipe_steps': log.recipe.instructions if log.recipe.instructions else [],
             'memo': log.memo,

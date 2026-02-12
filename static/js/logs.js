@@ -20,10 +20,10 @@
         }
 
         // 4. 공유 버튼 (공통)
-        const shareBtn = document.getElementById('instagramShareBtn');
-        if (shareBtn) {
-            shareBtn.addEventListener('click', handleInstagramShare);
-        }
+        // const shareBtn = document.getElementById('instagramShareBtn');
+        // if (shareBtn) {
+        //     shareBtn.addEventListener('click', handleInstagramShare);
+        // }
     });
 
     /**
@@ -59,9 +59,23 @@
             });
         }
 
-        // 별점 기능
+        // 별점 기능 (난이도·만족도 모두 5개 별)
         setupStarRating('difficultyStars', 'difficultyRating');
         setupStarRating('satisfactionStars', 'satisfactionRating');
+
+        // 난이도 1-5 → EASY/NORMAL/DIFFICULT 변환 후 제출
+        const form = document.getElementById('log-create-form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                const diffInput = document.getElementById('difficultyRating');
+                if (diffInput && diffInput.value) {
+                    const n = parseInt(diffInput.value, 10);
+                    if (n <= 2) diffInput.value = 'EASY';
+                    else if (n === 3) diffInput.value = 'NORMAL';
+                    else diffInput.value = 'DIFFICULT';
+                }
+            });
+        }
 
         // 오늘 날짜 자동 입력
         if (cookedAt && !cookedAt.value) {
@@ -118,16 +132,16 @@
     }
 
     // 인스타그램 공유 (클립보드 복사)
-    function handleInstagramShare() {
-        const currentUrl = window.location.href;
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(currentUrl).then(() => {
-                alert('링크가 복사되었습니다! 인스타그램에 공유해보세요.');
-            });
-        } else {
-            alert('이 브라우저는 링크 복사를 지원하지 않습니다.');
-        }
-    }
+    // function handleInstagramShare() {
+    //     const currentUrl = window.location.href;
+    //     if (navigator.clipboard) {
+    //         navigator.clipboard.writeText(currentUrl).then(() => {
+    //             alert('링크가 복사되었습니다! 인스타그램에 공유해보세요.');
+    //         });
+    //     } else {
+    //         alert('이 브라우저는 링크 복사를 지원하지 않습니다.');
+    //     }
+    // }
 
     // 스와이프 뒤로가기
     function setupSwipeBack() {
