@@ -38,12 +38,14 @@ class Recipe(models.Model):
         external_id: 외부 API의 레시피 ID (중복 방지용)
         source: 레시피 출처
         title: 레시피 제목
+        title_ko: 레시피 제목 (한글) - NEW!
         image_url: 썸네일 이미지
         ready_minutes: 예상 조리 시간
         difficulty: 난이도 (자동 계산)
         servings: 인분
         raw_data: API 원본 데이터 (JSON)
         instructions: 조리 단계 (JSON)
+        is_translated: 번역 완료 여부 - NEW!
         total_ingredients: 전체 재료 수 (IntegerField)
         required_ingredients: 필수 재료 수 (IntegerField)
         is_active: 활성 상태
@@ -74,6 +76,15 @@ class Recipe(models.Model):
     title = models.CharField(
         max_length=200,
         verbose_name='레시피 제목',
+        db_index=True
+    )
+    
+    # ============ 한글 제목 (NEW!) ============
+    title_ko = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True,
+        verbose_name='레시피 제목 (한글)',
         db_index=True
     )
     
@@ -117,11 +128,18 @@ class Recipe(models.Model):
     )
     
     # 조리 단계 (JSON 배열)
+    # 형식: [{"step": 1, "description": "...", "description_ko": "한글"}, ...]
     instructions = models.JSONField(
         null=True,
         blank=True,
         verbose_name='조리 단계',
-        help_text='[{"step": 1, "description": "..."}, ...] 형식'
+        help_text='[{"step": 1, "description": "...", "description_ko": "한글"}, ...] 형식'
+    )
+    
+    # ============ 번역 완료 여부 (NEW!) ============
+    is_translated = models.BooleanField(
+        default=False,
+        verbose_name='번역 완료 여부'
     )
     
     # 활성 상태
@@ -164,6 +182,7 @@ class Recipe(models.Model):
             models.Index(fields=['difficulty'], name='idx_recipe_difficulty'),
             models.Index(fields=['ready_minutes'], name='idx_recipe_time'),
             models.Index(fields=['title'], name='idx_recipe_title'),
+            models.Index(fields=['title_ko'], name='idx_recipe_title_ko'),  # NEW!
             models.Index(fields=['external_id', 'source'], name='idx_recipe_external_source'),
             models.Index(fields=['is_active'], name='idx_recipe_active'),
         ]
@@ -180,7 +199,49 @@ class Recipe(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.title} ({self.get_difficulty_display()})"
+        return f"{self.get_display_title()} ({self.get_difficulty_display()})"
+
+    # ============ 한글 우선 표시 메서드 (NEW!) ============
+    def get_display_title(self):
+        """한글 제목 우선, 없으면 원본"""
+        return self.title_ko if self.title_ko else self.title
+    
+    def get_display_steps(self):
+        """조리 단계 (한글 우선)
+        
+        Returns:
+            [
+                {
+                    'step': 1,
+                    'description': '한글 조리법',  # description_ko 우선
+                    'image': '...'
+                },
+                ...
+            ]
+        """
+        if not self.instructions:
+            return []
+        
+        result = []
+        for step_data in self.instructions:
+            if isinstance(step_data, dict):
+                # description_ko 우선, 없으면 description
+                description = step_data.get('description_ko') or step_data.get('description', '')
+                
+                result.append({
+                    'step': step_data.get('step'),
+                    'description': description,
+                    'image': step_data.get('image')
+                })
+            else:
+                # dict가 아닌 경우 (비정상)
+                result.append({
+                    'step': len(result) + 1,
+                    'description': str(step_data),
+                    'image': None
+                })
+        
+        return result
 
     @property
     def step_count(self):
@@ -199,122 +260,93 @@ class Recipe(models.Model):
         """필수 식재료 개수 (캐싱값 사용)"""
         return self.required_ingredients
 
-    def update_ingredient_counts(self):
-        """재료 개수 캐싱 필드 업데이트"""
-        self.total_ingredients = self.recipe_ingredients.count()
-        self.required_ingredients = self.recipe_ingredients.filter(is_optional=False).count()
-        self.save(update_fields=['total_ingredients', 'required_ingredients'])
+    def get_difficulty_display_custom(self):
+        """난이도 한글 표시"""
+        return dict(DifficultyLevel.choices).get(self.difficulty, '보통')
 
-    def calculate_difficulty(self):
-        """단계 수와 조리 시간 기반 난이도 자동 계산"""
-        step_count = self.step_count
-        ready_time = self.ready_minutes or 30
+    def calculate_recommendation_score(self, user, user_ingredient_ids, user_ingredients_dict, user_skill_level):
+        """
+        레시피 추천 점수 계산
         
-        # 단계 복잡도 (1~3점)
-        if step_count <= 3:
-            step_score = 1
-        elif step_count <= 6:
-            step_score = 2
-        else:
-            step_score = 3
+        총점 = 재료매칭(60%) + 유통기한(25%) + 난이도(10%) + 개인화(5%)
+        """
+        from datetime import date
         
-        # 조리 시간 점수 (1~3점)
-        if ready_time <= 20:
-            time_score = 1
-        elif ready_time <= 40:
-            time_score = 2
-        else:
-            time_score = 3
-        
-        final_score = (step_score * 0.6) + (time_score * 0.4)
-        
-        if final_score <= 1.5:
-            return DifficultyLevel.EASY
-        elif final_score <= 2.4:
-            return DifficultyLevel.NORMAL
-        else:
-            return DifficultyLevel.DIFFICULT
-
-    def get_difficulty_score_for_user(self, user_skill_level):
-        """사용자 실력에 따른 난이도 점수 계산"""
-        difficulty_map = {
-            DifficultyLevel.EASY: 1,
-            DifficultyLevel.NORMAL: 2,
-            DifficultyLevel.DIFFICULT: 3
-        }
-        skill_map = {
-            'BEGINNER': 1,
-            'INTERMEDIATE': 2,
-            'EXPERT': 3
-        }
-        recipe_difficulty = difficulty_map.get(self.difficulty, 2)
-        user_skill = skill_map.get(user_skill_level, 1)
-        
-        score = 100 - abs(user_skill - recipe_difficulty) * 30
-        return max(0, score)
-
-    def calculate_ingredient_matching_score(self, user_ingredient_ids):
-        """재료 매칭 점수 계산 (60%)"""
-        required_ingredients = self.recipe_ingredients.filter(is_optional=False)
-        total_required = required_ingredients.count()
+        # 1. 재료 매칭 점수 (60%)
+        recipe_ingredients = self.recipe_ingredients.all()
+        total_required = recipe_ingredients.count()
         
         if total_required == 0:
-            return 100
+            return {
+                'total_score': 0,
+                'ingredient_score': 0,
+                'expiry_score': 0,
+                'difficulty_score': 0,
+                'personalization_score': 0,
+                'missing_ingredients_count': 0
+            }
         
-        owned_count = required_ingredients.filter(
-            ingredient_id__in=user_ingredient_ids
-        ).count()
+        matched = sum(1 for ri in recipe_ingredients if ri.ingredient_id in user_ingredient_ids)
+        missing = total_required - matched
         
-        missing_count = total_required - owned_count
+        # 보유 비율
+        match_ratio = (matched / total_required) * 100
         
-        ratio_score = (owned_count / total_required) * 100
-        
-        if missing_count == 0:
-            penalty_score = 100
-        elif missing_count == 1:
-            penalty_score = 85
-        elif missing_count == 2:
-            penalty_score = 70
+        # 부족 재료 패널티
+        if missing == 0:
+            missing_penalty = 100
+        elif missing == 1:
+            missing_penalty = 85
+        elif missing == 2:
+            missing_penalty = 70
         else:
-            penalty_score = 50
+            missing_penalty = 50
         
-        final_score = (ratio_score * 0.7) + (penalty_score * 0.3)
-        return final_score
-
-    def calculate_expiry_score(self, user_ingredients_dict):
-        """유통기한 점수 계산 (25%)"""
-        recipe_ingredients = self.recipe_ingredients.filter(is_optional=False)
+        # 재료 점수 = (보유비율 × 0.7) + (부족패널티 × 0.3)
+        ingredient_score = (match_ratio * 0.7) + (missing_penalty * 0.3)
         
-        if not recipe_ingredients.exists():
-            return 20
+        # 2. 유통기한 점수 (25%)
+        expiry_score = 0
+        urgent_count = 0
         
-        total_score = 0
-        count = 0
+        for ri in recipe_ingredients:
+            if ri.ingredient_id in user_ingredients_dict:
+                ui = user_ingredients_dict[ri.ingredient_id]
+                if ui.expire_at:
+                    days_left = (ui.expire_at - date.today()).days
+                    
+                    if days_left <= 2:
+                        expiry_score += 100
+                        urgent_count += 1
+                    elif days_left <= 5:
+                        expiry_score += 70
+                    elif days_left <= 10:
+                        expiry_score += 40
+                    else:
+                        expiry_score += 20
+                else:
+                    expiry_score += 20
         
-        for recipe_ing in recipe_ingredients:
-            ingredient_id = recipe_ing.ingredient_id
-            
-            if ingredient_id in user_ingredients_dict:
-                user_ing = user_ingredients_dict[ingredient_id]
-                urgency_score = user_ing.get_urgency_score()
-                total_score += urgency_score
-            else:
-                total_score += 20
-            
-            count += 1
+        if matched > 0:
+            expiry_score = expiry_score / matched
+        else:
+            expiry_score = 0
         
-        return total_score / count if count > 0 else 20
-
-    def calculate_recommendation_score(self, user, user_ingredient_ids, 
-                                       user_ingredients_dict, user_skill_level):
-        """전체 추천 점수 계산"""
-        ingredient_score = self.calculate_ingredient_matching_score(user_ingredient_ids)
-        expiry_score = self.calculate_expiry_score(user_ingredients_dict)
-        difficulty_score = self.get_difficulty_score_for_user(user_skill_level)
+        # 3. 난이도 점수 (10%)
+        difficulty_map = {'EASY': 1, 'NORMAL': 2, 'DIFFICULT': 3}
+        skill_map = {'BEGINNER': 1, 'INTERMEDIATE': 2, 'ADVANCED': 3}
         
-        # MVP에서는 개인화 점수 고정값 (일지 기능 제외)
-        personalization_score = 50
+        recipe_diff = difficulty_map.get(self.difficulty, 2)
+        user_skill = skill_map.get(user_skill_level, 2)
         
+        diff_gap = abs(recipe_diff - user_skill)
+        difficulty_score = 100 - (diff_gap * 30)
+        difficulty_score = max(0, min(100, difficulty_score))
+        
+        # 4. 개인화 점수 (5%)
+        personalization_score = 50  # 기본값
+        
+        # 총점 계산
         total_score = (
             ingredient_score * 0.60 +
             expiry_score * 0.25 +
@@ -328,15 +360,12 @@ class Recipe(models.Model):
             'expiry_score': round(expiry_score, 2),
             'difficulty_score': round(difficulty_score, 2),
             'personalization_score': round(personalization_score, 2),
-            'missing_ingredients_count': self.recipe_ingredients.filter(
-                is_optional=False
-            ).exclude(
-                ingredient_id__in=user_ingredient_ids
-            ).count()
+            'missing_ingredients_count': missing,
+            'urgent_ingredients_count': urgent_count
         }
-
+    
     def get_recommendation_category(self, total_score):
-        """추천 점수에 따른 카테고리 분류"""
+        """점수에 따른 카테고리 분류"""
         if total_score >= 90:
             return 'urgent_ready'
         elif total_score >= 75:
@@ -344,102 +373,168 @@ class Recipe(models.Model):
         elif total_score >= 60:
             return 'almost_ready'
         else:
-            return 'not_ready'
-
+            return None
+    
     def get_ingredients_status_for_user(self, user_ingredients_dict):
-        """사용자 보유 재료 상태 정보 반환 (UI용)"""
+        """사용자 보유 재료 상태"""
+        from datetime import date
+        
         result = {
-            'ingredients_status': {},
             'has_expired': False,
             'has_urgent': False,
+            'ingredients_status': {},
             'expired_ingredients': [],
-            'urgent_ingredients': [],
-            'missing_ingredients': []
+            'urgent_ingredients': []
         }
         
-        recipe_ingredients = self.recipe_ingredients.filter(is_optional=False)
-        
-        for recipe_ing in recipe_ingredients:
-            ingredient_id = recipe_ing.ingredient_id
-            ingredient_name = recipe_ing.ingredient.name_ko
+        for ri in self.recipe_ingredients.all():
+            ing_id = ri.ingredient_id
             
-            if ingredient_id in user_ingredients_dict:
-                user_ing = user_ingredients_dict[ingredient_id]
-                status = user_ing.get_expiry_status()
+            if ing_id in user_ingredients_dict:
+                ui = user_ingredients_dict[ing_id]
+                status = {
+                    'is_owned': True,
+                    'expire_at': ui.expire_at.isoformat() if ui.expire_at else None,
+                    'is_expired': False,
+                    'is_urgent': False,
+                    'days_left': None
+                }
                 
-                result['ingredients_status'][ingredient_name] = status
+                if ui.expire_at:
+                    days_left = (ui.expire_at - date.today()).days
+                    status['days_left'] = days_left
+                    
+                    if days_left < 0:
+                        status['is_expired'] = True
+                        result['has_expired'] = True
+                        result['expired_ingredients'].append(ri.ingredient.name_ko)
+                    elif days_left <= 3:
+                        status['is_urgent'] = True
+                        result['has_urgent'] = True
+                        result['urgent_ingredients'].append(ri.ingredient.name_ko)
                 
-                if status == 'expired':
-                    result['has_expired'] = True
-                    result['expired_ingredients'].append(ingredient_name)
-                elif status == 'urgent':
-                    result['has_urgent'] = True
-                    result['urgent_ingredients'].append(ingredient_name)
+                result['ingredients_status'][ing_id] = status
             else:
-                result['ingredients_status'][ingredient_name] = 'missing'
-                result['missing_ingredients'].append(ingredient_name)
+                result['ingredients_status'][ing_id] = {
+                    'is_owned': False,
+                    'expire_at': None,
+                    'is_expired': False,
+                    'is_urgent': False,
+                    'days_left': None
+                }
         
         return result
 
-    # ========== Spoonacular API 연동 ==========
     @classmethod
     def create_from_spoonacular(cls, api_data, ingredient_mapping=None):
-        """Spoonacular API 응답에서 Recipe 객체 생성"""
-        recipe, created = cls.objects.get_or_create(
-            external_id=str(api_data.get('id')),
-            source=RecipeSource.SPOONACULAR,
-            defaults={
-                'title': api_data.get('title', 'Unknown Recipe'),
-                'image_url': api_data.get('image'),
-                'ready_minutes': api_data.get('readyInMinutes'),
-                'servings': api_data.get('servings', 1),
-                'raw_data': api_data,
-            }
+        """Spoonacular API 응답으로 Recipe 객체 생성"""
+        from ingredients.models import IngredientMaster
+        
+        external_id = str(api_data.get('id', ''))
+        title = api_data.get('title', 'Unknown Recipe')
+        image = api_data.get('image', '')
+        ready_minutes = api_data.get('readyInMinutes')
+        servings = api_data.get('servings', 1)
+        
+        # 난이도 계산
+        steps = api_data.get('analyzedInstructions', [])
+        step_count = sum(len(inst.get('steps', [])) for inst in steps)
+        
+        if step_count <= 5:
+            difficulty = 'EASY'
+        elif step_count <= 10:
+            difficulty = 'NORMAL'
+        else:
+            difficulty = 'DIFFICULT'
+        
+        # instructions JSON 생성
+        instructions_list = []
+        for instruction_group in steps:
+            for step in instruction_group.get('steps', []):
+                instructions_list.append({
+                    'step': step.get('number'),
+                    'description': step.get('step', ''),
+                    'image': None
+                })
+        
+        # Recipe 생성
+        recipe = cls.objects.create(
+            external_id=external_id,
+            source='spoonacular',
+            title=title,
+            image_url=image,
+            ready_minutes=ready_minutes,
+            difficulty=difficulty,
+            servings=servings,
+            raw_data=api_data,
+            instructions=instructions_list,
+            is_active=True
         )
         
-        # instructions 파싱
-        instructions = []
-        analyzed_instructions = api_data.get('analyzedInstructions', [])
-        if analyzed_instructions:
-            steps = analyzed_instructions[0].get('steps', [])
-            for step in steps:
-                instructions.append({
-                    'step': step.get('number'),
-                    'description': step.get('step')
-                })
-        recipe.instructions = instructions
-        
-        # 난이도 자동 계산
-        recipe.difficulty = recipe.calculate_difficulty()
-        recipe.save()
-        
         # RecipeIngredient 생성
-        if ingredient_mapping and created:
-            for api_ingredient in api_data.get('extendedIngredients', []):
-                # nameClean이 가장 정확한 재료명
-                ingredient_name = api_ingredient.get('nameClean') or api_ingredient.get('name', '').lower()
-                
-                ingredient_master = ingredient_mapping.get(ingredient_name)
-                
-                if ingredient_master:
-                    RecipeIngredient.objects.create(
-                        recipe=recipe,
-                        ingredient=ingredient_master,
-                        ingredient_name=api_ingredient.get('original', ingredient_name),
-                        is_optional=False
-                    )
+        extended_ingredients = api_data.get('extendedIngredients', [])
+        
+        for ing_data in extended_ingredients:
+            ing_name = ing_data.get('name', '').lower().strip()
             
-            # 재료 개수 캐싱
-            recipe.update_ingredient_counts()
+            # ingredient_mapping으로 IngredientMaster 찾기
+            ing_master = None
+            if ingredient_mapping and ing_name in ingredient_mapping:
+                try:
+                    ing_master = IngredientMaster.objects.get(
+                        ingredient_id=ingredient_mapping[ing_name]
+                    )
+                except IngredientMaster.DoesNotExist:
+                    pass
+            
+            # 찾지 못하면 이름으로 검색
+            if not ing_master:
+                ing_master = IngredientMaster.objects.filter(
+                    name_en__icontains=ing_name
+                ).first()
+            
+            # 그래도 없으면 기타 카테고리로 생성
+            if not ing_master:
+                from ingredients.models import IngredientCategory
+                other_category = IngredientCategory.objects.filter(
+                    name='기타'
+                ).first()
+                
+                if not other_category:
+                    other_category = IngredientCategory.objects.create(
+                        name='기타',
+                        icon='🍴'
+                    )
+                
+                ing_master = IngredientMaster.objects.create(
+                    category=other_category,
+                    name_ko=ing_name.capitalize(),
+                    name_en=ing_name
+                )
+            
+            # RecipeIngredient 생성
+            RecipeIngredient.objects.create(
+                recipe=recipe,
+                ingredient=ing_master,
+                ingredient_name=ing_data.get('original', ing_name),
+                is_optional=False
+            )
+        
+        # 캐싱 필드 업데이트
+        recipe.total_ingredients = recipe.recipe_ingredients.count()
+        recipe.required_ingredients = recipe.recipe_ingredients.filter(
+            is_optional=False
+        ).count()
+        recipe.save()
         
         return recipe
 
     @classmethod
-    def fetch_and_save_from_spoonacular(cls, recipe_id, api_key, ingredient_mapping=None):
-        """Spoonacular API에서 레시피 가져와서 저장 (timeout 추가)"""
+    def fetch_from_spoonacular_by_id(cls, recipe_id, api_key, ingredient_mapping=None):
+        """Spoonacular API로 특정 레시피 ID 가져오기"""
         import requests
         from requests.exceptions import Timeout, RequestException
-
+        
         url = f"https://api.spoonacular.com/recipes/{recipe_id}/information"
         params = {
             'apiKey': api_key,
@@ -559,15 +654,41 @@ class Recipe(models.Model):
             response.raise_for_status()
             
             results = response.json()
-            return [recipe['id'] for recipe in results]
+            return results
         
-        except (Timeout, RequestException) as e:
+        except Timeout:
+            print(f"❌ Spoonacular API 시간 초과")
+            return []
+        except RequestException as e:
             print(f"❌ Spoonacular 재료 검색 실패: {e}")
             return []
+        
+    def update_ingredient_counts(self, save=True):
+        """
+        RecipeIngredient 기준으로
+        - 전체 재료 수
+        - 필수 재료 수
+        를 갱신한다.
+        """
+        qs = self.recipe_ingredients.all()
+
+        self.total_ingredients = qs.count()
+        self.required_ingredients = qs.filter(is_optional=False).count()
+
+        if save:
+            self.save(update_fields=[
+                'total_ingredients',
+                'required_ingredients'
+            ])
 
 
 class RecipeIngredient(models.Model):
-    """레시피-식재료 연결 테이블"""
+    """레시피-식재료 연결 테이블
+    
+    ⚠️ 주의: 수량/단위 필드 없음!
+    - 식재료 유무만 체크
+    - 마지막에 소진 여부만 확인
+    """
     
     recipe_ingredient_id = models.BigAutoField(
         primary_key=True,
@@ -654,11 +775,7 @@ class FavoriteRecipe(models.Model):
         db_table = 'FavoriteRecipe'
         verbose_name = '찜한 레시피'
         verbose_name_plural = '찜한 레시피'
-        indexes = [
-            models.Index(fields=['user'], name='idx_favorite_user'),
-            models.Index(fields=['recipe'], name='idx_favorite_recipe'),
-            models.Index(fields=['user', 'created_at'], name='idx_favorite_user_date'),
-        ]
+        ordering = ['-created_at']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
@@ -667,4 +784,4 @@ class FavoriteRecipe(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user.nickname} ♥ {self.recipe.title}"
+        return f"{self.user.username} - {self.recipe.get_display_title()}"

@@ -205,12 +205,12 @@
         return `
             <div class="recipe-card" data-recipe-id="${recipe.recipe_id}">
                 <img src="${imageUrl}" 
-                     alt="${escapeHtml(recipe.title)}" 
+                     alt="${escapeHtml(recipe.display_title || recipe.title_ko || recipe.title)}" 
                      class="recipe-image"
                      data-default-image="/static/images/default-recipe.jpg"
                      loading="lazy">
                 <div class="recipe-info">
-                    <div class="recipe-name">${escapeHtml(recipe.title)}</div>
+                    <div class="recipe-name">${escapeHtml(recipe.display_title || recipe.title_ko || recipe.title)}</div>
                     <div class="recipe-meta">
                         <span class="recipe-time">⏱️ ${recipe.ready_minutes}분</span>
                         <span class="recipe-difficulty">${difficultyText}</span>
@@ -808,9 +808,9 @@
 
         _buildStepUrl(step) {
             if (this.recipeId) {
-                return `${this.baseUrl}/${this.recipeId}/cooking/?step=${step}`;
+                return `${this.baseUrl}/${this.recipeId}/step/${step}/`;
             }
-            return `${this.baseUrl}/cooking/?step=${step}`;
+            return `${this.baseUrl}/step/${step}/`;
         }
 
         exitCooking() {
