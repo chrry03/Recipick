@@ -366,7 +366,7 @@ def kakao_callback_view(request):
     token_data = {
         "grant_type": "authorization_code",
         "client_id": settings.KAKAO_CLIENT_ID,
-        # client_secret을 제거했습니다.
+        "client_secret": settings.KAKAO_CLIENT_SECRET,
         "redirect_uri": settings.KAKAO_REDIRECT_URI,
         "code": code,
     }
