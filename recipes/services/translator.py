@@ -60,11 +60,16 @@ class RecipeTranslator:
         # instructions 번역 (⭐ 핵심 ⭐)
         instructions = recipe_data.get('instructions') or []
 
-        if instructions:
+        # [수정] instructions가 리스트인지 확인
+        if instructions and isinstance(instructions, list):
             print(f"🔢 {len(instructions)}개 단계 번역 중...")
             translated = []
 
             for step in instructions:
+                # [수정] step이 dict인지 확인
+                if not isinstance(step, dict):
+                    continue
+                    
                 description = step.get('description', '')
                 description_ko = step.get('description_ko')
 
@@ -77,6 +82,9 @@ class RecipeTranslator:
                 })
 
             result['instructions'] = translated
+        elif isinstance(instructions, str):
+            # instructions가 문자열이면 그냥 저장
+            result['instructions'] = []
 
         result['is_translated'] = True
         return result

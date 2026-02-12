@@ -171,13 +171,14 @@ def calculate_final_recommendations(recipes, user, user_ingredients_dict, user_s
                 'score_data': score_data
             })
     
+    # 정렬: 총점 → 유통기한 점수 → 난이도
     scored_recipes.sort(
         key=lambda x: (
-            x['score_data']['total_score'],
-            x['score_data']['expiry_score'],
-            -x['score_data']['difficulty_score']
-        ),
-        reverse=True
+            -x['score_data']['total_score'],
+            -x['score_data']['expiry_score'],
+            x['score_data']['difficulty_score'],  # 난이도는 낮을수록 좋음
+            -x['score_data']['ingredient_score']
+        )
     )
     
     categories = {

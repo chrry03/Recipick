@@ -154,14 +154,13 @@ class SpoonacularService:
         for instruction_group in steps:
             for step in instruction_group.get('steps', []):
                 steps_data.append({
-                    'number': step.get('number'),
-                    'instruction': step.get('step'),
-                    'timer_seconds': None
+                    'step': step.get('number'),
+                    'description': step.get('step'),
+                    'image': None
                 })
         
         # ============ 번역 (NEW!) ============
         title_ko = None
-        instructions_ko = None
         is_translated = False
         
         if translate:
@@ -169,13 +168,13 @@ class SpoonacularService:
             try:
                 translation = self.translator.translate_full_recipe({
                     'title': recipe_data.get('title'),
-                    'instructions': recipe_data.get('instructions', ''),
-                    'steps': steps_data
+                    'instructions': steps_data  # ← 수정: steps_data를 직접 전달
                 })
                 
                 title_ko = translation.get('title_ko')
-                instructions_ko = translation.get('instructions_ko')
-                steps_data = translation.get('steps', steps_data)
+                # [수정] translation['instructions']에 한글이 추가된 steps_data가 들어있음
+                translated_steps = translation.get('instructions', steps_data)
+                steps_data = translated_steps
                 is_translated = True
                 
                 print(f"✅ 번역 완료: {title_ko}")
@@ -183,21 +182,18 @@ class SpoonacularService:
             except Exception as e:
                 print(f"⚠️ 번역 실패: {str(e)}")
         
-        # 레시피 생성
+        # 레시피 생성 (Recipe 모델 필드에 맞게 수정)
         recipe = Recipe.objects.create(
             external_id=external_id,
             source='spoonacular',
             title=recipe_data.get('title'),
             title_ko=title_ko,
-            instructions=recipe_data.get('instructions', ''),
-            instructions_ko=instructions_ko,
+            instructions=steps_data,  # ← 수정: JSON 필드에 steps_data 저장
             is_translated=is_translated,
             image_url=recipe_data.get('image', ''),
             ready_minutes=recipe_data.get('readyInMinutes', 0),
             servings=recipe_data.get('servings', 4),
             difficulty=difficulty,
-            steps=steps_data,
-            source_url=recipe_data.get('sourceUrl', ''),
             raw_data=recipe_data,
             is_active=True
         )
@@ -205,23 +201,38 @@ class SpoonacularService:
         # 재료 저장
         self._save_recipe_ingredients(recipe, recipe_data)
         
+        # [추가] 캐싱 필드 업데이트
+        recipe.update_ingredient_counts()
+        
         return recipe
     
     def _save_recipe_ingredients(self, recipe, recipe_data):
-        """레시피 재료 저장"""
+        """레시피 재료 저장 (RecipeIngredient 필드에 맞게 수정)"""
+        # 이미 추가된 식재료 ID 추적 (중복 방지)
+        added_ingredient_ids = set()
+        
         for ingredient_data in recipe_data.get('extendedIngredients', []):
             # IngredientMapper로 매핑
             ing_name = ingredient_data.get('name', '')
             ing_master = IngredientMapper.find_ingredient(ing_name)
             
             if ing_master:
-                RecipeIngredient.objects.create(
+                # 중복 체크
+                if ing_master.ingredient_id in added_ingredient_ids:
+                    continue
+                
+                # get_or_create로 안전하게 생성
+                RecipeIngredient.objects.get_or_create(
                     recipe=recipe,
                     ingredient=ing_master,
-                    quantity=ingredient_data.get('amount', 0),
-                    unit=ingredient_data.get('unit', ''),
-                    name_override=ingredient_data.get('original', '')
+                    defaults={
+                        'ingredient_name': ingredient_data.get('original', ing_name),
+                        'is_optional': False
+                    }
                 )
+                
+                # 추가된 식재료 ID 기록
+                added_ingredient_ids.add(ing_master.ingredient_id)
     
     def fetch_and_save_recipes(self, 
                                cuisine='korean',
