@@ -35,7 +35,7 @@
 
 .step-number {
     position: absolute;
-    top: 120px;
+    top: 110px; /* 크기가 줄었으니 위치를 살짝 조정 (기존 120px) */
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
@@ -44,7 +44,7 @@
 
 .step-number p {
     font-family: 'MemomentKkukkukk', sans-serif;
-    font-size: 100px;
+    font-size: 60px; /* [수정] 100px -> 60px로 축소 */
     line-height: 1;
     color: rgba(0, 0, 0, 1);
     font-weight: normal;
@@ -183,11 +183,19 @@
 .info-value { font-family: 'Gowun Dodum', sans-serif; font-size: 13px; color: #555555; flex-grow: 1; padding-left: 5px; min-width: 0; }
 .text-ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 
-
 /* ==========================================================================
-    3. 타이머 스타일 (기존 유지)
+   3. 타이머 스타일 (크기 축소 수정 버전)
    ========================================================================== */
-.base-timer { position: relative; width: 250px; height: 250px; margin: 0 auto; display: block; visibility: visible; }
+/* [수정] 크기를 250px -> 180px로 축소 */
+.base-timer { 
+    position: relative; 
+    width: 180px; 
+    height: 180px; 
+    margin: 0 auto; 
+    display: block; 
+    visibility: visible; 
+}
+
 .base-timer__svg { transform: scaleX(-1); width: 100%; height: 100%; }
 .base-timer__circle { fill: none; stroke: none; }
 .base-timer__path-elapsed { stroke-width: 4px; stroke: #d9d9d9; }
@@ -197,22 +205,109 @@
 .base-timer__path-remaining.red { color: #f44336; }
 
 .base-timer__content { position: absolute; width: 100%; height: 100%; top: 0; left: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.base-timer__left-label { font-size: 18px; font-weight: 500; color: rgba(85, 85, 85, 1); text-transform: uppercase; margin-bottom: 0; letter-spacing: 0.5px; font-family: 'MemomentKkukkukk', sans-serif; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: -45px; z-index: 1; }
-.base-timer__time { font-size: 65px; font-weight: normal; color: #000000; line-height: 1; margin: 0; font-family: 'MemomentKkukkukk', sans-serif; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); user-select: none; display: flex; align-items: center; justify-content: center; gap: 4px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; }
-.timer-time-part { display: inline-block; min-width: 50px; text-align: center; transition: background-color 0.2s ease; border-radius: 4px; padding: 0 4px; }
+
+/* [수정] 폰트 크기 및 위치 조정 */
+.base-timer__left-label { 
+    font-size: 14px; /* 18px -> 14px */
+    font-weight: 500; 
+    color: rgba(85, 85, 85, 1); 
+    text-transform: uppercase; 
+    margin-bottom: 0; 
+    letter-spacing: 0.5px; 
+    font-family: 'MemomentKkukkukk', sans-serif; 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    margin-top: -35px; /* -45px -> -35px (위치 조정) */
+    z-index: 1; 
+}
+
+/* [수정] 시간 폰트 크기 축소 */
+.base-timer__time { 
+    font-size: 48px; /* 65px -> 48px */
+    font-weight: normal; 
+    color: #000000; 
+    line-height: 1; 
+    margin: 0; 
+    font-family: 'MemomentKkukkukk', sans-serif; 
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); 
+    user-select: none; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 4px; 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    z-index: 1; 
+}
+
+.timer-time-part { display: inline-block; min-width: 35px; /* 50px -> 35px */ text-align: center; transition: background-color 0.2s ease; border-radius: 4px; padding: 0 2px; }
 .timer-time-part:hover { background-color: rgba(255, 110, 64, 0.1); }
 .timer-time-separator { display: inline-block; user-select: none; font-family: 'MemomentKkukkukk', sans-serif; }
-.timer-time-input { width: 100px; font-size: 65px; font-weight: normal; color: #000000; background-color: transparent; border: 2px solid #ff6e40; border-radius: 4px; text-align: center; font-family: 'MemomentKkukkukk', sans-serif; outline: none; padding: 0; }
-.timer-time-input--small { width: 50px; font-size: 65px; }
+
+/* [수정] 입력창 크기 축소 */
+.timer-time-input { 
+    width: 70px; /* 100px -> 70px */
+    font-size: 48px; /* 65px -> 48px */
+    font-weight: normal; 
+    color: #000000; 
+    background-color: transparent; 
+    border: 2px solid #ff6e40; 
+    border-radius: 4px; 
+    text-align: center; 
+    font-family: 'MemomentKkukkukk', sans-serif; 
+    outline: none; 
+    padding: 0; 
+}
+.timer-time-input--small { width: 40px; font-size: 48px; } /* 50px -> 40px */
 .timer-time-input::-webkit-inner-spin-button, .timer-time-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .timer-time-input[type="number"] { -moz-appearance: textfield; }
 .timer-time-input::placeholder { color: #999; }
 
-.base-timer__play-button { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: 40px; width: 0; height: 0; border-left: 24px solid #ff6e40; border-top: 16px solid transparent; border-bottom: 16px solid transparent; cursor: pointer; transition: transform 0.2s ease; z-index: 1; }
+/* [수정] 재생 버튼 크기 및 위치 조정 */
+.base-timer__play-button { 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    margin-top: 30px; /* 40px -> 30px (위치 조정) */
+    width: 0; 
+    height: 0; 
+    border-left: 18px solid #ff6e40; /* 24px -> 18px */
+    border-top: 12px solid transparent; /* 16px -> 12px */
+    border-bottom: 12px solid transparent; /* 16px -> 12px */
+    cursor: pointer; 
+    transition: transform 0.2s ease; 
+    z-index: 1; 
+}
+
 .base-timer__play-button:hover { transform: translate(-50%, -50%) scale(1.1); }
 .base-timer__play-button.paused:hover { transform: translate(-50%, -50%) scale(1.1); }
-.base-timer__play-button.paused { border-left: 0; border-top: 0; border-bottom: 0; width: 24px; height: 24px; background-color: transparent; position: absolute; transform: translate(-50%, -50%); margin-top: 40px; }
-.base-timer__play-button.paused::before, .base-timer__play-button.paused::after { content: ''; position: absolute; top: 0; width: 6px; height: 24px; background-color: #ff6e40; border-radius: 2px; }
+
+/* [수정] 일시정지 버튼(|| 모양) 크기 조정 */
+.base-timer__play-button.paused { 
+    border-left: 0; 
+    border-top: 0; 
+    border-bottom: 0; 
+    width: 18px; /* 24px -> 18px */
+    height: 18px; /* 24px -> 18px */
+    background-color: transparent; 
+    position: absolute; 
+    transform: translate(-50%, -50%); 
+    margin-top: 30px; 
+}
+.base-timer__play-button.paused::before, .base-timer__play-button.paused::after { 
+    content: ''; 
+    position: absolute; 
+    top: 0; 
+    width: 5px; /* 6px -> 5px */
+    height: 18px; /* 24px -> 18px */
+    background-color: #ff6e40; 
+    border-radius: 2px; 
+}
 .base-timer__play-button.paused::before { left: 0; }
 .base-timer__play-button.paused::after { right: 0; }
 
