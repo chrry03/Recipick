@@ -22,6 +22,14 @@ class SpoonacularService:
         self.api_key = getattr(settings, 'SPOONACULAR_API_KEY', '')
         self.base_url = 'https://api.spoonacular.com'
         self.translator = RecipeTranslator()
+        
+        # API 키 확인
+        if self.api_key:
+            print(f"✅ Spoonacular API 키 로드됨 (길이: {len(self.api_key)})")
+        else:
+            print("⚠️  Spoonacular API 키가 설정되지 않았습니다!")
+            print("💡 settings.py에 SPOONACULAR_API_KEY를 추가하거나")
+            print("💡 .env 파일에 SPOONACULAR_API_KEY=your_key를 추가하세요.")
     
     def search_recipes(self, 
                       query=None,
@@ -48,6 +56,7 @@ class SpoonacularService:
         """
         if not self.api_key:
             print("❌ SPOONACULAR_API_KEY가 설정되지 않았습니다.")
+            print("💡 .env 파일에 SPOONACULAR_API_KEY=your_key 를 추가하세요.")
             return []
         
         url = f"{self.base_url}/recipes/complexSearch"
@@ -74,21 +83,33 @@ class SpoonacularService:
             params['includeIngredients'] = ingredients
         
         try:
+            print(f"🌐 API 호출 중... (cuisine={cuisine}, offset={offset}, number={number})")
             response = requests.get(url, params=params, timeout=10)
+            
+            print(f"📡 응답 코드: {response.status_code}")
             
             if response.status_code == 402:
                 print("❌ API 일일 사용량 초과 (402)")
+                print("💡 내일 다시 시도하거나 유료 플랜을 구독하세요.")
                 return []
             
             if response.status_code != 200:
                 print(f"❌ API 오류: {response.status_code}")
+                print(f"📄 응답 내용: {response.text[:200]}")
                 return []
             
             data = response.json()
-            return data.get('results', [])
+            results = data.get('results', [])
+            total_results = data.get('totalResults', 0)
+            
+            print(f"✅ API 성공: {len(results)}개 레시피 반환 (전체: {total_results}개)")
+            
+            return results
             
         except Exception as e:
             print(f"❌ 검색 실패: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return []
     
     def get_recipe_information(self, recipe_id):
@@ -207,14 +228,33 @@ class SpoonacularService:
         return recipe
     
     def _save_recipe_ingredients(self, recipe, recipe_data):
-        """레시피 재료 저장 (RecipeIngredient 필드에 맞게 수정)"""
+        """
+        레시피 재료 저장 (자동 생성 포함!)
+        
+        ingredients.json에 없는 식재료도 자동으로 생성하여 연결
+        """
         # 이미 추가된 식재료 ID 추적 (중복 방지)
         added_ingredient_ids = set()
+        created_count = 0
         
         for ingredient_data in recipe_data.get('extendedIngredients', []):
             # IngredientMapper로 매핑
             ing_name = ingredient_data.get('name', '')
             ing_master = IngredientMapper.find_ingredient(ing_name)
+            
+            # ============ 핵심! ingredients.json에 없으면 자동 생성 ============
+            if not ing_master:
+                print(f"   ➕ 식재료 자동 생성: {ing_name}")
+                try:
+                    # '직접 추가' 카테고리(17)에 생성
+                    ing_master = IngredientMapper.get_or_create_user_ingredient(
+                        user_input_name=ing_name,
+                        category_id=17
+                    )
+                    created_count += 1
+                except Exception as e:
+                    print(f"   ❌ 생성 실패: {ing_name} - {str(e)}")
+                    continue
             
             if ing_master:
                 # 중복 체크
@@ -233,12 +273,16 @@ class SpoonacularService:
                 
                 # 추가된 식재료 ID 기록
                 added_ingredient_ids.add(ing_master.ingredient_id)
+        
+        if created_count > 0:
+            print(f"   ✨ 새 식재료 {created_count}개 자동 생성됨")
     
     def fetch_and_save_recipes(self, 
                                cuisine='korean',
                                limit=50,
                                translate=True,
-                               delay=0.5):
+                               delay=0.5,
+                               random_start=False):
         """
         레시피 일괄 수집 및 저장 (번역 포함)
         
@@ -247,17 +291,28 @@ class SpoonacularService:
             limit: 수집 개수
             translate: 번역 여부
             delay: API 호출 간격 (초)
+            random_start: 랜덤 시작 위치 사용 여부 (기본 False)
         
         Returns:
             (수집된 개수, 중복 개수, 오류 개수)
         """
+        import random
+        
         collected = 0
         skipped = 0
         errors = 0
         
-        print(f"🔍 {cuisine} 레시피 수집 시작 (최대 {limit}개)")
+        # ============ 랜덤 시작 offset (NEW!) ============
+        if random_start:
+            # 다양한 cuisine 지원 (italian, chinese, japanese 등)
+            # 0~500 사이의 랜덤 offset 사용
+            start_offset = random.randint(0, 500)
+            print(f"🔍 {cuisine} 레시피 수집 시작 (최대 {limit}개, 시작 위치: {start_offset})")
+        else:
+            start_offset = 0
+            print(f"🔍 {cuisine} 레시피 수집 시작 (최대 {limit}개)")
         
-        for offset in range(0, limit, 10):
+        for offset in range(start_offset, start_offset + limit, 10):
             # 검색
             results = self.search_recipes(
                 cuisine=cuisine,
