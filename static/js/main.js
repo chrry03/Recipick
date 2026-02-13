@@ -508,7 +508,7 @@
         if (header && appContainer) {
             // 헤더의 실제 높이를 계산하여 컨테이너 패딩 설정
             const headerHeight = header.offsetHeight;
-            appContainer.style.paddingTop = headerHeight + 'px';
+            appContainer.style.paddingTop = (headerHeight / 16) + 'rem';
         }
     }
 

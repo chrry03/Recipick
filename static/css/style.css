@@ -1,7 +1,7 @@
-/* 폰트 정의 - font-display: swap으로 로딩 전에도 텍스트 즉시 표시 */
+/* 폰트 정의 */
 @font-face {
     font-family: 'MemomentKkukkukk';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2205@1.0/MemomentKkukkukk.woff2') format('woff2');
+    src: url('../fonts/MemomentKkukkukk.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -21,7 +21,7 @@ html, body {
 }
 
 body {
-    font-family: 'Gowun Dodum', 'Nanum Gothic', 'MemomentKkukkukk', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    font-family: 'Gowun Dodum', 'Nanum Gothic', 'MemomentKkukkukk';
     background: linear-gradient(to bottom, #f5ede0, #f6f3ee);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
