@@ -164,7 +164,9 @@ def get_recipe_recommendations(request):
         user_ingredients = UserIngredient.objects.filter(
             user=user,
             is_consumed=False
-        ).select_related('ingredient', 'ingredient__category')
+        ).select_related('ingredient', 'ingredient__category').exclude(
+            ingredient__category__name__in=['Spoonacular API', 'FoodSafetyKorea']
+        )
         logger.info(f"✅ 사용자: {user.username}, 식재료: {user_ingredients.count()}개")
     else:
         user = None
@@ -455,26 +457,31 @@ def cooking_complete_view(request, recipe_id):
     except Recipe.DoesNotExist:
         return render(request, 'recipes/recipe_not_found.html', status=404)
 
-    # 다 쓴 재료 체크하기: 레시피에 적힌 재료 목록
+    # 다 쓴 재료 체크하기: 레시피에 적힌 재료 목록 (모든 재료 포함)
     recipe_ingredients = recipe.recipe_ingredients.select_related(
         'ingredient'
-    ).order_by('recipe_ingredient_id')
+    ).all()  # order_by 제거 - 모든 재료 표시
     
     ingredients = []
     for ri in recipe_ingredients:
-        ingredients.append({
-            'id': ri.ingredient.ingredient_id, 
-            'name': ri.ingredient.name_ko
-        })
+        # ingredient가 None인 경우 안전 처리
+        if ri.ingredient:
+            ingredients.append({
+                'id': ri.ingredient.ingredient_id, 
+                'name': ri.ingredient.name_ko or ri.ingredient.name_en or ri.ingredient_name or '알 수 없는 재료'
+            })
+        elif ri.ingredient_name:
+            # ingredient가 없지만 ingredient_name이 있는 경우
+            ingredients.append({
+                'id': None,  # ID가 없으므로 삭제 불가
+                'name': ri.ingredient_name
+            })
 
     user_ingredients = []
     if request.user.is_authenticated:
         user_ingredients = UserIngredient.objects.filter(
             user=request.user,
-            ingredient_id__in=recipe.recipe_ingredients.values_list(
-                'ingredient_id', 
-                flat=True
-            ),
+            ingredient_id__in=[ing['id'] for ing in ingredients if ing['id']],
             is_consumed=False
         ).select_related('ingredient')
 

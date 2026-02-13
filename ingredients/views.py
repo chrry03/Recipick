@@ -623,8 +623,10 @@ def add_ingredient_view(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def category_list_view(request):
-    """카테고리 목록 JSON"""
-    categories = IngredientCategory.objects.all().order_by('category_id')
+    """카테고리 목록 JSON (API 카테고리 제외)"""
+    categories = IngredientCategory.objects.exclude(
+        name__in=['Spoonacular API', 'FoodSafetyKorea']
+    ).order_by('category_id')
     data = []
     for cat in categories:
         data.append({
@@ -692,3 +694,42 @@ def search_ingredient_view(request):
         })
     
     return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def consume_ingredients(request):
+    """
+    재료 소비 (일괄 삭제)
+    
+    레시피 완료 후 사용한 재료를 체크하고 삭제
+    
+    POST /api/ingredients/consume/
+    {
+        "ingredient_ids": [1, 2, 3]
+    }
+    
+    응답:
+    {
+        "message": "3개 식재료가 삭제되었습니다",
+        "deleted_count": 3
+    }
+    """
+    ingredient_ids = request.data.get('ingredient_ids', [])
+    
+    if not ingredient_ids:
+        return Response(
+            {'error': '삭제할 재료를 선택하세요'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # 사용자의 식재료만 삭제
+    deleted_count = UserIngredient.objects.filter(
+        user=request.user,
+        ingredient_id__in=ingredient_ids
+    ).delete()[0]
+    
+    return Response({
+        'message': f'{deleted_count}개 식재료가 삭제되었습니다',
+        'deleted_count': deleted_count
+    }, status=status.HTTP_200_OK)

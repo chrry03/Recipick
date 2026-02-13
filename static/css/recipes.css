@@ -258,3 +258,36 @@
 @media (max-width: 400px) {
     .container { width: 100%; height: 100vh; border-radius: 0; }
 }
+
+/* ==========================================================================
+    찜 기능 스타일
+   ========================================================================== */
+.recipe-image-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.favorite-star {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #ccc;
+    transition: all 0.2s ease;
+    z-index: 10;
+    user-select: none;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.favorite-star:hover {
+    transform: scale(1.2);
+}
+
+.favorite-star.favorited {
+    color: #FFD700;
+}
+
+.favorite-star:active {
+    transform: scale(0.9);
+}

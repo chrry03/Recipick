@@ -29,4 +29,6 @@ urlpatterns = [
     path('search/', views.search_ingredient_view, name='search_ingredient'),
     # [추가] 커스텀 식재료 생성 API
     path('api/custom/', views.create_custom_ingredient, name='create_custom_ingredient'),
+    # [추가] 재료 소비 API (레시피 완료 후 사용)
+    path('api/consume/', views.consume_ingredients, name='consume_ingredients'),
 ]
