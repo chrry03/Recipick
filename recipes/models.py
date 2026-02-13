@@ -437,7 +437,7 @@ class Recipe(models.Model):
             return None
     
     def get_ingredients_status_for_user(self, user_ingredients_dict):
-        """사용자 보유 재료 상태"""
+        """사용자 보유 재료 상태 (식재료 이름으로 키 사용)"""
         from datetime import date
         
         result = {
@@ -450,6 +450,14 @@ class Recipe(models.Model):
         
         for ri in self.recipe_ingredients.all():
             ing_id = ri.ingredient_id
+            
+            # ============ 개선: ingredient가 None인 경우 안전 처리 ============
+            if not ri.ingredient:
+                # ingredient가 연결 안 된 경우 (드물지만 발생 가능)
+                ing_name = ri.ingredient_name or f"식재료_{ing_id}"
+            else:
+                # 정상적으로 연결된 경우
+                ing_name = ri.ingredient.name_ko or ri.ingredient.name_en or ri.ingredient_name or str(ing_id)
             
             if ing_id in user_ingredients_dict:
                 ui = user_ingredients_dict[ing_id]
@@ -468,15 +476,15 @@ class Recipe(models.Model):
                     if days_left < 0:
                         status['is_expired'] = True
                         result['has_expired'] = True
-                        result['expired_ingredients'].append(ri.ingredient.name_ko)
+                        result['expired_ingredients'].append(ing_name)
                     elif days_left <= 3:
                         status['is_urgent'] = True
                         result['has_urgent'] = True
-                        result['urgent_ingredients'].append(ri.ingredient.name_ko)
+                        result['urgent_ingredients'].append(ing_name)
                 
-                result['ingredients_status'][ing_id] = status
+                result['ingredients_status'][ing_name] = status
             else:
-                result['ingredients_status'][ing_id] = {
+                result['ingredients_status'][ing_name] = {
                     'is_owned': False,
                     'expire_at': None,
                     'is_expired': False,
