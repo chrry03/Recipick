@@ -152,7 +152,7 @@
     padding: 0 30px;
 }
 
-/* ============ [수정] 찜 버튼 스타일 ============ */
+/* ============ 찜 버튼 스타일 ============ */
 .card-like-btn {
     position: absolute;
     right: 0;
@@ -183,7 +183,7 @@
     transform: scale(0.9);
 }
 
-/* ========== [추가] 처리 중 스타일 ========== */
+/* 처리 중 스타일 */
 .card-like-btn.processing {
     animation: spin 1s linear infinite;
     opacity: 0.6;
