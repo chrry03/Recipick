@@ -272,30 +272,6 @@ def get_recipe_recommendations(request):
     
     logger.info(f"🎯 중복 제거 후: {len(unique_recipes)}개")
     
-    # 6-1. 키워드 전용 검색 (식재료 없음): 점수 필터 없이 바로 반환 (홈→레시피탭 검색 대응)
-    if keyword and not selected_ingredients.exists() and db_recipes_by_keyword:
-        def _format_recipe_for_response(recipe):
-            try:
-                status_info = recipe.get_ingredients_status_for_user(user_ingredients_dict)
-            except AttributeError:
-                status_info = {'ingredients_status': {}, 'has_expired': False, 'has_urgent': False}
-            return {
-                'recipe_id': recipe.recipe_id,
-                'title': recipe.title,
-                'image_url': recipe.image_url,
-                'ready_minutes': recipe.ready_minutes,
-                'difficulty': recipe.difficulty,
-                'ingredients_status': {
-                    'ingredients_status': status_info.get('ingredients_status', {}),
-                    'has_expired': status_info.get('has_expired', False),
-                    'has_urgent': status_info.get('has_urgent', False)
-                },
-                'is_favorited': False
-            }
-        recipes_flat = [_format_recipe_for_response(r) for r in db_recipes_by_keyword[:max_results]]
-        logger.info(f"🔑 키워드 전용 검색: {len(recipes_flat)}개 (점수 필터 생략)")
-        return Response({'recipes': recipes_flat, 'total_count': len(recipes_flat)})
-    
     # 7. 사용자 스킬 레벨
     user_skill_level = 'INTERMEDIATE'
     if user:
@@ -408,29 +384,44 @@ def cooking_mode_view(request, recipe_id, step=None):
     """
     조리 모드 페이지 (한글 단계 우선 표시)
     
-    URL: /recipes/<id>/cooking/ (1단계) 또는 /recipes/<id>/cooking/<step>/
+    주요 기능:
+    1. display_steps() 사용 (한글 우선)
+    2. 단계별 타이머 정보 포함
+    3. 1-based index 처리
+    
+    Args:
+        request: HTTP request
+        recipe_id: 레시피 ID
+        step: 현재 단계 번호 (URL parameter, optional)
     """
     try:
         recipe = Recipe.objects.get(recipe_id=recipe_id)
     except Recipe.DoesNotExist:
         return render(request, 'recipes/recipe_not_found.html', status=404)
 
-    # ============ 한글 단계 우선 ============
+    # ============ 한글 단계 우선 (수정!) ============
+    # get_display_steps()는 이미 한글 instruction_ko 우선으로 반환합니다.
     instructions = recipe.get_display_steps()
     
+    # 백업: steps 필드가 없으면 빈 리스트
     if not instructions:
         instructions = []
     
     total_steps = max(1, len(instructions))
 
-    # 현재 단계 (1-based): URL path 우선, 없으면 GET ?step=, 없으면 1
+    # ========== [수정] 현재 단계 (URL parameter 우선, 없으면 query parameter, 기본값 1) ==========
     if step is not None:
-        current_step = max(1, min(int(step), total_steps))
+        # URL path parameter로 받은 경우 (/recipes/123/cooking/2/)
+        current_step = step
     else:
+        # Query parameter로 받은 경우 (/recipes/123/cooking/?step=2)
         try:
             current_step = max(1, min(int(request.GET.get('step', 1)), total_steps))
         except (TypeError, ValueError):
             current_step = 1
+    
+    # step 범위 검증
+    current_step = max(1, min(current_step, total_steps))
 
     # 현재 단계 데이터
     step_data = None
