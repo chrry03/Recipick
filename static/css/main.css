@@ -3,8 +3,13 @@
   max-width: 448px;
   margin: 0 auto;
   padding-bottom: 6rem;
-  padding-top: 480px;
+  padding-top: 260px; /* 헤더(로고+검색창) 높이에 맞춤 - 기존 480px에서 축소 */
   position: relative;
+}
+
+/* base_with_navbar include로 들어오는 내부 app-container - min-height 제거하여 불필요한 스크롤 방지 */
+.app-container > .app-container {
+  min-height: auto;
 }
 
 /* Header */
@@ -313,8 +318,8 @@
 
 /* Section */
 .section {
-  margin-bottom: 3.5rem;
-  margin-top: 2rem;
+  margin-bottom: 2rem;
+  margin-top: 1.25rem;
 }
 
 .section:first-child {
@@ -349,10 +354,12 @@
   border: none;
   cursor: pointer;
   transition: color 0.2s;
+  text-decoration: none;
 }
 
 .view-all-btn:hover {
   color: #666;
+  text-decoration: none;
 }
 
 /* Carousel */

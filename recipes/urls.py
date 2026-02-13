@@ -14,7 +14,8 @@ urlpatterns = [
     path('', views.recipe_list_view, name='list'),
     path('<int:recipe_id>/', views.recipe_detail_view, name='detail'),
     
-    # [수정] 요리 모드 URL (HTML에서 이 이름을 사용합니다)
+    # 요리 모드 URL
+    path('<int:recipe_id>/cooking/<int:step>/', views.cooking_mode_view, name='cooking_mode_step'),
     path('<int:recipe_id>/cooking/', views.cooking_mode_view, name='cooking_mode'),
     
     # 요리 완료 URL
