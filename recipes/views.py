@@ -174,7 +174,7 @@ def get_recipe_recommendations(request):
     # 2. 요청 파라미터 받기
     ingredient_ids = request.data.get('ingredient_ids', [])
     use_all = request.data.get('use_all', False)
-    max_results = request.data.get('max_results', 20)
+    max_results = request.data.get('max_results', 100)  # 20 → 100으로 증가
     keyword = request.data.get('keyword', '').strip()
     
     logger.info(f"📥 요청: use_all={use_all}, keyword='{keyword}', ingredient_ids={ingredient_ids}")

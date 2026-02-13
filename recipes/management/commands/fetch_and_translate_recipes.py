@@ -2,11 +2,14 @@
 Spoonacular API 레시피 수집 + 한글 번역
 
 사용법:
-    # 기본 (한글 번역 포함)
+    # 기본 (한글 번역 포함, 랜덤 시작)
     python manage.py fetch_and_translate_recipes --cuisine korean --limit 50
     
     # 번역 제외
     python manage.py fetch_and_translate_recipes --cuisine italian --limit 30 --no-translate
+    
+    # 매번 같은 레시피부터 시작 (랜덤 비활성화)
+    python manage.py fetch_and_translate_recipes --cuisine korean --limit 10 --no-random
     
     # 검색어로 수집
     python manage.py fetch_and_translate_recipes --query "chicken pasta" --limit 20
@@ -26,6 +29,8 @@ class Command(BaseCommand):
         parser.add_argument('--limit', type=int, default=50)
         parser.add_argument('--delay', type=float, default=0.5)
         parser.add_argument('--no-translate', action='store_true')
+        parser.add_argument('--no-random', action='store_true', 
+                          help='매번 같은 레시피부터 시작 (기본: 랜덤 시작)')
 
     def handle(self, *args, **options):
         cuisine = options.get('cuisine')
@@ -33,6 +38,7 @@ class Command(BaseCommand):
         limit = options['limit']
         delay = options['delay']
         translate = not options['no_translate']
+        random_start = not options['no_random']
 
         if not cuisine and not query:
             self.stdout.write(self.style.ERROR(
@@ -52,7 +58,8 @@ class Command(BaseCommand):
             cuisine=cuisine or 'korean',
             limit=limit,
             translate=translate,
-            delay=delay
+            delay=delay,
+            random_start=random_start
         )
 
         self.stdout.write(self.style.SUCCESS(
