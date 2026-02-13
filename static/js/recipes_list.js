@@ -250,8 +250,19 @@
 
     // === 6. 초기화 및 이벤트 리스너 ===
     document.addEventListener('DOMContentLoaded', () => {
-        // 초기 로드
-        fetchAndRenderRecipes();
+        // URL 쿼리 파라미터 ?q= 검색어가 있으면 검색 실행 (홈에서 넘어온 경우)
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchKeyword = (urlParams.get('q') || '').trim();
+
+        if (searchKeyword && DOM.searchInput) {
+            DOM.searchInput.value = searchKeyword;
+            // DOM/렌더링 준비 후 검색 실행 (홈→레시피탭 이동 시 타이밍 이슈 방지)
+            requestAnimationFrame(() => {
+                fetchAndRenderRecipes('search', searchKeyword);
+            });
+        } else {
+            fetchAndRenderRecipes();
+        }
 
         // 검색 엔터키
         if (DOM.searchInput) {

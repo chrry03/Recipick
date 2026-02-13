@@ -430,6 +430,40 @@
     }
 
     /**
+     * 홈 검색 → 레시피 검색 탭 이동
+     */
+    function initSearchNavigation() {
+        const searchIconBtn = document.getElementById('searchIconBtn');
+        const searchInput = document.getElementById('searchInput');
+        const searchBar = document.querySelector('.search-bar');
+
+        function goToRecipeSearch(keyword) {
+            const url = keyword && keyword.trim()
+                ? '/recipes/?q=' + encodeURIComponent(keyword.trim())
+                : '/recipes/';
+            window.location.href = url;
+        }
+
+        if (searchIconBtn) {
+            searchIconBtn.addEventListener('click', () => goToRecipeSearch());
+        }
+        if (searchBar) {
+            searchBar.addEventListener('click', (e) => {
+                if (e.target === searchInput) return; // input 클릭 시 포커스만 (Enter로 이동)
+                goToRecipeSearch(searchInput ? searchInput.value : '');
+            });
+        }
+        if (searchInput) {
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    goToRecipeSearch(searchInput.value);
+                }
+            });
+        }
+    }
+
+    /**
      * 플로팅 추가 버튼 초기화
      */
     function initFloatingButton() {
@@ -491,6 +525,7 @@
         initFavoriteRecipes();
         initIngredients();
         initDiarySlider();
+        initSearchNavigation();
         initFloatingButton();
         
         // 헤더 높이에 맞춰 컨테이너 패딩 조정

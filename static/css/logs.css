@@ -1,3 +1,9 @@
+/* 일지 리스트 - 불필요한 스크롤 영역 축소 (style.css의 min-height: 100vh 오버라이드) */
+.app-container.log-list-page,
+.app-container.log-list-page > .app-container {
+    min-height: auto;
+}
+
 /* 일지 작성 페이지(URL: /logs/create/) */
 .title-section {
     display: flex;
@@ -208,8 +214,9 @@
     padding: 0 10px;
     transition: color 0.3s;
     font-family: 'MemomentKkukkukk';
+    text-decoration: none;
 }
-.month-nav:hover {color: #555;}
+.month-nav:hover {color: #555; text-decoration: none;}
 
 .divider {
     width: 100%;

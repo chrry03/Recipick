@@ -821,9 +821,9 @@
 
         _buildStepUrl(step) {
             if (this.recipeId) {
-                return `${this.baseUrl}/${this.recipeId}/step/${step}/`;
+                return `${this.baseUrl}/${this.recipeId}/cooking/${step}/`;
             }
-            return `${this.baseUrl}/step/${step}/`;
+            return `${this.baseUrl}/cooking/${step}/`;
         }
 
         exitCooking() {
