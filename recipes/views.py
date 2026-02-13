@@ -155,22 +155,31 @@ def get_recipe_recommendations(request):
     2. Spoonacular API 활성화
     3. 한글 우선 반환
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     # 1. 로그인 여부에 따라 user 처리
     if request.user.is_authenticated:
         user = request.user
         user_ingredients = UserIngredient.objects.filter(
             user=user,
             is_consumed=False
-        ).select_related('ingredient', 'ingredient__category')
+        ).select_related('ingredient', 'ingredient__category').exclude(
+            ingredient__category__name__in=['Spoonacular API', 'FoodSafetyKorea']
+        )
+        logger.info(f"✅ 사용자: {user.username}, 식재료: {user_ingredients.count()}개")
     else:
         user = None
         user_ingredients = UserIngredient.objects.none()
+        logger.info("⚠️ 비로그인 사용자")
 
     # 2. 요청 파라미터 받기
     ingredient_ids = request.data.get('ingredient_ids', [])
     use_all = request.data.get('use_all', False)
-    max_results = request.data.get('max_results', 20)
-    keyword = request.data.get('keyword', '').strip() 
+    max_results = request.data.get('max_results', 100)  # 20 → 100으로 증가
+    keyword = request.data.get('keyword', '').strip()
+    
+    logger.info(f"📥 요청: use_all={use_all}, keyword='{keyword}', ingredient_ids={ingredient_ids}")
     
     # ============ Spoonacular API 활성화 (수정!) ============
     include_spoonacular = request.data.get('include_spoonacular', True)
@@ -193,8 +202,11 @@ def get_recipe_recommendations(request):
     else:
         selected_ingredients = user_ingredients
     
+    logger.info(f"🥬 선택된 식재료: {selected_ingredients.count()}개")
+    
     # 검색어도 없고 재료도 없으면 빈 결과 반환
     if not selected_ingredients.exists() and not keyword:
+        logger.warning("❌ 식재료도 없고 검색어도 없음 → 빈 결과 반환")
         return Response({
             'message': '선택된 식재료 또는 검색어가 없습니다',
             'categories': {},
@@ -209,6 +221,8 @@ def get_recipe_recommendations(request):
         ui.ingredient_id: ui for ui in selected_ingredients
     }
     
+    logger.info(f"📋 식재료 ID 목록: {selected_ingredient_ids[:5]}...")  # 처음 5개만
+    
     # ==========================================
     # 4. DB 검색 (utils.py 함수 사용)
     # ==========================================
@@ -218,6 +232,7 @@ def get_recipe_recommendations(request):
         db_recipes_by_ing = list(
             search_recipes_from_db(selected_ingredient_ids, user)
         )
+        logger.info(f"🗄️ DB 레시피 (식재료 기반): {len(db_recipes_by_ing)}개")
 
     # ============ 한글/영문 키워드 검색 (수정!) ============
     db_recipes_by_keyword = []
@@ -228,20 +243,24 @@ def get_recipe_recommendations(request):
                 Q(title_ko__icontains=keyword)
             )
         )
+        logger.info(f"🔍 DB 레시피 (키워드 '{keyword}'): {len(db_recipes_by_keyword)}개")
 
     # 결과 합치기
     combined_db = db_recipes_by_keyword + db_recipes_by_ing
+    logger.info(f"📦 DB 레시피 합계: {len(combined_db)}개")
 
     # ==========================================
     # 5. Spoonacular 검색 (utils.py 함수 사용)
     # ==========================================
     spoon_recipes = []
     if include_spoonacular and selected_ingredients.exists():
+        logger.info("🌐 Spoonacular 검색 시작...")
         # utils.py 함수가 402 에러를 방지하고 빈 리스트를 반환합니다.
         spoon_recipes = search_recipes_from_spoonacular(
             selected_ingredients,
             max_results=10
         )
+        logger.info(f"🌐 Spoonacular 레시피: {len(spoon_recipes)}개")
     
     # 6. 통합 및 중복 제거
     all_recipes = list(combined_db) + spoon_recipes
@@ -250,6 +269,8 @@ def get_recipe_recommendations(request):
     for recipe in all_recipes:
         if recipe.external_id not in unique_recipes:
             unique_recipes[recipe.external_id] = recipe
+    
+    logger.info(f"🎯 중복 제거 후: {len(unique_recipes)}개")
     
     # 7. 사용자 스킬 레벨
     user_skill_level = 'INTERMEDIATE'
@@ -263,12 +284,16 @@ def get_recipe_recommendations(request):
     # 8. 최종 결과 계산 (utils.py 함수 사용)
     final_list = list(unique_recipes.values())
     
+    logger.info(f"🧮 점수 계산 시작: {len(final_list)}개")
+    
     result = calculate_final_recommendations(
         recipes=final_list[:max_results],
         user=user,
         user_ingredients_dict=user_ingredients_dict,
         user_skill_level=user_skill_level
     )
+    
+    logger.info(f"✅ 최종 결과: {result.get('total_count', 0)}개")
     
     return Response(result)
 
@@ -355,7 +380,7 @@ def recipe_detail_view(request, recipe_id):
     return render(request, 'recipes/recipe_detail.html', context)
 
 
-def cooking_mode_view(request, recipe_id):
+def cooking_mode_view(request, recipe_id, step=None):
     """
     조리 모드 페이지 (한글 단계 우선 표시)
     
@@ -363,6 +388,11 @@ def cooking_mode_view(request, recipe_id):
     1. display_steps() 사용 (한글 우선)
     2. 단계별 타이머 정보 포함
     3. 1-based index 처리
+    
+    Args:
+        request: HTTP request
+        recipe_id: 레시피 ID
+        step: 현재 단계 번호 (URL parameter, optional)
     """
     try:
         recipe = Recipe.objects.get(recipe_id=recipe_id)
@@ -379,11 +409,19 @@ def cooking_mode_view(request, recipe_id):
     
     total_steps = max(1, len(instructions))
 
-    # 현재 단계 (1-based)
-    try:
-        current_step = max(1, min(int(request.GET.get('step', 1)), total_steps))
-    except (TypeError, ValueError):
-        current_step = 1
+    # ========== [수정] 현재 단계 (URL parameter 우선, 없으면 query parameter, 기본값 1) ==========
+    if step is not None:
+        # URL path parameter로 받은 경우 (/recipes/123/cooking/2/)
+        current_step = step
+    else:
+        # Query parameter로 받은 경우 (/recipes/123/cooking/?step=2)
+        try:
+            current_step = max(1, min(int(request.GET.get('step', 1)), total_steps))
+        except (TypeError, ValueError):
+            current_step = 1
+    
+    # step 범위 검증
+    current_step = max(1, min(current_step, total_steps))
 
     # 현재 단계 데이터
     step_data = None
@@ -432,26 +470,31 @@ def cooking_complete_view(request, recipe_id):
     except Recipe.DoesNotExist:
         return render(request, 'recipes/recipe_not_found.html', status=404)
 
-    # 다 쓴 재료 체크하기: 레시피에 적힌 재료 목록
+    # 다 쓴 재료 체크하기: 레시피에 적힌 재료 목록 (모든 재료 포함)
     recipe_ingredients = recipe.recipe_ingredients.select_related(
         'ingredient'
-    ).order_by('recipe_ingredient_id')
+    ).all()  # order_by 제거 - 모든 재료 표시
     
     ingredients = []
     for ri in recipe_ingredients:
-        ingredients.append({
-            'id': ri.ingredient.ingredient_id, 
-            'name': ri.ingredient.name_ko
-        })
+        # ingredient가 None인 경우 안전 처리
+        if ri.ingredient:
+            ingredients.append({
+                'id': ri.ingredient.ingredient_id, 
+                'name': ri.ingredient.name_ko or ri.ingredient.name_en or ri.ingredient_name or '알 수 없는 재료'
+            })
+        elif ri.ingredient_name:
+            # ingredient가 없지만 ingredient_name이 있는 경우
+            ingredients.append({
+                'id': None,  # ID가 없으므로 삭제 불가
+                'name': ri.ingredient_name
+            })
 
     user_ingredients = []
     if request.user.is_authenticated:
         user_ingredients = UserIngredient.objects.filter(
             user=request.user,
-            ingredient_id__in=recipe.recipe_ingredients.values_list(
-                'ingredient_id', 
-                flat=True
-            ),
+            ingredient_id__in=[ing['id'] for ing in ingredients if ing['id']],
             is_consumed=False
         ).select_related('ingredient')
 

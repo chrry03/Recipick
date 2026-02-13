@@ -241,7 +241,7 @@ class IngredientNameMapping(models.Model):
     )
     
     alternative_name = models.CharField(
-        max_length=100,
+        max_length=255,
         verbose_name='대체 이름',
         help_text='다른 이름, 영어 이름, 별칭 등'
     )

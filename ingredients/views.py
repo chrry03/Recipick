@@ -36,38 +36,71 @@ from ingredients.utils.mapper import IngredientMapper
 from .models import IngredientMaster, IngredientCategory 
 from .serializers import IngredientSerializer
 
-# [1] 직접 추가 생성 API 수정
+# [1] 직접 추가 생성 API 수정 (API 카테고리 처리)
 @api_view(['POST'])
 def create_custom_ingredient(request):
+    """
+    사용자 직접 추가 식재료 생성
+    
+    개선사항:
+    - API 카테고리(Spoonacular, FoodSafetyKorea)의 식재료를 직접 추가하면
+      해당 식재료를 "직접 추가" 카테고리로 이동시킴
+    - ingredient_id는 유지되므로 레시피 매칭 정상 작동
+    """
     name = request.data.get('name')
     
     if not name:
         return Response({'error': '이름을 입력해주세요.'}, status=400)
 
-    # DB에서 '직접 추가' 카테고리를 찾습니다. (fixtures에 있으므로 무조건 있음)
-    try:
-        category = IngredientCategory.objects.get(name='직접 추가')
-    except IngredientCategory.DoesNotExist:
-        # 만약 없으면 생성 (안전장치)
-        category = IngredientCategory.objects.create(name='직접 추가', icon_url='/static/images/categories/add-button.png')
-
-    # 식재료 생성 (이미 있으면 가져오기)
-    ingredient, created = IngredientMaster.objects.get_or_create(
-        name_ko=name,
-        defaults={
-            'category': category,
-            'name_en': None # 필요한 경우
-        }
-    )
+    # 1. 기존에 있는지 확인
+    existing = IngredientMaster.objects.filter(name_ko=name).first()
     
-    serializer = IngredientSerializer(ingredient)
-    return Response(serializer.data)
+    if existing:
+        # 2. API 카테고리인지 확인
+        if existing.category.name in ['Spoonacular API', 'FoodSafetyKorea']:
+            # API 카테고리 → 직접 추가로 이동 (ingredient_id 유지)
+            try:
+                direct_category = IngredientCategory.objects.get(pk=16)
+                existing.category = direct_category
+                existing.save()
+                print(f"   🔄 식재료 이동: {name} ({existing.category.name} → 직접 추가)")
+            except IngredientCategory.DoesNotExist:
+                # 비상 대비
+                direct_category = IngredientCategory.objects.create(
+                    name='직접 추가',
+                    icon_url='/static/images/categories/add-button.png'
+                )
+                existing.category = direct_category
+                existing.save()
+        
+        # 일반 카테고리면 그대로 사용
+        serializer = IngredientSerializer(existing)
+        return Response(serializer.data)
+    
+    else:
+        # 3. 없으면 새로 생성
+        try:
+            category = IngredientCategory.objects.get(pk=16)
+        except IngredientCategory.DoesNotExist:
+            category = IngredientCategory.objects.create(
+                name='직접 추가',
+                icon_url='/static/images/categories/add-button.png'
+            )
+        
+        ingredient = IngredientMaster.objects.create(
+            name_ko=name,
+            category=category,
+            name_en='',
+            aliases=[]
+        )
+        
+        serializer = IngredientSerializer(ingredient)
+        return Response(serializer.data)
 
 # ==================== API ViewSets (DRF) ==================== #
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    """식재료 마스터 데이터 조회 (검색, 필터링)"""
-    queryset = IngredientMaster.objects.all().order_by('name_ko')
+    """식재료 마스터 데이터 조회 (검색, 필터링) - API 카테고리 제외"""
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny]
     # [핵심 수정 1] 페이지네이션 비활성화 (20개 제한 해제)
@@ -76,7 +109,12 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['name_ko', 'name_en', 'aliases']
     
     def get_queryset(self):
-        queryset = super().get_queryset()
+        """API 카테고리 제외 (Spoonacular, FoodSafetyKorea)"""
+        # [핵심!] 사용자 UI에서 API 카테고리 식재료 숨김
+        queryset = IngredientMaster.objects.exclude(
+            category__name__in=['Spoonacular API', 'FoodSafetyKorea']
+        ).order_by('name_ko')
+        
         category_id = self.request.query_params.get('category_id')
         if category_id:
             queryset = queryset.filter(category_id=category_id)
@@ -92,31 +130,38 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     
     @action(detail=False, methods=['get'])
     def search(self, request):
-        """키워드 검색 (자동완성 등)"""
+        """키워드 검색 (자동완성 등) - API 카테고리 제외"""
         keyword = request.query_params.get('keyword', '')
         if not keyword:
             return Response([])
         
-        # [핵심 수정 2] 검색 제한 늘리기 (10 -> 50)
-        suggestions = IngredientMapper.suggest_matches(keyword, limit=50)
-        serializer = self.get_serializer(suggestions, many=True)
-        return Response(serializer.data)
+        # [핵심!] API 카테고리 제외하고 검색
+        suggestions = IngredientMaster.objects.exclude(
+            category__name__in=['Spoonacular API', 'FoodSafetyKorea']
+        ).filter(
+            Q(name_ko__icontains=keyword) |
+            Q(name_en__icontains=keyword) |
+            Q(aliases__icontains=keyword)
+        )[:50]
         
-        # IngredientMapper 사용
-        suggestions = IngredientMapper.suggest_matches(keyword, limit=10)
         serializer = self.get_serializer(suggestions, many=True)
         return Response(serializer.data)
 
 
 class IngredientCategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    """식재료 카테고리 조회"""
-    queryset = IngredientCategory.objects.all()
+    """식재료 카테고리 조회 (API 카테고리 숨김)"""
     serializer_class = IngredientCategorySerializer
     permission_classes = [AllowAny]
     
+    def get_queryset(self):
+        """API 전용 카테고리 제외"""
+        return IngredientCategory.objects.exclude(
+            name__in=['Spoonacular API', 'FoodSafetyKorea']
+        )
+    
     @action(detail=False, methods=['get'])
     def with_counts(self, request):
-        """각 카테고리별 식재료 개수 포함"""
+        """각 카테고리별 식재료 개수 포함 (API 카테고리 제외)"""
         categories = self.get_queryset()
         
         data = []
@@ -578,8 +623,10 @@ def add_ingredient_view(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def category_list_view(request):
-    """카테고리 목록 JSON"""
-    categories = IngredientCategory.objects.all().order_by('category_id')
+    """카테고리 목록 JSON (API 카테고리 제외)"""
+    categories = IngredientCategory.objects.exclude(
+        name__in=['Spoonacular API', 'FoodSafetyKorea']
+    ).order_by('category_id')
     data = []
     for cat in categories:
         data.append({
@@ -647,3 +694,42 @@ def search_ingredient_view(request):
         })
     
     return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def consume_ingredients(request):
+    """
+    재료 소비 (일괄 삭제)
+    
+    레시피 완료 후 사용한 재료를 체크하고 삭제
+    
+    POST /api/ingredients/consume/
+    {
+        "ingredient_ids": [1, 2, 3]
+    }
+    
+    응답:
+    {
+        "message": "3개 식재료가 삭제되었습니다",
+        "deleted_count": 3
+    }
+    """
+    ingredient_ids = request.data.get('ingredient_ids', [])
+    
+    if not ingredient_ids:
+        return Response(
+            {'error': '삭제할 재료를 선택하세요'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # 사용자의 식재료만 삭제
+    deleted_count = UserIngredient.objects.filter(
+        user=request.user,
+        ingredient_id__in=ingredient_ids
+    ).delete()[0]
+    
+    return Response({
+        'message': f'{deleted_count}개 식재료가 삭제되었습니다',
+        'deleted_count': deleted_count
+    }, status=status.HTTP_200_OK)

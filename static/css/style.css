@@ -1,9 +1,10 @@
 /* 폰트 정의 */
 @font-face {
     font-family: 'MemomentKkukkukk';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2205@1.0/MemomentKkukkukk.woff2') format('woff2');
+    src: url('../fonts/MemomentKkukkukk.woff') format('woff');
     font-weight: normal;
     font-style: normal;
+    font-display: swap;
 }
 
 /* 공통 스타일 */

@@ -127,5 +127,21 @@
       "name": "직접 추가",
       "icon_url": "/static/images/categories/add-button.png"
     }
+  },
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 17,
+    "fields": {
+      "name": "Spoonacular API",
+      "icon_url": "/static/images/categories/spoonacular.png"
+    }
+  },
+  {
+    "model": "ingredients.ingredientcategory",
+    "pk": 18,
+    "fields": {
+      "name": "FoodSafetyKorea",
+      "icon_url": "/static/images/categories/foodsafetykorea.png"
+    }
   }
 ]

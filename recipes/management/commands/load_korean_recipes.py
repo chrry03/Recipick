@@ -153,9 +153,22 @@ class Command(BaseCommand):
         return instructions
     
     def add_ingredients_to_recipe(self, recipe, ingredients_text):
-        """재료를 레시피에 추가"""
+        """
+        재료를 레시피에 추가 (자동 생성 포함 + 정규화)
+        
+        개선사항:
+        1. "재료 " 접두사 제거
+        2. IngredientMapper 사용
+        3. 없으면 전체 DB에서 검색 (중복 방지)
+        4. 그래도 없으면 FoodSafetyKorea 카테고리에 생성
+        """
+        # FoodSafetyKorea 카테고리 ID
+        korea_category_id = self._get_foodsafety_category_id()
+        
         # 재료 파싱 (예: "양파 1개, 마늘 3쪽, 간장 2큰술")
         ingredient_parts = re.split(r'[,·]', ingredients_text)
+        
+        created_count = 0
         
         for part in ingredient_parts:
             part = part.strip()
@@ -163,13 +176,47 @@ class Command(BaseCommand):
                 continue
             
             # 재료명과 양 분리
-            match = re.match(r'([가-힣a-zA-Z\s]+)\s*([\d./]+)?\s*([가-힣a-zA-Z]+)?', part)
+            match = re.match(r'([가-힣a-zA-Z\s]+)\s*([\d./]+)?\s*([가-힣a-zA-Z()]+)?', part)
             
             if match:
-                ing_name = match.group(1).strip()
+                ing_name_raw = match.group(1).strip()
                 
-                # 식재료 매핑
+                # [1] 정규화 (괄호 안 내용 제거 + "재료 " 접두사 제거)
+                ing_name = self._normalize_korean_ingredient(ing_name_raw)
+                
+                # [2] IngredientMapper로 매핑 시도
                 ingredient = IngredientMapper.find_ingredient(ing_name)
+                
+                # [3] 못 찾으면 전체 DB에서 검색 (중복 방지)
+                if not ingredient:
+                    from ingredients.models import IngredientMaster
+                    ingredient = IngredientMaster.objects.filter(
+                        name_ko=ing_name
+                    ).first()
+                
+                # [4] 그래도 없으면 자동 생성
+                if not ingredient:
+                    try:
+                        from ingredients.models import IngredientMaster, IngredientCategory
+                        
+                        # 카테고리 가져오기
+                        category = IngredientCategory.objects.get(category_id=korea_category_id)
+                        
+                        # 새로 생성
+                        ingredient = IngredientMaster.objects.create(
+                            category=category,
+                            name_ko=ing_name,
+                            name_en='',
+                            aliases=[]
+                        )
+                        created_count += 1
+                        self.stdout.write(f'   ➕ 식재료 자동 생성: {ing_name}')
+                            
+                    except Exception as e:
+                        self.stdout.write(self.style.WARNING(
+                            f'   ⚠️  생성 실패: {ing_name} - {str(e)}'
+                        ))
+                        continue
                 
                 if ingredient:
                     # 이미 추가된 재료인지 확인
@@ -183,6 +230,57 @@ class Command(BaseCommand):
                             ingredient_name=ing_name,
                             is_optional=False
                         )
+        
+        if created_count > 0:
+            self.stdout.write(f'   ✨ 새 식재료 {created_count}개 자동 생성됨')
+    
+    def _get_foodsafety_category_id(self):
+        """FoodSafetyKorea 카테고리 ID 가져오기 (고정: 18번)"""
+        from ingredients.models import IngredientCategory
+        
+        # FoodSafetyKorea 카테고리 찾기 (pk=18)
+        category = IngredientCategory.objects.filter(pk=18).first()
+        
+        if not category:
+            # fixtures에 없으면 생성 (비상 대비)
+            category, created = IngredientCategory.objects.get_or_create(
+                name='FoodSafetyKorea',
+                defaults={
+                    'icon': '🇰🇷',
+                    'parent': None,
+                    'is_parent': False
+                }
+            )
+            if created:
+                self.stdout.write(f'   🆕 FoodSafetyKorea 카테고리 생성 (ID: {category.category_id})')
+        
+        return category.category_id
+    
+    def _normalize_korean_ingredient(self, name):
+        """
+        한글 식재료명 정규화
+        
+        예시:
+        - "재료 미나리" → "미나리"
+        - "돼지고기 100g" → "돼지고기"
+        - "양파(1개)" → "양파"
+        - "청양고추 10g(1/2개)" → "청양고추"
+        """
+        import re
+        
+        # [핵심 추가!] "재료 " 접두사 제거
+        name = re.sub(r'^재료\s+', '', name)
+        
+        # 괄호 안 내용 제거
+        name = re.sub(r'\([^)]*\)', '', name)
+        
+        # 수량 표현 제거
+        name = re.sub(r'\d+[가-힣a-zA-Z]*', '', name)
+        
+        # 앞뒤 공백 제거
+        name = name.strip()
+        
+        return name
     
     def estimate_cooking_time(self, recipe_data):
         """조리 시간 추정 (분)"""

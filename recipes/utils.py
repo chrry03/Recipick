@@ -164,8 +164,9 @@ def calculate_final_recommendations(recipes, user, user_ingredients_dict, user_s
                 'ingredient_score': 0, 'missing_ingredients_count': 0
             }
 
-        # 테스트를 위해 점수 필터 완화 (필요시 60으로 복구)
-        if score_data['total_score'] >= 0:
+        # ============ 개선: 점수 필터 완화 (55점 이상) ============
+        # 기존: >= 60 → 새로: >= 55
+        if score_data['total_score'] >= 55:
             scored_recipes.append({
                 'recipe': recipe,
                 'score_data': score_data
