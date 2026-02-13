@@ -5,6 +5,7 @@ Recipes Serializers (한글 필드 포함)
 1. title_ko, instructions_ko 필드 추가
 2. display_title, display_instructions 메서드 추가
 3. 한글 우선 반환
+4. total_ingredients_count를 SerializerMethodField로 변경 (500 에러 해결)
 """
 from rest_framework import serializers
 from recipes.models import Recipe, RecipeIngredient, FavoriteRecipe
@@ -30,10 +31,8 @@ class RecipeListSerializer(serializers.ModelSerializer):
         source='get_difficulty_display',
         read_only=True
     )
-    total_ingredients_count = serializers.IntegerField(
-        source='total_ingredients_count',
-        read_only=True
-    )
+    # ========== [수정] SerializerMethodField로 변경 (500 에러 해결) ==========
+    total_ingredients_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -56,6 +55,11 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
     def get_display_title(self, obj):
         return obj.get_display_title()
+    
+    # ========== [추가] total_ingredients_count getter ==========
+    def get_total_ingredients_count(self, obj):
+        """레시피의 총 재료 개수 반환"""
+        return obj.recipe_ingredients.count()
 
 
 class RecipeDetailSerializer(serializers.ModelSerializer):
@@ -70,10 +74,8 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
         source='get_difficulty_display',
         read_only=True
     )
-    total_ingredients_count = serializers.IntegerField(
-        source='total_ingredients_count',
-        read_only=True
-    )
+    # ========== [수정] SerializerMethodField로 변경 ==========
+    total_ingredients_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -103,6 +105,11 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
 
     def get_display_steps(self, obj):
         return obj.get_display_steps()
+    
+    # ========== [추가] total_ingredients_count getter ==========
+    def get_total_ingredients_count(self, obj):
+        """레시피의 총 재료 개수 반환"""
+        return obj.recipe_ingredients.count()
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):

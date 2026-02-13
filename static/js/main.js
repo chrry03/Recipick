@@ -6,7 +6,7 @@
 (function() {
     'use strict';
     
-    // ========== [추가] 유틸리티 함수 ==========
+    // ========== 유틸리티 함수 ==========
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -78,7 +78,7 @@
     let recipes = [];
     let carouselDisplayCount = CAROUSEL_MAX_CARDS;
 
-    // ========== [추가] 찜 상태 관리 ==========
+    // 찜 상태 관리
     let favoritedIds = new Set();
     let processingIds = new Set();
 
@@ -111,6 +111,8 @@
             const difficultyText = difficultyMap[recipe.difficulty] || '보통';
             const cardContainer = document.createElement('div');
             cardContainer.className = 'card-container';
+            // ========== [추가] recipe_id를 data 속성으로 저장 ==========
+            cardContainer.dataset.recipeId = recipe.id;
             cardContainer.innerHTML = `
                 <div class="carousel-card">
                     <h3>${escapeHtml(recipe.name)}</h3>
@@ -123,6 +125,17 @@
                     </div>
                 </div>
             `;
+            
+            // ========== [추가] 카드 클릭 이벤트 ==========
+            cardContainer.addEventListener('click', function() {
+                if (index === activeRecipeIndex) {
+                    const recipeId = this.dataset.recipeId;
+                    if (recipeId) {
+                        window.location.href = `/recipes/${recipeId}/cooking/`;
+                    }
+                }
+            });
+            
             carousel.appendChild(cardContainer);
         });
 
@@ -179,6 +192,7 @@
             card.style.setProperty('--offset', offset);
             card.style.setProperty('--direction', direction);
             card.style.setProperty('--abs-offset', absOffset);
+            // ========== [수정] 활성 카드만 클릭 가능 ==========
             card.style.pointerEvents = isActive ? 'auto' : 'none';
             card.style.opacity = Math.abs(activeRecipeIndex - i) >= CAROUSEL_MAX_VISIBILITY ? '0' : '1';
             card.style.display = Math.abs(activeRecipeIndex - i) > CAROUSEL_MAX_VISIBILITY ? 'none' : 'block';
@@ -228,7 +242,6 @@
         }
 
         favoriteRecipes.forEach(recipe => {
-            // ========== [수정] recipe.id를 favoritedIds에 추가 ==========
             favoritedIds.add(recipe.id);
             
             const card = document.createElement('div');
@@ -256,10 +269,9 @@
     }
 
     /**
-     * ========== [완전 수정] 찜하기 토글 ==========
+     * 찜하기 토글
      */
     async function toggleFavorite(recipeId, button) {
-        // 중복 클릭 방지
         if (processingIds.has(recipeId)) {
             console.log('⏳ 이미 처리 중:', recipeId);
             return;
@@ -277,14 +289,12 @@
             return;
         }
 
-        // 처리 중 표시
         processingIds.add(recipeId);
         button.disabled = true;
         button.style.opacity = '0.6';
 
         try {
             if (isLiked) {
-                // 찜 취소
                 const response = await fetch('/recipes/api/favorites/remove/', {
                     method: 'DELETE',
                     headers: {
@@ -303,7 +313,6 @@
                     throw new Error(`찜 취소 실패: ${response.status}`);
                 }
             } else {
-                // 찜 추가
                 const response = await fetch('/recipes/api/favorites/', {
                     method: 'POST',
                     headers: {
@@ -521,7 +530,7 @@
         
         if (header && appContainer) {
             const headerHeight = header.offsetHeight;
-            appContainer.style.paddingTop = (headerHeight / 16) + 'rem';
+            appContainer.style.paddingTop = headerHeight + 'px';
         }
     }
 

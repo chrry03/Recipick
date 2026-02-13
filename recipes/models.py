@@ -403,10 +403,10 @@ class Recipe(models.Model):
         base_line = 20
         
         weighted_score = (
-            ingredient_score * 0.35 +      # 45→35%
-            expiry_score * 0.35 +          # 40→35%
-            difficulty_score * 0.15 +      # 10→15%
-            personalization_score * 0.15   # 5→15%
+            ingredient_score * 0.45 +      # 45%
+            expiry_score * 0.40 +          # 40%
+            difficulty_score * 0.10 +      # 10%
+            personalization_score * 0.05   # 5%
         )
         
         total_score = base_line + weighted_score
