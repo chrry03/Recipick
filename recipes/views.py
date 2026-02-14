@@ -247,8 +247,10 @@ def get_recipe_recommendations(request):
     use_all = request.data.get('use_all', False)
     max_results = request.data.get('max_results', 100)  # 20 → 100으로 증가
     keyword = request.data.get('keyword', '').strip()
+    # ========== [추가] 내 재료만 필터 ==========
+    only_owned_ingredients = request.data.get('only_owned_ingredients', False)
     
-    logger.info(f"📥 요청: use_all={use_all}, keyword='{keyword}', ingredient_ids={ingredient_ids}")
+    logger.info(f"📥 요청: use_all={use_all}, keyword='{keyword}', ingredient_ids={ingredient_ids}, only_owned={only_owned_ingredients}")
     
     # ============ Spoonacular API 활성화 (수정!) ============
     include_spoonacular = request.data.get('include_spoonacular', True)
@@ -361,6 +363,53 @@ def get_recipe_recommendations(request):
         user_ingredients_dict=user_ingredients_dict,
         user_skill_level=user_skill_level
     )
+    
+    # ========== [추가] 내 재료만 필터링 ==========
+    if only_owned_ingredients and user:
+        logger.info("🔒 '내 재료만' 필터 적용")
+        
+        # 사용자가 보유한 재료 ID 목록
+        owned_ingredient_ids = set(selected_ingredient_ids)
+        
+        filtered_recipes = []
+        
+        # 각 카테고리별로 필터링
+        for category_key in ['urgent_ready', 'ready', 'almost_ready']:
+            if category_key in result.get('categories', {}):
+                category_recipes = result['categories'][category_key].get('recipes', [])
+                
+                for recipe_data in category_recipes:
+                    recipe = recipe_data.get('recipe')
+                    if not recipe:
+                        continue
+                    
+                    # 레시피의 필수 재료 확인
+                    required_ingredients = recipe.recipe_ingredients.filter(is_optional=False)
+                    required_ingredient_ids = set(
+                        required_ingredients.values_list('ingredient_id', flat=True)
+                    )
+                    
+                    # 모든 필수 재료를 보유하고 있는지 확인
+                    if required_ingredient_ids.issubset(owned_ingredient_ids):
+                        filtered_recipes.append(recipe_data)
+                        logger.info(f"  ✅ {recipe.get_display_title()[:20]}... - 모든 재료 보유")
+                    else:
+                        missing = required_ingredient_ids - owned_ingredient_ids
+                        logger.info(f"  ❌ {recipe.get_display_title()[:20]}... - 부족한 재료: {len(missing)}개")
+        
+        # 필터링된 레시피로 결과 재구성
+        logger.info(f"🔒 필터링 결과: {len(filtered_recipes)}개")
+        
+        result = {
+            'categories': {
+                'ready': {
+                    'recipes': filtered_recipes,
+                    'count': len(filtered_recipes)
+                }
+            },
+            'total_count': len(filtered_recipes),
+            'recipes': [r.get('recipe') for r in filtered_recipes if r.get('recipe')]
+        }
     
     logger.info(f"✅ 최종 결과: {result.get('total_count', 0)}개")
     

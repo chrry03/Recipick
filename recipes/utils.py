@@ -77,7 +77,7 @@ def search_recipes_from_db(user_ingredient_ids, user, exclude_allergies=True):
 # =========================================================
 def search_recipes_from_spoonacular(user_ingredients, max_results=10):
     """
-    Spoonacular API에서 레시피 검색 (402 에러 방어 포함)
+    Spoonacular API에서 레시피 검색 (402 에러 방어 포함 + 자동 번역)
     """
     api_key = getattr(settings, 'SPOONACULAR_API_KEY', '')
     if not api_key:
@@ -118,15 +118,33 @@ def search_recipes_from_spoonacular(user_ingredients, max_results=10):
             
         data = response.json()
         
+        # ========== [추가] 번역 서비스 import ==========
+        from recipes.services.translator import RecipeTranslator
+        translator = RecipeTranslator()
+        
         # 데이터를 Recipe 모델 형식의 임시 객체로 변환
         results = []
         for item in data:
+            title_en = item.get('title', '')
+            
+            # ========== [추가] 제목 자동 번역 ==========
+            title_ko = ''
+            try:
+                if title_en:
+                    title_ko = translator.translate_text(title_en, target_lang='ko')
+                    print(f"   📝 번역: {title_en} → {title_ko}")
+            except Exception as e:
+                print(f"   ⚠️ 번역 실패: {e}")
+                title_ko = title_en  # 번역 실패 시 원문 사용
+            
             recipe = Recipe(
-                title=item.get('title'),
+                title=title_en,  # 영문 제목
+                title_ko=title_ko,  # ========== [추가] 한글 제목 ==========
                 image_url=item.get('image'),
                 ready_minutes=0, 
                 difficulty='NORMAL',
-                external_id=str(item.get('id'))
+                external_id=str(item.get('id')),
+                is_translated=bool(title_ko and title_ko != title_en)  # ========== [추가] 번역 플래그 ==========
             )
             recipe.recipe_id = -item.get('id') 
             results.append(recipe)

@@ -77,6 +77,8 @@ class Command(BaseCommand):
         # 3. 한식 레시피 로드
         if not options['skip_recipes']:
             self.load_korean_recipes()
+            # ========== [추가] 하드코딩 레시피 로드 ==========
+            self.load_hardcoded_recipes()
         else:
             self.stdout.write(self.style.WARNING('3. 한식 레시피 로드 건너뜀 (--skip-recipes)\n'))
         
@@ -146,6 +148,116 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('   ✓ 한식 레시피 로드 완료\n'))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'   ✗ 한식 레시피 로드 실패: {e}\n'))
+    
+    def load_hardcoded_recipes(self):
+        """하드코딩 레시피 로드"""
+        self.stdout.write('📝 3-1. 하드코딩 레시피 로드 중...')
+        
+        import json
+        from recipes.models import Recipe, RecipeIngredient
+        
+        json_file = 'hardcoded_recipes.json'
+        
+        if not os.path.exists(json_file):
+            self.stdout.write(self.style.WARNING(
+                f'   ⚠ {json_file} 파일을 찾을 수 없습니다\n'
+                '   프로젝트 루트에 hardcoded_recipes.json 파일을 배치하세요.\n'
+            ))
+            return
+        
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            recipes_data = data.get('recipes', [])
+            created_count = 0
+            updated_count = 0
+            
+            for recipe_data in recipes_data:
+                external_id = recipe_data.get('external_id')
+                
+                # 레시피 생성 또는 업데이트
+                recipe, created = Recipe.objects.update_or_create(
+                    external_id=external_id,
+                    defaults={
+                        'source': recipe_data.get('source', 'HARDCODED'),
+                        'title': recipe_data.get('title', ''),
+                        'title_ko': recipe_data.get('title_ko', ''),
+                        'difficulty': recipe_data.get('difficulty', 'NORMAL'),
+                        'ready_minutes': recipe_data.get('ready_minutes', 30),
+                        'servings': recipe_data.get('servings', 2),
+                        'image_url': recipe_data.get('image_url', ''),
+                        'instructions_ko': recipe_data.get('instructions_ko', []),
+                        'is_translated': True  # 이미 한글임
+                    }
+                )
+                
+                if created:
+                    created_count += 1
+                else:
+                    updated_count += 1
+                
+                # 기존 재료 삭제
+                RecipeIngredient.objects.filter(recipe=recipe).delete()
+                
+                # 재료 추가
+                for idx, ing_data in enumerate(recipe_data.get('ingredients', [])):
+                    # 식재료 마스터에서 찾기
+                    ingredient = None
+                    name_ko = ing_data.get('name_ko', '')
+                    name_en = ing_data.get('name_en', '')
+                    
+                    if name_ko:
+                        ingredient = IngredientMaster.objects.filter(
+                            name_ko__icontains=name_ko
+                        ).first()
+                    
+                    if not ingredient and name_en:
+                        ingredient = IngredientMaster.objects.filter(
+                            name_en__icontains=name_en
+                        ).first()
+                    
+                    # ========== [추가] 식재료가 없으면 자동 생성 ==========
+                    if not ingredient and (name_ko or name_en):
+                        # HARDCODED 카테고리 찾기 또는 생성
+                        hardcoded_category, _ = IngredientCategory.objects.get_or_create(
+                            name='HARDCODED',
+                            defaults={'name': 'HARDCODED'}
+                        )
+                        
+                        # 식재료 생성
+                        ingredient = IngredientMaster.objects.create(
+                            name_ko=name_ko or name_en,
+                            name_en=name_en or name_ko,
+                            category=hardcoded_category
+                        )
+                        self.stdout.write(
+                            f'      ✓ 식재료 자동 생성: {name_ko or name_en}'
+                        )
+                    
+                    # RecipeIngredient 생성
+                    RecipeIngredient.objects.create(
+                        recipe=recipe,
+                        ingredient=ingredient,  # 이제 항상 있음
+                        ingredient_name=name_ko or name_en,
+                        is_optional=ing_data.get('is_optional', False),
+                        order=idx + 1
+                    )
+                
+                self.stdout.write(
+                    f'   {"✓ 생성" if created else "✓ 업데이트"}: {recipe.title_ko}'
+                )
+            
+            self.stdout.write(self.style.SUCCESS(
+                f'   ✓ 하드코딩 레시피 로드 완료 (생성: {created_count}, 업데이트: {updated_count})\n'
+            ))
+        
+        except FileNotFoundError:
+            self.stdout.write(self.style.ERROR(f'   ✗ {json_file} 파일을 찾을 수 없습니다\n'))
+        except json.JSONDecodeError as e:
+            self.stdout.write(self.style.ERROR(f'   ✗ JSON 파싱 오류: {e}\n'))
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f'   ✗ 하드코딩 레시피 로드 실패: {e}\n'))
     
     def test_spoonacular(self):
         """Spoonacular API 테스트"""
