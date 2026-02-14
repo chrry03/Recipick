@@ -205,7 +205,10 @@
 .timer-time-input { width: 100px; font-size: 65px; font-weight: normal; color: #000000; background-color: transparent; border: 2px solid #ff6e40; border-radius: 4px; text-align: center; font-family: 'MemomentKkukkukk', sans-serif; outline: none; padding: 0; }
 .timer-time-input--small { width: 50px; font-size: 65px; }
 .timer-time-input::-webkit-inner-spin-button, .timer-time-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.timer-time-input[type="number"] { -moz-appearance: textfield; }
+.timer-time-input[type="number"] { 
+    -moz-appearance: textfield; 
+    appearance: textfield;
+}
 .timer-time-input::placeholder { color: #999; }
 
 .base-timer__play-button { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: 40px; width: 0; height: 0; border-left: 24px solid #ff6e40; border-top: 16px solid transparent; border-bottom: 16px solid transparent; cursor: pointer; transition: transform 0.2s ease; z-index: 1; }
