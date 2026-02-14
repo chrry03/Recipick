@@ -132,7 +132,7 @@ class Command(BaseCommand):
     
     def load_korean_recipes(self):
         """한식 레시피 로드"""
-        self.stdout.write('🍚 3. 한식 레시피 DB 로드 중...')
+        self.stdout.write('🍚 3-1. 한식 레시피 DB 로드 중...')
         
         json_file = 'foodsafetykorea.json'
         
@@ -151,7 +151,7 @@ class Command(BaseCommand):
     
     def load_hardcoded_recipes(self):
         """하드코딩 레시피 로드"""
-        self.stdout.write('📝 3-1. 하드코딩 레시피 로드 중...')
+        self.stdout.write('📝 3-2. 하드코딩 레시피 로드 중...')
         
         import json
         from recipes.models import Recipe, RecipeIngredient
