@@ -217,20 +217,17 @@ class Command(BaseCommand):
                             name_en__icontains=name_en
                         ).first()
                     
-                    # ========== [수정] 식재료가 없으면 자동 생성 → HARDCODED 카테고리로 ==========
+                    # ========== [수정] 식재료가 없으면 자동 생성 → '기타' 카테고리로 ==========
                     if not ingredient and (name_ko or name_en):
-                        # HARDCODED 카테고리 찾기 (pk=19)
-                        hardcoded_category = IngredientCategory.objects.filter(
-                            name='HARDCODED'
-                        ).first()
+                        # '기타' 카테고리 찾기 (pk=16)
+                        other_category = IngredientCategory.objects.filter(pk=16).first()
                         
-                        if not hardcoded_category:
-                            # HARDCODED 카테고리가 없으면 생성 (fixtures 로드 안된 경우)
-                            hardcoded_category, _ = IngredientCategory.objects.get_or_create(
-                                name='HARDCODED',
+                        if not other_category:
+                            # '기타' 카테고리가 없으면 생성 (fixtures 로드 안된 경우)
+                            other_category, _ = IngredientCategory.objects.get_or_create(
+                                name='기타',
                                 defaults={
-                                    'name': 'HARDCODED',
-                                    'icon_url': '/static/images/categories/hardcoded.png'
+                                    'icon_url': '/static/images/categories/else.png'
                                 }
                             )
                         
@@ -238,19 +235,20 @@ class Command(BaseCommand):
                         ingredient = IngredientMaster.objects.create(
                             name_ko=name_ko or name_en,
                             name_en=name_en or name_ko,
-                            category=hardcoded_category
+                            category=other_category
                         )
                         self.stdout.write(
-                            f'      ✓ 식재료 자동 생성 (HARDCODED): {name_ko or name_en}'
+                            f'      ✓ 식재료 자동 생성 (기타): {name_ko or name_en}'
                         )
                     
                     # RecipeIngredient 생성
-                    RecipeIngredient.objects.create(
-                        recipe=recipe,
-                        ingredient=ingredient,  # 이제 항상 있음
-                        ingredient_name=name_ko or name_en,
-                        is_optional=ing_data.get('is_optional', False)
-                    )
+                    if ingredient:
+                        RecipeIngredient.objects.create(
+                            recipe=recipe,
+                            ingredient=ingredient,
+                            ingredient_name=name_ko or name_en,
+                            is_optional=ing_data.get('is_optional', False)
+                        )
                 
                 self.stdout.write(
                     f'   {"✓ 생성" if created else "✓ 업데이트"}: {recipe.title_ko}'
