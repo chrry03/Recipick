@@ -1,7 +1,9 @@
-/* 일지 리스트 - 불필요한 스크롤 영역 축소 (style.css의 min-height: 100vh 오버라이드) */
+/* 일지 리스트/상세 - 불필요한 스크롤 영역 축소 (style.css의 min-height: 100vh 오버라이드) */
 .app-container.log-list-page,
-.app-container.log-list-page > .app-container {
+.app-container.log-list-page > .app-container,
+.app-container.log-detail-page {
     min-height: auto;
+    padding-bottom: 4rem;
 }
 
 /* 일지 작성 페이지(URL: /logs/create/) */
@@ -46,8 +48,9 @@
 .image-upload-wrapper { /* 이미지 추가 영역 */
     display: flex;
     justify-content: center;
+    align-items: center;
     margin: 30px 0;
-    position: relative;
+    min-height: 148px;
 }
 
 .image-upload { /* 이미지 추가 박스  */
@@ -62,6 +65,7 @@
     box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.25);
     transition: all 0.3s ease;
     overflow: hidden;
+    flex-shrink: 0;
 }
 .image-upload:hover {background: #c9c9c9;}
 
@@ -76,15 +80,39 @@
     border-radius: 4px;
 }
 
+.image-preview-wrap { /* 이미지 미리보기 + 수정 아이콘 래퍼 (클릭 시 파일 선택) */
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.image-preview-inner {
+    position: relative;
+    display: inline-block;
+}
+
 .image-preview { /* 업로드된 이미지 */
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    display: block;
     width: 111px;
     height: 148px;
     object-fit: cover;
     border-radius: 4px;
+    box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+}
+
+.image-edit-icon { /* 사진 우측 상단 수정 버튼 */
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+    background-color: #FF7043;
+    mask: url(../images/log_edit_icon.png) no-repeat center;
+    mask-size: contain;
+    -webkit-mask: url(../images/log_edit_icon.png) no-repeat center;
+    -webkit-mask-size: contain;
 }
 
 .camera-icon { /* 카메라 아이콘 */
@@ -381,13 +409,13 @@
 
 
 
-/* 일지 상세세 페이지 (URL: /logs/detail/<log_id>/) */
+/* 일지 상세 페이지 (URL: /logs/detail/<log_id>/) */
 
 .detail-content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    padding-bottom: 12px;
 }
 
 .detail-header {
@@ -477,9 +505,9 @@
 .recipe-info-section { /* 요리 정보 섹션 */
     display: flex;
     gap: 35px;
-    margin-bottom: 30px;
-    padding-left: 0;
-    padding-right: 96px;
+    margin-bottom: 12px;
+    padding-left: 17px;
+    padding-right: 24px;
 }
 
 .recipe-image-wrapper { /* 요리 이미지 영역 */
@@ -546,13 +574,13 @@
 }
 
 .ingredients-section {
-    margin-top: 20px;
+    margin-top: 12px;
 }
 
 .ingredients-section h3 {
     font-family: 'MemomentKkukkukk';
     font-size: 13px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .ingredients-text {
@@ -563,15 +591,15 @@
 
 /* 레시피 스텝 섹션 */
 .recipe-steps-section {
-    margin-bottom: 30px;
+    margin-bottom: 12px;
 }
 
 .recipe-steps-section h3 {
     font-family: 'MemomentKkukkukk';
     font-size: 13px;
     text-align: center;
-    margin-top: 8px;
-    margin-bottom: 15px;
+    margin-top: 4px;
+    margin-bottom: 6px;
 }
 
 .recipe-steps {
@@ -583,13 +611,13 @@
 .recipe-steps li {
     font-family: 'Gowun Dodum';
     font-size: 12px;
-    line-height: 1.75;
-    margin-bottom: 8px;
+    line-height: 1.6;
+    margin-bottom: 4px;
 }
 
 /* 메모 섹션 */
 .app-container .memo-section {
-    margin-bottom: 30px;
+    margin-bottom: 12px;
     width: 400px;
     max-width: 100%;
 }
@@ -598,8 +626,8 @@
     font-family: 'MemomentKkukkukk';
     font-size: 13px;
     text-align: center;
-    margin-top: 8px;
-    margin-bottom: 15px;
+    margin-top: 4px;
+    margin-bottom: 6px;
 }
 
 .app-container .memo-box {

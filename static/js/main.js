@@ -39,20 +39,31 @@
     // 스크롤 헤더 축소 함수
     let scrollTimeout;
     let isScrolled = false;
-    
-    function toggleHeaderOnScroll() {
+    /** 스크롤이 실제로 일어나는 요소 (capture로 잡은 target 저장) */
+    var activeScrollTarget = null;
+
+    function getScrollY() {
+        if (activeScrollTarget) {
+            var y = activeScrollTarget.scrollTop;
+            if (y > 0) return y;
+        }
+        return window.pageYOffset || window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    }
+
+    function toggleHeaderOnScroll(optionalScrollTarget) {
         clearTimeout(scrollTimeout);
-        
+
         scrollTimeout = setTimeout(function() {
-            var y = window.pageYOffset || window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-            
+            var fromEl = optionalScrollTarget || activeScrollTarget || document.scrollingElement || document.documentElement;
+            var y = (fromEl && fromEl.scrollTop !== undefined) ? fromEl.scrollTop : (window.pageYOffset || window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0);
+
             var mainHeader = document.getElementById('mainHeader');
             var scrollThreshold = 40;
-            
+
             if (!mainHeader) {
                 return;
             }
-            
+
             var upperThreshold = scrollThreshold;
             var lowerThreshold = scrollThreshold - 30;
 
@@ -73,6 +84,7 @@
     // 상수 정의
     const CAROUSEL_MAX_VISIBILITY = 3;
     const CAROUSEL_MAX_CARDS = 6;
+    const FAVORITES_MAX_HOME = 3;  /* 홈 화면 찜한 레시피 최대 개수 */
     const DIARY_SCROLL_AMOUNT = 150;
     const CAROUSEL_DEFAULT_INDEX = 2;
 
@@ -407,9 +419,11 @@
             
             console.log('🔄 레시피 카드 생성 시작');
             container.innerHTML = '';
-            
+
+            // 홈 화면에는 최대 3개만 표시
+            const favoritesToShow = favoritesList.slice(0, FAVORITES_MAX_HOME);
             // 찜한 레시피 렌더링
-            favoritesList.forEach((item, index) => {
+            favoritesToShow.forEach((item, index) => {
                 console.log(`  [${index}] 처리 중:`, item);
                 
                 // recipe 객체 추출
@@ -678,7 +692,8 @@
         
         if (!slider) return;
 
-        const diaryEntries = slider.dataset.entries ? JSON.parse(slider.dataset.entries) : [];
+        const scriptEl = document.getElementById('diaryEntriesData');
+        const diaryEntries = scriptEl && scriptEl.textContent.trim() ? JSON.parse(scriptEl.textContent) : [];
         
         if (diaryEntries.length === 0) {
             slider.classList.add('empty');
@@ -719,8 +734,8 @@
             setTimeout(checkScroll, 300);
         }
         
-        if (prevBtn) prevBtn.addEventListener('click', () => scroll('left'));
-        if (nextBtn) nextBtn.addEventListener('click', () => scroll('right'));
+        if (prevBtn) prevBtn.addEventListener('click', (e) => { e.preventDefault(); scroll('left'); e.target.closest('button')?.blur(); });
+        if (nextBtn) nextBtn.addEventListener('click', (e) => { e.preventDefault(); scroll('right'); e.target.closest('button')?.blur(); });
         slider.addEventListener('scroll', checkScroll);
         
         checkScroll();
@@ -803,14 +818,20 @@
             }
             
             var scrollHandler = function(e) {
-                toggleHeaderOnScroll();
+                // 헤더는 페이지(윈도우) 스크롤에만 반응. 일지 슬라이더 등 내부 스크롤은 무시
+                var t = e.target;
+                if (t !== document && t !== document.documentElement && t !== document.body && t !== document.scrollingElement) {
+                    return;
+                }
+                activeScrollTarget = e.target;
+                toggleHeaderOnScroll(e.target);
             };
-            
             window.addEventListener('scroll', scrollHandler, { passive: true });
-            
+            document.addEventListener('scroll', scrollHandler, { passive: true, capture: true });
+
             mainHeader.classList.remove('scrolled');
             isScrolled = false;
-            
+
             toggleHeaderOnScroll();
         }, 100);
     });

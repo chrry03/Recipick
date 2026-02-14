@@ -507,10 +507,10 @@ def main_view(request):
                 'image': icon_url
             })
 
-    # 4. 내 일지 (최신순 5개)
+    # 4. 내 일지 (최근 등록순 10개)
     diary_entries = []
     if user.is_authenticated:
-        log_qs = RecipeLog.objects.filter(user=user).select_related('recipe').order_by('-cooked_at')[:5]
+        log_qs = RecipeLog.objects.filter(user=user).select_related('recipe').order_by('-created_at')[:10]
         for log in log_qs:
             # 일지 이미지가 있으면 쓰고, 없으면 Recipick 로고 사용
             display_image = log.image.url if log.image else static('images/Recipick_logo.png')
@@ -527,7 +527,7 @@ def main_view(request):
         'recommended_recipes': json.dumps(recommended_recipes, ensure_ascii=False),
         'favorite_recipes': json.dumps(favorite_recipes, ensure_ascii=False),
         'ingredients': ingredients,
-        'diary_entries': diary_entries,
+        'diary_entries': json.dumps(diary_entries, ensure_ascii=False),
     }
     return render(request, 'main.html', context)
 
