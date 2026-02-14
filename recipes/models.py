@@ -781,7 +781,7 @@ class RecipeIngredient(models.Model):
     )
     
     ingredient_name = models.CharField(
-        max_length=100,
+        max_length=255,
         verbose_name='식재료명(API 기준)',
         help_text='원본 API에서 사용하는 이름'
     )

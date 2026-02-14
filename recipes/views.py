@@ -77,9 +77,18 @@ class FavoriteRecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
+        # ========== [수정] recipe_ingredients를 prefetch하여 재료 정보 포함 ==========
         return FavoriteRecipe.objects.filter(
             user=self.request.user
-        ).select_related('recipe').order_by('-created_at')
+        ).select_related('recipe').prefetch_related(
+            'recipe__recipe_ingredients__ingredient'
+        ).order_by('-created_at')
+    
+    def get_serializer_context(self):
+        # ========== [추가] context에 request 포함 (재료 상태 계산용) ==========
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
     
     def create(self, request, *args, **kwargs):
         """레시피 찜하기"""
