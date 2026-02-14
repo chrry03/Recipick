@@ -6,10 +6,16 @@ from recipes.models import Recipe
 # 1. [공통] 레시피 정보 요약용 (상세 조회 시 포함될 데이터)
 # ===============================================================
 class SimpleRecipeSerializer(serializers.ModelSerializer):
+    # ========== [수정] 한글 제목 우선 표시 ==========
+    display_title = serializers.SerializerMethodField()
+    
     class Meta:
         model = Recipe
-        # recipes/models.py를 확인해보니 썸네일이 'image_url'이고 PK가 'recipe_id'입니다.
-        fields = ['recipe_id', 'title', 'image_url']
+        fields = ['recipe_id', 'title', 'title_ko', 'display_title', 'image_url']
+    
+    def get_display_title(self, obj):
+        """한글 제목 우선, 없으면 영문"""
+        return obj.get_display_title()
 
 
 # ===============================================================
@@ -48,11 +54,19 @@ class RecipeLogListSerializer(serializers.ModelSerializer):
     # 명세서: "id", "recipe_title", "cooked_at", "rating", "image"
     
     id = serializers.IntegerField(source='recipe_log_id', read_only=True)
-    recipe_title = serializers.CharField(source='recipe.title', read_only=True)
+    
+    # ========== [수정] 한글 제목 우선 표시 ==========
+    recipe_title = serializers.SerializerMethodField()
     
     class Meta:
         model = RecipeLog
         fields = ['id', 'recipe_title', 'cooked_at', 'rating', 'image']
+    
+    def get_recipe_title(self, obj):
+        """한글 제목 우선, 없으면 영문"""
+        if obj.recipe:
+            return obj.recipe.get_display_title()
+        return "알 수 없는 레시피"
 
 
 # ===============================================================

@@ -232,9 +232,12 @@ def calculate_final_recommendations(recipes, user, user_ingredients_dict, user_s
             status_info = {'has_expired': False, 'has_urgent': False, 'ingredients_status': {}, 'expired_ingredients': [], 'urgent_ingredients': []}
 
         if category in categories:
+            # ========== [수정] 한글 제목 우선 표시 ==========
             recipe_data = {
                 'recipe_id': recipe.recipe_id,
-                'title': recipe.title,
+                'title': recipe.get_display_title(),  # ✅ 한글 우선
+                'title_ko': recipe.title_ko,  # 추가: 한글 제목
+                'title_en': recipe.title,  # 추가: 영문 제목
                 'image_url': recipe.image_url,
                 'ready_minutes': recipe.ready_minutes,
                 'difficulty': recipe.difficulty,

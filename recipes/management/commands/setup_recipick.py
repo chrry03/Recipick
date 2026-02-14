@@ -187,7 +187,7 @@ class Command(BaseCommand):
                         'ready_minutes': recipe_data.get('ready_minutes', 30),
                         'servings': recipe_data.get('servings', 2),
                         'image_url': recipe_data.get('image_url', ''),
-                        'instructions': recipe_data.get('instructions', []),  # instructions_ko → instructions
+                        'instructions': recipe_data.get('instructions', []),  # instructions 직접 사용
                         'is_translated': True  # 이미 한글임
                     }
                 )
@@ -200,46 +200,56 @@ class Command(BaseCommand):
                 # 기존 재료 삭제
                 RecipeIngredient.objects.filter(recipe=recipe).delete()
                 
+                # ========== [핵심 수정] 정확한 매칭으로 변경 ==========
                 # 재료 추가
                 for idx, ing_data in enumerate(recipe_data.get('ingredients', [])):
-                    # 식재료 마스터에서 찾기
                     ingredient = None
-                    name_ko = ing_data.get('name_ko', '')
-                    name_en = ing_data.get('name_en', '')
+                    name_ko = ing_data.get('name_ko', '').strip()
+                    name_en = ing_data.get('name_en', '').strip()
                     
+                    # ========== [수정1] icontains → iexact (정확한 매칭) ==========
+                    # 우선순위 1: 한글 이름으로 정확히 찾기
                     if name_ko:
                         ingredient = IngredientMaster.objects.filter(
-                            name_ko__icontains=name_ko
+                            name_ko__iexact=name_ko  # ✅ 정확한 매칭 (대소문자만 무시)
                         ).first()
                     
+                    # 우선순위 2: 영문 이름으로 정확히 찾기
                     if not ingredient and name_en:
                         ingredient = IngredientMaster.objects.filter(
-                            name_en__icontains=name_en
+                            name_en__iexact=name_en  # ✅ 정확한 매칭
                         ).first()
                     
-                    # ========== [수정] 식재료가 없으면 자동 생성 → '기타' 카테고리로 ==========
+                    # ========== [수정2] 기타 카테고리로 자동 생성 (pk=16) ==========
                     if not ingredient and (name_ko or name_en):
-                        # '기타' 카테고리 찾기 (pk=16)
-                        other_category = IngredientCategory.objects.filter(pk=16).first()
+                        # 기타 카테고리 찾기
+                        other_category = IngredientCategory.objects.filter(
+                            pk=16  # '기타' 카테고리
+                        ).first()
                         
                         if not other_category:
-                            # '기타' 카테고리가 없으면 생성 (fixtures 로드 안된 경우)
+                            # 기타 카테고리가 없으면 생성
                             other_category, _ = IngredientCategory.objects.get_or_create(
-                                name='기타',
+                                pk=16,
                                 defaults={
-                                    'icon_url': '/static/images/categories/else.png'
+                                    'name': '기타',
+                                    'icon_url': '/static/images/categories/other.png'
                                 }
                             )
                         
-                        # 식재료 생성
-                        ingredient = IngredientMaster.objects.create(
+                        # 식재료 생성 (중복 방지)
+                        ingredient, created = IngredientMaster.objects.get_or_create(
                             name_ko=name_ko or name_en,
-                            name_en=name_en or name_ko,
-                            category=other_category
+                            defaults={
+                                'name_en': name_en or name_ko,
+                                'category': other_category
+                            }
                         )
-                        self.stdout.write(
-                            f'      ✓ 식재료 자동 생성 (기타): {name_ko or name_en}'
-                        )
+                        
+                        if created:
+                            self.stdout.write(
+                                f'      ✨ 식재료 자동 생성 (기타): {name_ko or name_en}'
+                            )
                     
                     # RecipeIngredient 생성
                     if ingredient:
@@ -249,6 +259,10 @@ class Command(BaseCommand):
                             ingredient_name=name_ko or name_en,
                             is_optional=ing_data.get('is_optional', False)
                         )
+                    else:
+                        self.stdout.write(self.style.WARNING(
+                            f'      ⚠ 식재료를 찾거나 생성할 수 없음: {name_ko or name_en}'
+                        ))
                 
                 self.stdout.write(
                     f'   {"✓ 생성" if created else "✓ 업데이트"}: {recipe.title_ko}'

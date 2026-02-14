@@ -98,55 +98,50 @@ class Command(BaseCommand):
         self.stdout.write(f'✗ 실패: {error_count}개\n')
     
     def create_recipe(self, recipe_data):
-        """개별 레시피 생성"""
-        rcp_seq = recipe_data.get('RCP_SEQ', '')
-        rcp_nm = recipe_data.get('RCP_NM', '').strip()
-        
-        if not rcp_nm:
-            return None
-        
-        # Recipe 객체 생성
-        recipe = Recipe(
-            external_id=f"korean_{rcp_seq}",
-            title=rcp_nm,  # ← name이 아닌 title
-            source='korean_db',
-            ready_minutes=self.estimate_cooking_time(recipe_data),  # ← cooking_time이 아닌 ready_minutes
-            servings=2,  # 한식 DB에는 인분 정보가 없으므로 기본값
-            image_url=recipe_data.get('ATT_FILE_NO_MAIN', ''),
-        )
-        
-        # 난이도 추정
-        recipe.difficulty = self.estimate_difficulty(recipe_data)  # ← difficulty_level이 아닌 difficulty
-        
-        # 조리 단계 추출
-        instructions = self.extract_instructions(recipe_data)
-        recipe.instructions = instructions  # JSON 필드라서 자동 변환
-        
-        recipe.save()
-        
-        # 재료 추출 및 매핑
-        ingredients_text = recipe_data.get('RCP_PARTS_DTLS', '')
-        if ingredients_text:
-            self.add_ingredients_to_recipe(recipe, ingredients_text)
-        
-        # 재료 개수 업데이트
-        recipe.update_ingredient_counts()
-        
-        return recipe
-    
-    def extract_instructions(self, recipe_data):
-        """조리 단계 추출"""
-        instructions = []
-        
-        # MANUAL01 ~ MANUAL20
-        for i in range(1, 21):
-            manual_key = f'MANUAL{i:02d}'
-            manual_text = recipe_data.get(manual_key, '').strip()
+        """레시피 생성"""
+        try:
+            # 기본 정보
+            rcp_seq = recipe_data.get('RCP_SEQ', '')
+            rcp_nm = recipe_data.get('RCP_NM', '').strip()
             
-            if manual_text:
+            if not rcp_nm:
+                return None
+            
+            # 레시피 생성
+            recipe = Recipe.objects.create(
+                external_id=f"korean_{rcp_seq}",
+                source='korean_food',
+                title=rcp_nm,
+                title_ko=rcp_nm,  # 한글 제목
+                image_url=recipe_data.get('ATT_FILE_NO_MAIN', ''),
+                ready_minutes=self.estimate_cooking_time(recipe_data),
+                difficulty=self.estimate_difficulty(recipe_data),
+                servings=1,
+                instructions=self.parse_instructions(recipe_data),
+                is_translated=False,
+                is_active=True
+            )
+            
+            # 재료 추가
+            ingredients_text = recipe_data.get('RCP_PARTS_DTLS', '')
+            if ingredients_text:
+                self.add_ingredients_to_recipe(recipe, ingredients_text)
+            
+            return recipe
+            
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f'레시피 생성 실패: {e}'))
+            return None
+    
+    def parse_instructions(self, recipe_data):
+        """조리 단계 파싱"""
+        instructions = []
+        for i in range(1, 21):
+            step_text = recipe_data.get(f'MANUAL{i:02d}', '').strip()
+            if step_text:
                 instructions.append({
                     'step': i,
-                    'description': manual_text,  # ← text가 아닌 description
+                    'description': step_text,
                     'image': recipe_data.get(f'MANUAL_IMG{i:02d}', '')
                 })
         
@@ -160,10 +155,10 @@ class Command(BaseCommand):
         1. "재료 " 접두사 제거
         2. IngredientMapper 사용
         3. 없으면 전체 DB에서 검색 (중복 방지)
-        4. 그래도 없으면 '기타' 카테고리에 생성
+        4. 그래도 없으면 기타 카테고리(pk=16)에 생성
         """
-        # '기타' 카테고리 ID
-        other_category_id = self._get_other_category_id()
+        # 기타 카테고리 ID (통합 후)
+        other_category_id = 16
         
         # 재료 파싱 (예: "양파 1개, 마늘 3쪽, 간장 2큰술")
         ingredient_parts = re.split(r'[,·]', ingredients_text)
@@ -175,8 +170,9 @@ class Command(BaseCommand):
             if not part:
                 continue
             
-            # 재료명과 양 분리
-            match = re.match(r'([가-힣a-zA-Z\s]+)\s*([\d./]+)?\s*([가-힣a-zA-Z()]+)?', part)
+            # ========== [수정] 마침표(.), 가운뎃점(·), 하이픈(-) 추가 ==========
+            # 재료명과 양 분리 - L.A갈비, U.S비프 등 지원
+            match = re.match(r'([가-힣a-zA-Z\s.·-]+)\s*([\d./]+)?\s*([가-힣a-zA-Z()]+)?', part)
             
             if match:
                 ing_name_raw = match.group(1).strip()
@@ -194,13 +190,23 @@ class Command(BaseCommand):
                         name_ko=ing_name
                     ).first()
                 
-                # [4] 그래도 없으면 자동 생성 ('기타' 카테고리)
+                # [4] 그래도 없으면 자동 생성 (기타 카테고리)
                 if not ingredient:
                     try:
                         from ingredients.models import IngredientMaster, IngredientCategory
                         
-                        # 카테고리 가져오기
-                        category = IngredientCategory.objects.get(category_id=other_category_id)
+                        # 기타 카테고리 가져오기
+                        category = IngredientCategory.objects.filter(pk=other_category_id).first()
+                        
+                        if not category:
+                            # 없으면 생성
+                            category, _ = IngredientCategory.objects.get_or_create(
+                                pk=other_category_id,
+                                defaults={
+                                    'name': '기타',
+                                    'icon_url': '/static/images/categories/other.png'
+                                }
+                            )
                         
                         # 새로 생성
                         ingredient = IngredientMaster.objects.create(
@@ -210,7 +216,7 @@ class Command(BaseCommand):
                             aliases=[]
                         )
                         created_count += 1
-                        self.stdout.write(f'   ➕ 식재료 자동 생성 (기타): {ing_name}')
+                        self.stdout.write(f'   ➕ 식재료 자동 생성: {ing_name}')
                             
                     except Exception as e:
                         self.stdout.write(self.style.WARNING(
@@ -234,27 +240,6 @@ class Command(BaseCommand):
         if created_count > 0:
             self.stdout.write(f'   ✨ 새 식재료 {created_count}개 자동 생성됨 (기타 카테고리)')
     
-    def _get_other_category_id(self):
-        """'기타' 카테고리 ID 가져오기 (고정: 16번)"""
-        from ingredients.models import IngredientCategory
-        
-        # '기타' 카테고리 찾기 (pk=16)
-        category = IngredientCategory.objects.filter(pk=16).first()
-        
-        if not category:
-            # fixtures에 없으면 생성 (비상 대비)
-            category, created = IngredientCategory.objects.get_or_create(
-                name='기타',
-                defaults={
-                    'icon_url': '/static/images/categories/else.png',
-                    'parent': None
-                }
-            )
-            if created:
-                self.stdout.write(f'   🆕 기타 카테고리 생성 (ID: {category.category_id})')
-        
-        return category.category_id
-    
     def _normalize_korean_ingredient(self, name):
         """
         한글 식재료명 정규화
@@ -264,6 +249,7 @@ class Command(BaseCommand):
         - "돼지고기 100g" → "돼지고기"
         - "양파(1개)" → "양파"
         - "청양고추 10g(1/2개)" → "청양고추"
+        - "L.A갈비(200g)" → "L.A갈비"  ← 마침표 유지!
         """
         import re
         
@@ -273,7 +259,7 @@ class Command(BaseCommand):
         # 괄호 안 내용 제거
         name = re.sub(r'\([^)]*\)', '', name)
         
-        # 수량 표현 제거
+        # 수량 표현 제거 (단, 마침표는 유지!)
         name = re.sub(r'\d+[가-힣a-zA-Z]*', '', name)
         
         # 앞뒤 공백 제거

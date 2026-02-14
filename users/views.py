@@ -455,7 +455,7 @@ def main_view(request):
     for r in recommended_qs:
         recommended_recipes.append({
             'id': r.recipe_id,
-            'name': r.title,
+            'name': r.get_display_title(),  # ✅ 한글 우선
             'difficulty': r.difficulty, # EASY, NORMAL, DIFFICULT
             'cookingTime': f"{r.ready_minutes}분" if r.ready_minutes else "??분",
             'image': r.image_url
@@ -468,7 +468,7 @@ def main_view(request):
         for f in fav_qs:
             favorite_recipes.append({
                 'id': f.recipe.recipe_id,
-                'name': f.recipe.title,
+                'name': f.recipe.get_display_title(),  # ✅ 한글 우선
                 'image': f.recipe.image_url,
                 'isFavorite': True
             })
@@ -517,7 +517,7 @@ def main_view(request):
             
             diary_entries.append({
                 'id': log.recipe_log_id,
-                'title': log.recipe.title,
+                'title': log.recipe.get_display_title(),  # ✅ 한글 우선
                 'date': log.cooked_at.strftime('%y.%m.%d'), # 26.01.11 형식
                 'image': display_image
             })
