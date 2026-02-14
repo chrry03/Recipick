@@ -910,6 +910,7 @@
     };
 
     let TIME_LIMIT = 0;
+    let INITIAL_TIME_LIMIT = 0;  /* 리셋 시 복원할 초기 시간(초) */
     let timePassed = 0;
     let timeLeft = TIME_LIMIT;
     let timerInterval = null;
@@ -1249,7 +1250,16 @@
             return;
         }
 
-        // 타이머 상태 초기화 (DOM 생성 전)
+        // 단계별 초기 타이머 시간 읽기 (리셋 시 이 값으로 복원)
+        const container = document.querySelector(".recipe-container");
+        const initialSeconds = container
+            ? parseInt(container.getAttribute("data-initial-timer-seconds"), 10)
+            : 0;
+        if (!isNaN(initialSeconds) && initialSeconds >= 0) {
+            TIME_LIMIT = initialSeconds;
+            INITIAL_TIME_LIMIT = initialSeconds;
+        }
+
         stopTimer();
         timePassed = 0;
         timeLeft = TIME_LIMIT;
@@ -1274,6 +1284,11 @@
                     </g>
                 </svg>
                 <div class="base-timer__content">
+                    <button type="button" class="base-timer__reset-button" id="base-timer-reset-button" aria-label="타이머 리셋" title="리셋">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" fill="currentColor"/>
+                        </svg>
+                    </button>
                     <div class="base-timer__left-label">LEFT</div>
                     <div id="base-timer-label" class="base-timer__time">
                         <span id="timer-minutes" class="timer-time-part">${timeObj.minutes}</span>
@@ -1328,6 +1343,22 @@
                         startTimer();
                     }
                 }
+            });
+        }
+
+        // 리셋 버튼: 타이머를 단계 초기 시간(INITIAL_TIME_LIMIT)으로 되돌림
+        const resetButton = document.getElementById("base-timer-reset-button");
+        if (resetButton) {
+            resetButton.addEventListener("click", function(e) {
+                e.stopPropagation();
+                stopTimer();
+                timePassed = 0;
+                TIME_LIMIT = INITIAL_TIME_LIMIT;
+                timeLeft = INITIAL_TIME_LIMIT;
+                updateTimerDisplay();
+                updatePlayButtonState();
+                setCircleDasharray();
+                setRemainingPathColor(timeLeft);
             });
         }
     }
@@ -1443,6 +1474,7 @@
         }
 
         const recipeId = dataElement ? dataElement.dataset.recipeId : null;
+        const recipeTitle = dataElement ? (dataElement.dataset.recipeTitle || '') : '';
         const logCreateUrl = dataElement ? dataElement.dataset.logCreateUrl : null;
 
         // "아니오" 버튼 - 레시피 목록으로 이동
@@ -1468,11 +1500,12 @@
                     consumeIngredients(checkedIngredients);
                 }
                 
-                // 일지 작성 페이지로 이동
-                if (logCreateUrl && recipeId) {
-                    window.location.href = `${logCreateUrl}?recipe_id=${recipeId}`;
-                } else if (logCreateUrl) {
-                    window.location.href = logCreateUrl;
+                // 일지 작성 페이지로 이동 (recipe_id, title 전달)
+                if (logCreateUrl) {
+                    const params = new URLSearchParams();
+                    if (recipeId) params.set('recipe_id', recipeId);
+                    if (recipeTitle) params.set('title', recipeTitle);
+                    window.location.href = params.toString() ? `${logCreateUrl}?${params.toString()}` : logCreateUrl;
                 } else {
                     window.location.href = '/logs/create/';
                 }

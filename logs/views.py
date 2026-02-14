@@ -32,18 +32,18 @@ def log_list_view(request):
     # 3. 템플릿에서 쓰기 좋게 데이터 가공 (별점 숫자 -> 별 문자)
     display_logs = []
     for log in logs:
-        # 난이도 문자열 변환 (EASY -> 2개, NORMAL -> 3개, DIFFICULT -> 4개, 5개 별 기준)
-        diff_score = {'EASY':2, 'NORMAL':3, 'DIFFICULT':4}.get(log.perceived_difficulty, 3)
+        # 난이도 3개 별 (EASY 1, NORMAL 2, DIFFICULT 3)
+        diff_score = {'EASY': 1, 'NORMAL': 2, 'DIFFICULT': 3}.get(log.perceived_difficulty, 2)
         
         display_logs.append({
             'id': log.recipe_log_id,
             'day': log.cooked_at.day,
-            'time': log.created_at.strftime('%H:%M'),
+            'time': timezone.localtime(log.created_at).strftime('%H:%M'),
             'recipe_name': log.recipe.title,
             # 이미지가 있으면 URL, 없으면 None
             'image': log.image.url if log.image else None,
-            # 화면에 바로 뿌릴 별 문자열 (예: ★★★☆☆) - 5개 별 기준
-            'difficulty_stars': '★' * diff_score + '☆' * (5 - diff_score),
+            # 난이도 3개 별, 만족도 5개 별
+            'difficulty_stars': '★' * diff_score + '☆' * (3 - diff_score),
             'satisfaction_stars': '★' * log.rating + '☆' * (5 - log.rating),
         })
 
@@ -74,22 +74,35 @@ def log_detail_view(request, pk):
     일지 상세 내용을 보여줍니다.
     """
     log = get_object_or_404(RecipeLog, pk=pk)
-    
-    # 템플릿용 데이터 정리 (난이도·만족도 모두 5개 별 표시)
-    diff_score = {'EASY':2, 'NORMAL':3, 'DIFFICULT':4}.get(log.perceived_difficulty, 3)
+    recipe = log.recipe
+
+    # 레시피 재료: RecipeIngredient에서 가져와 표시용 문자열로 만듦
+    ingredients_parts = []
+    for ri in recipe.recipe_ingredients.select_related('ingredient').all():
+        if ri.ingredient:
+            name = ri.ingredient.name_ko or ri.ingredient.name_en or ri.ingredient_name or '알 수 없는 재료'
+        else:
+            name = ri.ingredient_name or '알 수 없는 재료'
+        if ri.is_optional:
+            name = f"{name}(선택)"
+        ingredients_parts.append(name)
+    ingredients_text = ', '.join(ingredients_parts) if ingredients_parts else '재료 정보 없음'
+
+    # 템플릿용 데이터 정리 (난이도 3개 별, 만족도 5개 별)
+    diff_score = {'EASY': 1, 'NORMAL': 2, 'DIFFICULT': 3}.get(log.perceived_difficulty, 2)
     context = {
         'log': {
             'id': log.recipe_log_id,
             'date': log.cooked_at.strftime('%m월 %d일'),
-            'time': log.created_at.strftime('%H:%M'),
-            'recipe_name': log.recipe.title,
-            'recipe_image': log.recipe.image_url, # 레시피 원본 썸네일
-            'difficulty': '★' * diff_score + '☆' * (5 - diff_score),
+            'time': timezone.localtime(log.created_at).strftime('%H:%M'),
+            'recipe_name': recipe.title,
+            'recipe_image': recipe.image_url,
+            'difficulty': '★' * diff_score + '☆' * (3 - diff_score),
             'satisfaction': '★' * log.rating + '☆' * (5 - log.rating),
-            'ingredients': "재료 정보 없음", # (추후 RecipeIngredient 연결 필요)
-            'recipe_steps': log.recipe.instructions if log.recipe.instructions else [],
+            'ingredients': ingredients_text,
+            'recipe_steps': recipe.instructions if recipe.instructions else [],
             'memo': log.memo,
-            'image': log.image.url if log.image else None, # 내가 찍은 사진
+            'image': log.image.url if log.image else None,
         }
     }
     return render(request, 'logs/log_detail.html', context)
@@ -109,10 +122,8 @@ def log_create_view(request):
         # request.data 대신 request.POST, request.FILES를 넘겨줍니다.
         serializer = RecipeLogCreateSerializer(data=request.POST)
         
-        # 이미지 파일은 별도로 넣어줘야 함 (form-data 특성상)
-        if 'image' in request.FILES:
-            # request.POST는 수정 불가능(Immutable)해서 copy() 필요할 수도 있지만,
-            # DRF Serializer는 initial_data에 파일과 데이터를 같이 넘기면 처리 가능합니다.
+        # 이미지 파일은 별도로 넣어줘야 함 (form-data 특성상). 빈 파일은 제외
+        if request.FILES.get('image') and request.FILES['image'].size > 0:
             data = request.POST.copy()
             data['image'] = request.FILES['image']
             serializer = RecipeLogCreateSerializer(data=data)
@@ -148,17 +159,24 @@ def log_update_view(request, pk):
     log = get_object_or_404(RecipeLog, pk=pk, user=request.user)
 
     if request.method == 'POST':
-        # 기존 instance를 넣어줘야 '수정' 모드로 동작함
-        serializer = RecipeLogCreateSerializer(data=request.POST, instance=log)
-        
-        # 이미지 파일 처리
-        if 'image' in request.FILES:
-            data = request.POST.copy()
-            data['image'] = request.FILES['image']
-            serializer = RecipeLogCreateSerializer(data=data, instance=log)
-
+        data = request.POST.copy()
+        # 새 이미지를 선택했을 때만 반영 (없으면 data에 image 넣지 않아 기존 이미지 유지)
+        new_image = request.FILES.get('image')
+        if new_image and new_image.size > 0:
+            data['image'] = new_image
+        else:
+            data.pop('image', None)  # POST에 빈 값으로 올 수 있으므로 제거
+        # 난이도가 폼에서 오는 그대로 반영되도록 data에 확실히 넣음
+        difficulty_raw = request.POST.get('difficulty', '').strip()
+        if difficulty_raw in dict(RecipeLog.PerceivedDifficulty.choices):
+            data['difficulty'] = difficulty_raw
+        serializer = RecipeLogCreateSerializer(data=data, instance=log, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            # save()에 난이도 직접 전달해 수정 시에도 반영되게 함
+            save_kwargs = {}
+            if difficulty_raw in dict(RecipeLog.PerceivedDifficulty.choices):
+                save_kwargs['perceived_difficulty'] = difficulty_raw
+            serializer.save(**save_kwargs)
             messages.success(request, "일지가 수정되었습니다.")
             return redirect('logs:detail', pk=log.pk)
         else:
