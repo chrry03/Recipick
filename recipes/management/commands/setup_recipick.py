@@ -132,7 +132,7 @@ class Command(BaseCommand):
     
     def load_korean_recipes(self):
         """한식 레시피 로드"""
-        self.stdout.write('🍚 3-1. 한식 레시피 DB 로드 중...')
+        self.stdout.write('🍚 3. 한식 레시피 DB 로드 중...')
         
         json_file = 'foodsafetykorea.json'
         
@@ -151,7 +151,7 @@ class Command(BaseCommand):
     
     def load_hardcoded_recipes(self):
         """하드코딩 레시피 로드"""
-        self.stdout.write('📝 3-2. 하드코딩 레시피 로드 중...')
+        self.stdout.write('📝 3-1. 하드코딩 레시피 로드 중...')
         
         import json
         from recipes.models import Recipe, RecipeIngredient
@@ -187,7 +187,7 @@ class Command(BaseCommand):
                         'ready_minutes': recipe_data.get('ready_minutes', 30),
                         'servings': recipe_data.get('servings', 2),
                         'image_url': recipe_data.get('image_url', ''),
-                        'instructions': recipe_data.get('instructions', []),
+                        'instructions': recipe_data.get('instructions', []),  # instructions_ko → instructions
                         'is_translated': True  # 이미 한글임
                     }
                 )
@@ -217,13 +217,22 @@ class Command(BaseCommand):
                             name_en__icontains=name_en
                         ).first()
                     
-                    # ========== [추가] 식재료가 없으면 자동 생성 ==========
+                    # ========== [수정] 식재료가 없으면 자동 생성 → HARDCODED 카테고리로 ==========
                     if not ingredient and (name_ko or name_en):
-                        # HARDCODED 카테고리 찾기 또는 생성
-                        hardcoded_category, _ = IngredientCategory.objects.get_or_create(
-                            name='HARDCODED',
-                            defaults={'name': 'HARDCODED'}
-                        )
+                        # HARDCODED 카테고리 찾기 (pk=19)
+                        hardcoded_category = IngredientCategory.objects.filter(
+                            name='HARDCODED'
+                        ).first()
+                        
+                        if not hardcoded_category:
+                            # HARDCODED 카테고리가 없으면 생성 (fixtures 로드 안된 경우)
+                            hardcoded_category, _ = IngredientCategory.objects.get_or_create(
+                                name='HARDCODED',
+                                defaults={
+                                    'name': 'HARDCODED',
+                                    'icon_url': '/static/images/categories/hardcoded.png'
+                                }
+                            )
                         
                         # 식재료 생성
                         ingredient = IngredientMaster.objects.create(
@@ -232,7 +241,7 @@ class Command(BaseCommand):
                             category=hardcoded_category
                         )
                         self.stdout.write(
-                            f'      ✓ 식재료 자동 생성: {name_ko or name_en}'
+                            f'      ✓ 식재료 자동 생성 (HARDCODED): {name_ko or name_en}'
                         )
                     
                     # RecipeIngredient 생성
@@ -240,7 +249,7 @@ class Command(BaseCommand):
                         recipe=recipe,
                         ingredient=ingredient,  # 이제 항상 있음
                         ingredient_name=name_ko or name_en,
-                        is_optional=ing_data.get('is_optional', False),
+                        is_optional=ing_data.get('is_optional', False)
                     )
                 
                 self.stdout.write(
