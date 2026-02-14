@@ -132,7 +132,7 @@ class Command(BaseCommand):
     
     def load_korean_recipes(self):
         """한식 레시피 로드"""
-        self.stdout.write('🍚 3. 한식 레시피 DB 로드 중...')
+        self.stdout.write('🍚 3-1. 한식 레시피 DB 로드 중...')
         
         json_file = 'foodsafetykorea.json'
         
@@ -151,7 +151,7 @@ class Command(BaseCommand):
     
     def load_hardcoded_recipes(self):
         """하드코딩 레시피 로드"""
-        self.stdout.write('📝 3-1. 하드코딩 레시피 로드 중...')
+        self.stdout.write('📝 3-2. 하드코딩 레시피 로드 중...')
         
         import json
         from recipes.models import Recipe, RecipeIngredient
@@ -187,7 +187,7 @@ class Command(BaseCommand):
                         'ready_minutes': recipe_data.get('ready_minutes', 30),
                         'servings': recipe_data.get('servings', 2),
                         'image_url': recipe_data.get('image_url', ''),
-                        'instructions_ko': recipe_data.get('instructions_ko', []),
+                        'instructions': recipe_data.get('instructions', []),
                         'is_translated': True  # 이미 한글임
                     }
                 )
@@ -241,7 +241,6 @@ class Command(BaseCommand):
                         ingredient=ingredient,  # 이제 항상 있음
                         ingredient_name=name_ko or name_en,
                         is_optional=ing_data.get('is_optional', False),
-                        order=idx + 1
                     )
                 
                 self.stdout.write(
