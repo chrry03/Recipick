@@ -651,12 +651,18 @@ def cooking_complete_view(request, recipe_id):
             })
 
     user_ingredients = []
+    owned_ingredient_ids = set()
     if request.user.is_authenticated:
         user_ingredients = UserIngredient.objects.filter(
             user=request.user,
             ingredient_id__in=[ing['id'] for ing in ingredients if ing['id']],
             is_consumed=False
         ).select_related('ingredient')
+        owned_ingredient_ids = {ui.ingredient_id for ui in user_ingredients}
+
+    # 체크리스트에는 보유 재료만 표시 (로그인한 경우)
+    if request.user.is_authenticated:
+        ingredients = [ing for ing in ingredients if ing['id'] and ing['id'] in owned_ingredient_ids]
 
     context = {
         'recipe': recipe,
