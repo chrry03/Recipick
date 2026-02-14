@@ -97,6 +97,7 @@
 <!-- 데이터 전달용 hidden 요소 -->
 <div id="cooking-complete-data" 
      data-recipe-id="{{ recipe.recipe_id }}"
+     data-recipe-title="{{ recipe.get_display_title|default:recipe.title|default:'' }}"
      data-log-create-url="{% url 'logs:create' %}"
      style="display: none;">
 </div>

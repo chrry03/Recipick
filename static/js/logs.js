@@ -30,14 +30,64 @@
      * [작성 페이지] 초기화
      */
     function initLogCreate() {
+        const form = document.getElementById('log-create-form');
         const imageUpload = document.getElementById('imageUpload');
         const imageInput = document.getElementById('imageInput');
         const imagePreview = document.getElementById('imagePreview');
         const cookedAt = document.getElementById('cookedAt');
+        const isEdit = form && form.getAttribute('data-is-edit') === 'true';
 
-        // 이미지 미리보기
+        // 수정 페이지: 이전 버튼 클릭 시 수정 사항 있으면 확인
+        let formDirty = false;
+        if (isEdit && form) {
+            const backBtn = document.getElementById('logBackBtn');
+            const diffInput = document.getElementById('difficultyRating');
+            const ratingInput = document.getElementById('satisfactionRating');
+            const memoInput = form.querySelector('textarea[name="memo"]');
+
+            function checkDirty() {
+                const diffChanged = diffInput && diffInput.value !== (diffInput.getAttribute('data-initial') || '');
+                const ratingChanged = ratingInput && ratingInput.value !== (ratingInput.getAttribute('data-initial') || '');
+                const memoChanged = memoInput && memoInput.value !== (memoInput.getAttribute('data-initial') || '');
+                const dateChanged = cookedAt && cookedAt.value !== (cookedAt.getAttribute('data-initial') || '');
+                const imageChanged = imageInput && imageInput.files && imageInput.files.length > 0;
+                formDirty = !!(diffChanged || ratingChanged || memoChanged || dateChanged || imageChanged);
+            }
+
+            if (diffInput) diffInput.setAttribute('data-initial', diffInput.value || '');
+            if (ratingInput) ratingInput.setAttribute('data-initial', ratingInput.value || '');
+            if (memoInput) memoInput.setAttribute('data-initial', memoInput.value || '');
+            if (cookedAt) cookedAt.setAttribute('data-initial', cookedAt.value || '');
+
+            form.addEventListener('input', checkDirty);
+            form.addEventListener('change', checkDirty);
+            if (imageInput) imageInput.addEventListener('change', checkDirty);
+
+            if (backBtn) {
+                backBtn.addEventListener('click', function() {
+                    checkDirty();
+                    if (formDirty && confirm('수정 사항이 있습니다. 저장하고 종료하시겠어요?')) {
+                        form.submit();
+                    } else {
+                        window.history.back();
+                    }
+                });
+            }
+        } else {
+            const backBtn = document.getElementById('logBackBtn');
+            if (backBtn) backBtn.addEventListener('click', function() { window.history.back(); });
+        }
+
+        // 이미지 미리보기 및 수정하기 (클릭 시 파일 선택)
+        const imagePreviewWrap = document.getElementById('imagePreviewWrap');
         if (imageUpload && imageInput) {
             imageUpload.addEventListener('click', () => imageInput.click());
+            if (imagePreviewWrap) {
+                imagePreviewWrap.addEventListener('click', () => imageInput.click());
+            }
+            if (imagePreview) {
+                imagePreview.addEventListener('click', (e) => { e.preventDefault(); imageInput.click(); });
+            }
             imageInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -53,7 +103,8 @@
                 reader.onload = (ev) => {
                     imagePreview.src = ev.target.result;
                     imagePreview.style.display = 'block';
-                    imageUpload.style.display = 'none';
+                    if (imagePreviewWrap) imagePreviewWrap.style.display = 'flex';
+                    if (imageUpload) imageUpload.style.display = 'none';
                 };
                 reader.readAsDataURL(file);
             });
@@ -63,17 +114,17 @@
         setupStarRating('difficultyStars', 'difficultyRating');
         setupStarRating('satisfactionStars', 'satisfactionRating');
 
-        // 난이도 1-5 → EASY/NORMAL/DIFFICULT 변환 후 제출
-        const form = document.getElementById('log-create-form');
+        // 난이도
         if (form) {
             form.addEventListener('submit', function() {
                 const diffInput = document.getElementById('difficultyRating');
-                if (diffInput && diffInput.value) {
-                    const n = parseInt(diffInput.value, 10);
-                    if (n <= 2) diffInput.value = 'EASY';
-                    else if (n === 3) diffInput.value = 'NORMAL';
-                    else diffInput.value = 'DIFFICULT';
-                }
+                if (!diffInput || !diffInput.value) return;
+                const val = diffInput.value.trim();
+                if (val === 'EASY' || val === 'NORMAL' || val === 'DIFFICULT') return;
+                const n = parseInt(val, 10);
+                if (n <= 2) diffInput.value = 'EASY';
+                else if (n === 3) diffInput.value = 'NORMAL';
+                else diffInput.value = 'DIFFICULT';
             });
         }
 

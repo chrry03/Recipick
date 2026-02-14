@@ -8,19 +8,26 @@
 /* ==========================================================================
     1. 요리 모드 & 완성 화면 (기존 독립 레이아웃 유지)
    ========================================================================== */
-/* 요리 모드는 화면을 꽉 채워야 하므로 app-container 대신 이 클래스 유지 */
 .recipe-container,
 .cooking-complete-container {
     position: relative;
     width: 100%;
     max-width: 385px;
-    height: 100vh; /* [수정] 100% -> 100vh로 화면에 맞춤 */
-    max-height: 1200px;
+    min-height: 100vh;
     margin: 0 auto;
-    /* 배경은 style.css와 맞춤 */
-    background: transparent; 
+    padding-bottom: 70px; /* 네비 버튼 공간 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
     border-radius: 20px;
-    overflow: hidden;
+    overflow-x: hidden;
+}
+
+/* 요리 완료: 스크롤 여유 확보(버튼 고정 시 하단 여백 + 최소 높이) */
+.cooking-complete-container {
+    padding-bottom: 90px;
+    min-height: max(100vh, 820px);
 }
 
 .recipe-container .app-header {
@@ -33,13 +40,11 @@
 .recipe-container .app-header .header-logo { width: 175px; height: 37px; }
 .recipe-container .app-header .logo-img { width: 100%; height: 100%; object-fit: cover; }
 
+/* 헤더 아래에 오도록 상단 여백 (헤더 높이 ~60px + 여유) */
 .step-number {
-    position: absolute;
-    top: 120px;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    flex-shrink: 0;
     text-align: center;
-    z-index: 5;
+    margin-top: 72px;
 }
 
 .step-number p {
@@ -51,15 +56,23 @@
     margin: 0;
 }
 
+/* 설명: 단계 번호 아래 (순서: 단계 → 설명 → 사진 → 타이머) */
 .description {
-    position: absolute;
-    top: 180px;
-    left: 50%;
-    transform: translateX(-50%);
+    flex-shrink: 0;
     width: 312px;
     max-width: calc(100% - 40px);
+    margin-top: 12px;
+    margin-bottom: 16px;
     text-align: center;
-    z-index: 5;
+}
+
+/* 사진 + 타이머: 설명 아래 */
+.mask-group {
+    flex-shrink: 0;
+    width: 353px;
+    max-width: calc(100% - 32px);
+    margin-top: 0;
+    margin-bottom: 12px;
 }
 
 .description p {
@@ -69,16 +82,7 @@
     color: rgba(85, 85, 85, 1);
     white-space: pre-wrap;
     margin: 0;
-}
-
-.mask-group {
-    position: absolute;
-    top: 250px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 353px;
-    max-width: calc(100% - 32px);
-    z-index: 1;
+    word-break: keep-all;
 }
 
 .image-container {
@@ -107,9 +111,17 @@
 }
 
 .nav-buttons {
-    position: absolute;
-    bottom: 10px; left: 0; right: 0;
-    display: flex; justify-content: space-between; padding: 0 33px;
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 385px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 33px;
+    box-sizing: border-box;
+    z-index: 10;
 }
 
 .btn {
@@ -127,7 +139,7 @@
 .btn:active { transform: scale(0.95); }
 
 @media (max-width: 385px) {
-    .recipe-container { border-radius: 0; max-height: 100vh; }
+    .recipe-container { border-radius: 0; }
 }
 
 
@@ -197,6 +209,38 @@
 .base-timer__path-remaining.red { color: #f44336; }
 
 .base-timer__content { position: absolute; width: 100%; height: 100%; top: 0; left: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.base-timer__reset-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: -75px;
+    z-index: 1;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #555555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.base-timer__reset-button:hover {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.08);
+}
+.base-timer__reset-button:active {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+.base-timer__reset-button svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
 .base-timer__left-label { font-size: 18px; font-weight: 500; color: rgba(85, 85, 85, 1); text-transform: uppercase; margin-bottom: 0; letter-spacing: 0.5px; font-family: 'MemomentKkukkukk', sans-serif; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: -45px; z-index: 1; }
 .base-timer__time { font-size: 65px; font-weight: normal; color: #000000; line-height: 1; margin: 0; font-family: 'MemomentKkukkukk', sans-serif; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); user-select: none; display: flex; align-items: center; justify-content: center; gap: 4px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; }
 .timer-time-part { display: inline-block; min-width: 50px; text-align: center; transition: background-color 0.2s ease; border-radius: 4px; padding: 0 4px; }
@@ -265,6 +309,20 @@
 
 .question { position: absolute; top: 740px; left: 50%; transform: translateX(-50%); font-size: 30px; font-weight: normal; color: #555; text-align: center; line-height: 28px; font-family: 'MemomentKkukkukk', sans-serif; white-space: nowrap; width: auto; max-width: calc(100% - 40px); }
 
+/* 요리 완료: 예/아니오 버튼 화면 하단 고정 */
+.cooking-complete-container .button-group {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 385px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 33px;
+    box-sizing: border-box;
+    z-index: 10;
+}
 .button-group { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 33px; }
 .btn-no { background-color: #d9d9d9; color: #000; }
 .btn-no:hover { background-color: #c9c9c9; }
