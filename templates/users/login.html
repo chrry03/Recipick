@@ -42,10 +42,10 @@
         <a href="{% url 'users:google_login' %}" class="btn-social-custom google-mw">
             <img src="{% static 'images/btn_google.png' %}" alt="구글 로그인">
         </a>
-        <a href="#" class="btn-social-custom naver-mw">
+        <a href="{% url 'users:naver_login' %}" class="btn-social-custom naver-mw">
             <img src="{% static 'images/btn_naver.png' %}" alt="네이버 로그인">
         </a>
-        <a href="#" class="btn-social-custom kakao-mw">
+        <a href="{% url 'users:kakao_login' %}" class="btn-social-custom kakao-mw">
             <img src="{% static 'images/btn_kakao.png' %}" alt="카카오 로그인">
         </a>
     </div>
