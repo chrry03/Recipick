@@ -493,6 +493,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const filterParam = urlParams.get('filter');
         const searchKeyword = (urlParams.get('q') || '').trim();
+        const focusSearch = urlParams.get('focus') === 'search';
 
         if (filterParam) {
             const targetChip = Array.from(DOM.filterChips).find(
@@ -520,6 +521,9 @@
                     fetchAndRenderRecipes('search', DOM.searchInput.value);
                 }
             });
+            if (focusSearch) {
+                DOM.searchInput.focus();
+            }
         }
 
         DOM.filterChips.forEach(chip => {
