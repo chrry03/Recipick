@@ -8,27 +8,31 @@
       "difficulty": "EASY",
       "ready_minutes": 15,
       "servings": 1,
-      "image_url": "/static/images/recipes/spicy_noodle_soup.jpg",
+      "image_url": "/static/images/recipes/SpicyNoodleSoup_4",
       "instructions_ko": [
         {
           "step_number": 1,
           "description": "소면을 3~4분정도 삶고 찬물에 충분히 헹군다",
-          "timer_minutes": 4
+          "timer_minutes": 4,
+          "image": "/static/images/recipes/SpicyNoodleSoup_1"
         },
         {
           "step_number": 2,
           "description": "물 500ml, 고추가루 한 스푼, 간장 한 스푼, 참치액 한 스푼, 치킨스톡 반 스푼을 넣는다",
-          "timer_minutes": 0
+          "timer_minutes": 0,
+          "image": "/static/images/recipes/SpicyNoodleSoup_2"
         },
         {
           "step_number": 3,
           "description": "충분히 끓으면 청양고추 1-2개, 대파를 넣고 끓인다",
-          "timer_minutes": 5
+          "timer_minutes": 5,
+          "image": "/static/images/recipes/SpicyNoodleSoup_3"
         },
         {
           "step_number": 4,
           "description": "면을 국물에 넣고 김가루와 깨를 뿌려 마무리한다",
-          "timer_minutes": 0
+          "timer_minutes": 0,
+          "image": "/static/images/recipes/SpicyNoodleSoup_4"
         }
       ],
       "ingredients": [

@@ -131,7 +131,7 @@ def search_recipes_from_spoonacular(user_ingredients, max_results=10):
             title_ko = ''
             try:
                 if title_en:
-                    title_ko = translator.translate_text(title_en, target_lang='ko')
+                    title_ko = translator.translate_text(title_en)
                     print(f"   📝 번역: {title_en} → {title_ko}")
             except Exception as e:
                 print(f"   ⚠️ 번역 실패: {e}")
