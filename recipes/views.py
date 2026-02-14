@@ -234,7 +234,7 @@ def get_recipe_recommendations(request):
             user=user,
             is_consumed=False
         ).select_related('ingredient', 'ingredient__category').exclude(
-            ingredient__category__name__in=['Spoonacular API', 'FoodSafetyKorea']
+            ingredient__category__name__in=['Spoonacular API', 'FoodSafetyKorea', 'HARDCODED']
         )
         logger.info(f"✅ 사용자: {user.username}, 식재료: {user_ingredients.count()}개")
     else:
@@ -247,7 +247,8 @@ def get_recipe_recommendations(request):
     use_all = request.data.get('use_all', False)
     max_results = request.data.get('max_results', 100)  # 20 → 100으로 증가
     keyword = request.data.get('keyword', '').strip()
-    # ========== [추가] 내 재료만 필터 ==========
+    
+    # ========== [핵심] 내 재료만 필터 ==========
     only_owned_ingredients = request.data.get('only_owned_ingredients', False)
     
     logger.info(f"📥 요청: use_all={use_all}, keyword='{keyword}', ingredient_ids={ingredient_ids}, only_owned={only_owned_ingredients}")
@@ -364,41 +365,82 @@ def get_recipe_recommendations(request):
         user_skill_level=user_skill_level
     )
     
-    # ========== [추가] 내 재료만 필터링 ==========
-    if only_owned_ingredients and user:
-        logger.info("🔒 '내 재료만' 필터 적용")
+    # ========== [수정] 내 재료만 필터링 (완전 재작성) ==========
+    if only_owned_ingredients and user and selected_ingredient_ids:
+        logger.info("=" * 50)
+        logger.info("🔒 '내 재료만' 필터 적용 시작")
+        logger.info(f"🔒 보유 식재료 개수: {len(selected_ingredient_ids)}개")
+        logger.info(f"🔒 보유 식재료 ID: {selected_ingredient_ids[:10]}..." if len(selected_ingredient_ids) > 10 else f"🔒 보유 식재료 ID: {selected_ingredient_ids}")
         
-        # 사용자가 보유한 재료 ID 목록
         owned_ingredient_ids = set(selected_ingredient_ids)
-        
         filtered_recipes = []
         
-        # 각 카테고리별로 필터링
-        for category_key in ['urgent_ready', 'ready', 'almost_ready']:
-            if category_key in result.get('categories', {}):
-                category_recipes = result['categories'][category_key].get('recipes', [])
+        # result에서 레시피 추출
+        recipes_to_filter = []
+        
+        if 'recipes' in result and result['recipes']:
+            recipes_to_filter = result['recipes']
+            logger.info(f"📦 필터링 대상: result['recipes']에서 {len(recipes_to_filter)}개")
+        elif 'categories' in result:
+            # categories에서 모든 레시피 수집
+            for category_key in ['urgent_ready', 'ready', 'almost_ready']:
+                if category_key in result['categories']:
+                    cat_recipes = result['categories'][category_key].get('recipes', [])
+                    recipes_to_filter.extend(cat_recipes)
+            logger.info(f"📦 필터링 대상: categories에서 {len(recipes_to_filter)}개")
+        else:
+            logger.warning("⚠️ result 구조를 파악할 수 없음")
+            logger.info(f"⚠️ result keys: {result.keys()}")
+        
+        # 각 레시피 필터링
+        for idx, recipe in enumerate(recipes_to_filter):
+            # Recipe 객체 확인
+            if not hasattr(recipe, 'recipe_ingredients'):
+                logger.warning(f"  ⚠️ [{idx}] Recipe 객체 아님: {type(recipe)}")
+                continue
+            
+            try:
+                # 필수 재료만 확인 (is_optional=False)
+                required_ingredients = recipe.recipe_ingredients.filter(is_optional=False)
+                required_ingredient_ids = set(
+                    required_ingredients.values_list('ingredient_id', flat=True)
+                )
                 
-                for recipe_data in category_recipes:
-                    recipe = recipe_data.get('recipe')
-                    if not recipe:
-                        continue
-                    
-                    # 레시피의 필수 재료 확인
-                    required_ingredients = recipe.recipe_ingredients.filter(is_optional=False)
+                # None 제거
+                required_ingredient_ids = {id for id in required_ingredient_ids if id is not None}
+                
+                if not required_ingredient_ids:
+                    # 필수 재료가 없으면 모든 재료 확인
+                    all_ingredients = recipe.recipe_ingredients.all()
                     required_ingredient_ids = set(
-                        required_ingredients.values_list('ingredient_id', flat=True)
+                        all_ingredients.values_list('ingredient_id', flat=True)
                     )
-                    
-                    # 모든 필수 재료를 보유하고 있는지 확인
-                    if required_ingredient_ids.issubset(owned_ingredient_ids):
-                        filtered_recipes.append(recipe_data)
-                        logger.info(f"  ✅ {recipe.get_display_title()[:20]}... - 모든 재료 보유")
-                    else:
-                        missing = required_ingredient_ids - owned_ingredient_ids
-                        logger.info(f"  ❌ {recipe.get_display_title()[:20]}... - 부족한 재료: {len(missing)}개")
+                    required_ingredient_ids = {id for id in required_ingredient_ids if id is not None}
+                
+                # 디버깅: 첫 5개만 상세 로그
+                if idx < 5:
+                    logger.info(f"  [{idx}] {recipe.get_display_title()[:30]}")
+                    logger.info(f"       필수 재료: {required_ingredient_ids}")
+                    logger.info(f"       보유 여부: {required_ingredient_ids.issubset(owned_ingredient_ids)}")
+                
+                # 모든 필수 재료를 보유하고 있는지 확인
+                if required_ingredient_ids.issubset(owned_ingredient_ids):
+                    filtered_recipes.append(recipe)
+                    if idx < 5:
+                        logger.info(f"       ✅ 포함")
+                else:
+                    missing = required_ingredient_ids - owned_ingredient_ids
+                    if idx < 5:
+                        logger.info(f"       ❌ 제외 (부족: {missing})")
+            
+            except Exception as e:
+                logger.error(f"  ❌ [{idx}] 필터링 에러: {e}")
+                continue
         
         # 필터링된 레시피로 결과 재구성
-        logger.info(f"🔒 필터링 결과: {len(filtered_recipes)}개")
+        logger.info(f"🔒 필터링 전: {len(recipes_to_filter)}개")
+        logger.info(f"🔒 필터링 후: {len(filtered_recipes)}개")
+        logger.info("=" * 50)
         
         result = {
             'categories': {
@@ -408,7 +450,7 @@ def get_recipe_recommendations(request):
                 }
             },
             'total_count': len(filtered_recipes),
-            'recipes': [r.get('recipe') for r in filtered_recipes if r.get('recipe')]
+            'recipes': filtered_recipes
         }
     
     logger.info(f"✅ 최종 결과: {result.get('total_count', 0)}개")

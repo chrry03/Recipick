@@ -126,25 +126,39 @@ def search_recipes_from_spoonacular(user_ingredients, max_results=10):
         results = []
         for item in data:
             title_en = item.get('title', '')
+            external_id = str(item.get('id'))
             
-            # ========== [추가] 제목 자동 번역 ==========
-            title_ko = ''
-            try:
-                if title_en:
-                    title_ko = translator.translate_text(title_en)
-                    print(f"   📝 번역: {title_en} → {title_ko}")
-            except Exception as e:
-                print(f"   ⚠️ 번역 실패: {e}")
-                title_ko = title_en  # 번역 실패 시 원문 사용
+            # ========== [추가] DB에 이미 번역된 레시피가 있는지 확인 (캐싱) ==========
+            cached_recipe = Recipe.objects.filter(
+                external_id=external_id,
+                source='spoonacular',
+                is_translated=True
+            ).first()
+            
+            if cached_recipe and cached_recipe.title_ko:
+                # 캐시된 번역 사용 (DB 조회)
+                title_ko = cached_recipe.title_ko
+                # 로그 제거 (속도 향상)
+            else:
+                # 새로 번역
+                title_ko = ''
+                try:
+                    if title_en:
+                        title_ko = translator.translate_text(title_en)
+                        # 로그 제거 (속도 향상)
+                except Exception as e:
+                    # 에러만 출력
+                    print(f"   ⚠️ 번역 실패: {e}")
+                    title_ko = title_en  # 번역 실패 시 원문 사용
             
             recipe = Recipe(
                 title=title_en,  # 영문 제목
-                title_ko=title_ko,  # ========== [추가] 한글 제목 ==========
+                title_ko=title_ko,  # 한글 제목
                 image_url=item.get('image'),
                 ready_minutes=0, 
                 difficulty='NORMAL',
-                external_id=str(item.get('id')),
-                is_translated=bool(title_ko and title_ko != title_en)  # ========== [추가] 번역 플래그 ==========
+                external_id=external_id,
+                is_translated=bool(title_ko and title_ko != title_en)
             )
             recipe.recipe_id = -item.get('id') 
             results.append(recipe)

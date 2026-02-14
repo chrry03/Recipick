@@ -1,6 +1,6 @@
 /**
  * static/js/recipes_list.js
- * 찜 기능 - toggle API 사용 + 토큰 에러 처리
+ * 찜 기능 + 내 재료만 필터 (완전 수정)
  */
 
 (function() {
@@ -34,17 +34,12 @@
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
             });
         },
-        /**
-         * 401 에러 처리 - 로그인 페이지로 리다이렉트
-         */
         handleUnauthorized: () => {
             alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
-            // 토큰 삭제
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            // 로그인 페이지로 이동
             window.location.href = '/users/login/?next=' + encodeURIComponent(window.location.pathname);
         }
     };
@@ -71,10 +66,11 @@
         const difficulty = diffMap[recipe.difficulty] || '보통';
         const isLiked = currentState.favoritedIds.has(recipe.recipe_id);
         
+        const displayTitle = recipe.title_ko || recipe.display_title || recipe.title || '레시피';
+        
         let ownedText = "없음";
         let missingText = "없음";
 
-        // ========== [수정] ingredients_status 처리 개선 ==========
         if (recipe.ingredients_status && recipe.ingredients_status.ingredients_status) {
             const statusMap = recipe.ingredients_status.ingredients_status;
             let owned = [];
@@ -100,8 +96,6 @@
             if (owned.length > 0) ownedText = owned.join(', ');
             if (missing.length > 0) missingText = missing.join(', ');
         } else {
-            // ========== [추가] ingredients_status가 없는 경우 기본 처리 ==========
-            // 찜한 레시피 탭에서는 재료 정보가 없을 수 있음
             ownedText = "정보 없음";
             missingText = "정보 없음";
         }
@@ -109,7 +103,7 @@
         return `
             <div class="recipe-list-card" data-id="${recipe.recipe_id}">
                 <div class="card-header-row">
-                    <h3 class="card-title">${RecipeUtils.escapeHtml(recipe.title)}</h3>
+                    <h3 class="card-title">${RecipeUtils.escapeHtml(displayTitle)}</h3>
                     <button class="card-like-btn ${isLiked ? 'active' : 'inactive'}" 
                             data-recipe-id="${recipe.recipe_id}"
                             onclick="event.stopPropagation();">
@@ -149,16 +143,12 @@
     // === 4. 찜 기능 ===
     async function loadFavoriteStatus() {
         const token = RecipeUtils.getAccessToken();
-        console.log('🔑 [loadFavoriteStatus] 토큰:', token ? '있음' : '없음');
         
         if (!token) {
-            console.log('⚠️ [loadFavoriteStatus] 비로그인');
             return;
         }
 
         try {
-            console.log('📡 [loadFavoriteStatus] GET /recipes/api/favorites/');
-            
             const response = await fetch('/recipes/api/favorites/', {
                 method: 'GET',
                 headers: {
@@ -167,18 +157,13 @@
                 }
             });
 
-            console.log('📥 [loadFavoriteStatus] 응답:', response.status);
-
-            // ========== [추가] 401 에러 처리 ==========
             if (response.status === 401) {
-                console.error('❌ 인증 만료');
                 RecipeUtils.handleUnauthorized();
                 return;
             }
 
             if (response.ok) {
                 const favorites = await response.json();
-                console.log('✅ [loadFavoriteStatus] 찜 목록:', favorites);
                 
                 currentState.favoritedIds.clear();
                 
@@ -192,81 +177,50 @@
                     });
                 }
                 
-                console.log('💛 [loadFavoriteStatus] 찜한 ID:', Array.from(currentState.favoritedIds));
                 updateStarIcons();
-            } else {
-                const errorText = await response.text();
-                console.error('❌ [loadFavoriteStatus] 실패:', response.status, errorText);
             }
         } catch (error) {
-            console.error('❌ [loadFavoriteStatus] 오류:', error);
+            console.error('찜 목록 로드 실패:', error);
         }
     }
 
     function updateStarIcons() {
-        console.log('🌟 updateStarIcons 시작');
-        console.log('💛 현재 favoritedIds:', Array.from(currentState.favoritedIds));
-        
-        const buttons = document.querySelectorAll('.card-like-btn');
-        console.log('🔘 찾은 버튼 개수:', buttons.length);
-        
-        buttons.forEach(btn => {
+        document.querySelectorAll('.card-like-btn').forEach(btn => {
             const recipeId = parseInt(btn.dataset.recipeId);
             
             if (currentState.processingIds.has(recipeId)) {
                 return;
             }
             
-            const isFavorited = currentState.favoritedIds.has(recipeId);
-            
-            if (isFavorited) {
+            if (currentState.favoritedIds.has(recipeId)) {
                 btn.classList.remove('inactive');
                 btn.classList.add('active');
-                console.log(`  ⭐ ${recipeId}: active (노란색)`);
             } else {
                 btn.classList.remove('active');
                 btn.classList.add('inactive');
-                console.log(`  ☆ ${recipeId}: inactive (회색)`);
             }
         });
-        
-        console.log('🌟 updateStarIcons 완료');
     }
 
-    /**
-     * ========== [핵심] toggle API 사용 + 401 에러 처리 ==========
-     */
     async function handleFavoriteClick(btn) {
         const recipeId = parseInt(btn.dataset.recipeId);
         
         if (currentState.processingIds.has(recipeId)) {
-            console.log('⏳ 이미 처리 중:', recipeId);
             return;
         }
         
-        const wasLiked = currentState.favoritedIds.has(recipeId);
-        
-        console.log('========================================');
-        console.log('⭐ 별 클릭:', recipeId, wasLiked ? '취소' : '추가');
-
         const token = RecipeUtils.getAccessToken();
         const csrfToken = RecipeUtils.getCsrfToken();
         
         if (!token) {
             alert('로그인이 필요합니다');
-            window.location.href = '/users/login/?next=' + encodeURIComponent(window.location.pathname);
+            window.location.href = '/users/login/';
             return;
         }
 
         currentState.processingIds.add(recipeId);
-        btn.classList.add('processing');
-        btn.disabled = true;
 
         try {
-            console.log('📡 POST /recipes/api/favorites/toggle/');
-            console.log('📤 Body:', { recipe_id: recipeId });
-            console.log('🔑 Token:', token.substring(0, 20) + '...');
-            
             const response = await fetch('/recipes/api/favorites/toggle/', {
                 method: 'POST',
                 headers: {
@@ -277,68 +231,37 @@
                 body: JSON.stringify({ recipe_id: recipeId })
             });
             
-            console.log('📥 응답 상태:', response.status);
-            
-            // ========== [핵심] 401 에러 처리 ==========
             if (response.status === 401) {
-                console.error('❌ 인증 만료');
                 RecipeUtils.handleUnauthorized();
                 return;
             }
             
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('❌ 응답 실패:', response.status, errorText);
-                throw new Error(`API 오류: ${response.status}\n${errorText}`);
-            }
-            
-            const data = await response.json();
-            console.log('✅ 응답 데이터:', data);
-            
-            // 서버 응답에 따라 상태 업데이트
-            if (data.is_favorite) {
-                currentState.favoritedIds.add(recipeId);
-                btn.classList.remove('inactive');
-                btn.classList.add('active');
-                console.log('✅ 찜 추가 완료');
-            } else {
-                currentState.favoritedIds.delete(recipeId);
-                btn.classList.remove('active');
-                btn.classList.add('inactive');
-                console.log('✅ 찜 취소 완료');
+            if (response.ok) {
+                const data = await response.json();
                 
-                // 찜한 레시피 탭에서는 카드 제거
-                if (currentState.filter === 'favorites') {
-                    const card = btn.closest('.recipe-list-card');
-                    if (card) {
-                        card.style.transition = 'opacity 0.3s, transform 0.3s';
-                        card.style.opacity = '0';
-                        card.style.transform = 'scale(0.8)';
-                        
-                        setTimeout(() => {
+                if (data.is_favorite) {
+                    currentState.favoritedIds.add(recipeId);
+                    btn.classList.remove('inactive');
+                    btn.classList.add('active');
+                } else {
+                    currentState.favoritedIds.delete(recipeId);
+                    btn.classList.remove('active');
+                    btn.classList.add('inactive');
+                    
+                    if (currentState.filter === 'favorites') {
+                        const card = btn.closest('.recipe-list-card');
+                        if (card) {
                             card.remove();
-                            const remainingCards = document.querySelectorAll('.recipe-list-card').length;
-                            updateCount(remainingCards);
-                            
-                            if (remainingCards === 0) {
-                                DOM.container.innerHTML = getEmptyHTML('찜한 레시피가 없습니다');
-                            }
-                        }, 300);
+                            updateCount(document.querySelectorAll('.recipe-list-card').length);
+                        }
                     }
                 }
             }
-            
-            console.log('========================================');
-            
         } catch (error) {
-            console.error('========================================');
             console.error('❌ 찜 처리 오류:', error);
-            console.error('========================================');
-            alert('찜 처리 중 오류가 발생했습니다\n\n' + error.message);
+            alert('찜 처리 중 오류가 발생했습니다');
         } finally {
             currentState.processingIds.delete(recipeId);
-            btn.classList.remove('processing');
-            btn.disabled = false;
         }
     }
 
@@ -357,15 +280,26 @@
             }
 
             const url = '/recipes/api/recommendations/';
+            
+            // ========== [핵심] 내 재료만 필터 ==========
+            const onlyOwnedIngredients = (currentState.filter === 'my-ingredients');
+            
+            console.log('========================================');
+            console.log('🔍 [JS] 현재 필터:', currentState.filter);
+            console.log('🔒 [JS] 내 재료만:', onlyOwnedIngredients);
+            console.log('========================================');
+            
             const payload = {
                 ingredient_ids: [],
                 use_all: true,
                 include_spoonacular: true,
                 max_results: 500,
-                keyword: keyword
+                keyword: keyword,
+                only_owned_ingredients: onlyOwnedIngredients
             };
+            
+            console.log('📤 [JS] 요청 페이로드:', JSON.stringify(payload, null, 2));
 
-            // ========== [추가] 토큰 헤더 추가 ==========
             const token = RecipeUtils.getAccessToken();
             const headers = {
                 'Content-Type': 'application/json',
@@ -381,29 +315,41 @@
                 body: JSON.stringify(payload)
             });
 
-            if (!res.ok) throw new Error('API Error');
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('❌ [JS] API 에러:', res.status, errorText);
+                throw new Error(`API Error: ${res.status}`);
+            }
+            
             const data = await res.json();
+            
+            console.log('📥 [JS] 응답 데이터:', data);
+            console.log('📊 [JS] total_count:', data.total_count);
 
             let recipeList = [];
-            if (data.recipes) {
+            if (data.recipes && Array.isArray(data.recipes)) {
                 recipeList = data.recipes;
+                console.log('✅ [JS] recipes 필드 사용:', recipeList.length, '개');
             } else if (data.categories) {
-                if(data.categories.urgent_ready) recipeList.push(...data.categories.urgent_ready.recipes);
-                if(data.categories.ready) recipeList.push(...data.categories.ready.recipes);
-                if(data.categories.almost_ready) recipeList.push(...data.categories.almost_ready.recipes);
+                if(data.categories.urgent_ready && data.categories.urgent_ready.recipes) {
+                    recipeList.push(...data.categories.urgent_ready.recipes);
+                }
+                if(data.categories.ready && data.categories.ready.recipes) {
+                    recipeList.push(...data.categories.ready.recipes);
+                }
+                if(data.categories.almost_ready && data.categories.almost_ready.recipes) {
+                    recipeList.push(...data.categories.almost_ready.recipes);
+                }
+                console.log('✅ [JS] categories 필드 사용:', recipeList.length, '개');
             }
-
-            console.log('✅ 최종 레시피:', recipeList.length, '개');
-            renderToDOM(recipeList, keyword);
             
-            // ========== [추가] 렌더링 후 별 상태 한 번 더 업데이트 ==========
-            setTimeout(() => {
-                updateStarIcons();
-                console.log('🌟 별 상태 재확인 완료');
-            }, 100);
+            console.log('✅ [JS] 최종 레시피:', recipeList.length, '개');
+            console.log('========================================');
+
+            renderToDOM(recipeList, keyword);
 
         } catch (err) {
-            console.error('❌ 레시피 로드 오류:', err);
+            console.error('❌ [JS] 레시피 로드 오류:', err);
             DOM.container.innerHTML = getEmptyHTML('레시피를 불러오지 못했습니다.');
         } finally {
             DOM.spinner.classList.remove('show');
@@ -411,18 +357,10 @@
         }
     }
 
-    /**
-     * 찜한 레시피 표시
-     */
     async function displayFavorites() {
         const token = RecipeUtils.getAccessToken();
         
-        console.log('========================================');
-        console.log('📡 [displayFavorites] 시작');
-        console.log('========================================');
-        
         if (!token) {
-            console.log('⚠️ 비로그인');
             DOM.container.innerHTML = getEmptyHTML('로그인이 필요합니다');
             DOM.spinner.classList.remove('show');
             currentState.isLoading = false;
@@ -430,8 +368,6 @@
         }
 
         try {
-            console.log('📡 GET /recipes/api/favorites/');
-            
             const response = await fetch('/recipes/api/favorites/', {
                 method: 'GET',
                 headers: {
@@ -440,113 +376,47 @@
                 }
             });
 
-            console.log('📥 응답:', response.status);
-
-            // ========== [추가] 401 에러 처리 ==========
             if (response.status === 401) {
-                console.error('❌ 인증 만료');
                 RecipeUtils.handleUnauthorized();
                 return;
             }
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('❌ 응답 실패:', response.status, errorText);
-                throw new Error(`찜 목록 로드 실패: ${response.status}`);
+                throw new Error('찜 목록 로드 실패');
             }
             
             const data = await response.json();
-            console.log('✅ 응답 데이터:', data);
-            console.log('📊 타입:', Array.isArray(data) ? '배열' : typeof data);
             
-            // ========== [수정] pagination 응답 처리 ==========
             let favoritesList = [];
             
-            // 배열인 경우 (pagination 없음)
             if (Array.isArray(data)) {
                 favoritesList = data;
+            } else if (data && typeof data === 'object' && Array.isArray(data.results)) {
+                favoritesList = data.results;
             }
-            // 객체인 경우 (pagination 있음)
-            else if (data && typeof data === 'object') {
-                // results 배열 추출
-                if (Array.isArray(data.results)) {
-                    favoritesList = data.results;
-                    console.log('📦 pagination 응답 - count:', data.count);
-                } else {
-                    console.error('❌ results 필드가 배열이 아님:', data);
-                    throw new Error('응답 형식 오류: results가 없음');
-                }
-            } else {
-                console.error('❌ 잘못된 응답 형식:', data);
-                throw new Error('응답 형식 오류');
-            }
-            
-            console.log('📊 찜한 레시피 개수:', favoritesList.length);
             
             if (favoritesList.length === 0) {
-                console.log('ℹ️ 찜한 레시피 0개');
                 DOM.container.innerHTML = getEmptyHTML('찜한 레시피가 없습니다');
                 DOM.spinner.classList.remove('show');
                 currentState.isLoading = false;
                 return;
             }
             
-            console.log('🔄 레시피 추출 시작');
-            
-            // recipe 추출
-            let recipeList = favoritesList.map((item, index) => {
-                    if (item.recipe && typeof item.recipe === 'object') {
-                        // ========== [추가] ingredients_status 포함 ==========
-                        const recipe = item.recipe;
-                        if (item.ingredients_status) {
-                            recipe.ingredients_status = item.ingredients_status;
-                            console.log(`  [${index}] ingredients_status 포함:`, recipe.display_title || recipe.title);
-                        }
-                        return recipe;
+            let recipeList = favoritesList.map(item => {
+                if (item.recipe && typeof item.recipe === 'object') {
+                    const recipe = item.recipe;
+                    if (item.ingredients_status) {
+                        recipe.ingredients_status = item.ingredients_status;
                     }
-                    if (item.recipe_id || item.title) {
-                        return item;
-                    }
-                    return null;
-                }).filter(r => r && (r.recipe_id || r.id));
-                
-                console.log('📦 추출 완료:', recipeList.length, '개');
-                
-                if (recipeList.length === 0) {
-                    console.error('❌ 레시피 추출 실패');
-                    DOM.container.innerHTML = getEmptyHTML('찜한 레시피 데이터를 처리할 수 없습니다');
-                    DOM.spinner.classList.remove('show');
-                    currentState.isLoading = false;
-                    return;
-                }
-                
-                // recipe_id 정규화 및 찜 상태 업데이트
-                recipeList = recipeList.map(recipe => {
-                    if (!recipe.recipe_id && recipe.id) {
-                        recipe.recipe_id = recipe.id;
-                    }
-                    if (!recipe.title && !recipe.display_title) {
-                        recipe.title = recipe.title_ko || recipe.name || '레시피';
-                    } else if (!recipe.title) {
-                        recipe.title = recipe.display_title || recipe.title_ko || recipe.name || '레시피';
-                    }
-                    
-                    if (recipe.recipe_id) {
-                        currentState.favoritedIds.add(recipe.recipe_id);
-                    }
-                    
                     return recipe;
-                });
-                
-                console.log('🎨 렌더링 시작:', recipeList.length, '개');
-                console.log('💛 찜한 ID:', Array.from(currentState.favoritedIds));
-                renderToDOM(recipeList, '');
-                console.log('========================================');
+                }
+                return item;
+            }).filter(r => r && r.recipe_id);
+            
+            renderToDOM(recipeList, '');
             
         } catch (error) {
-            console.error('========================================');
-            console.error('❌ displayFavorites 오류:', error);
-            console.error('========================================');
+            console.error('찜 목록 로드 오류:', error);
             DOM.container.innerHTML = getEmptyHTML('찜한 레시피를 불러오지 못했습니다');
         } finally {
             DOM.spinner.classList.remove('show');
@@ -555,14 +425,14 @@
     }
 
     function renderToDOM(list, keyword) {
+        console.log('🎨 [JS] renderToDOM 시작:', list.length, '개');
+        
         if (!list || list.length === 0) {
             const msg = keyword ? `'${keyword}' 검색 결과가 없습니다.` : '추천 레시피가 없습니다.';
             DOM.container.innerHTML = getEmptyHTML(msg);
             updateCount(0);
             return;
         }
-
-        console.log('🎨 렌더링:', list.length, '개');
 
         let html = '<div class="recipe-card-grid">';
         list.forEach(item => {
@@ -571,12 +441,11 @@
         html += '</div>';
         
         DOM.container.innerHTML = html;
-        
         updateCount(list.length);
         attachClickEvents();
-        
-        // ========== [추가] 렌더링 후 별 상태 업데이트 ==========
         updateStarIcons();
+        
+        console.log('🎨 [JS] 렌더링 완료:', list.length, '개');
     }
 
     function attachClickEvents() {
@@ -617,34 +486,27 @@
 
     // === 6. 초기화 ===
     document.addEventListener('DOMContentLoaded', async () => {
-        console.log('🚀 [DOMContentLoaded] 초기화 시작');
+        console.log('🚀 [JS] 페이지 로드 시작');
         
-        // ========== [수정] 찜 상태를 먼저 로드한 후 레시피 렌더링 ==========
         await loadFavoriteStatus();
-        console.log('✅ 찜 상태 로드 완료');
         
-        // URL 파라미터로 필터 확인
         const urlParams = new URLSearchParams(window.location.search);
         const filterParam = urlParams.get('filter');
         const searchKeyword = (urlParams.get('q') || '').trim();
-        
-        console.log('🔍 URL 파라미터:', { filter: filterParam, q: searchKeyword });
 
-        // filter 파라미터가 있으면 해당 필터 활성화
         if (filterParam) {
             const targetChip = Array.from(DOM.filterChips).find(
                 chip => chip.dataset.filter === filterParam
             );
             
             if (targetChip) {
-                console.log('🎯 필터 자동 선택:', filterParam);
                 DOM.filterChips.forEach(c => c.classList.remove('active'));
                 targetChip.classList.add('active');
                 currentState.filter = filterParam;
+                console.log('🎯 [JS] URL에서 필터 설정:', filterParam);
             }
         }
 
-        // 레시피 렌더링 (찜 상태 로드 후)
         if (searchKeyword && DOM.searchInput) {
             DOM.searchInput.value = searchKeyword;
             await fetchAndRenderRecipes('search', searchKeyword);
@@ -662,15 +524,16 @@
 
         DOM.filterChips.forEach(chip => {
             chip.addEventListener('click', () => {
-                console.log('🔘 필터 클릭:', chip.dataset.filter);
+                console.log('🔘 [JS] 필터 클릭:', chip.dataset.filter);
                 DOM.filterChips.forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
                 currentState.filter = chip.dataset.filter;
+                console.log('🔘 [JS] 필터 변경됨:', currentState.filter);
                 fetchAndRenderRecipes('recommend');
             });
         });
         
-        console.log('✅ 초기화 완료');
+        console.log('✅ [JS] 초기화 완료');
     });
 
 })();
