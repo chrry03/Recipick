@@ -160,10 +160,10 @@ class Command(BaseCommand):
         1. "재료 " 접두사 제거
         2. IngredientMapper 사용
         3. 없으면 전체 DB에서 검색 (중복 방지)
-        4. 그래도 없으면 FoodSafetyKorea 카테고리에 생성
+        4. 그래도 없으면 '기타' 카테고리에 생성
         """
-        # FoodSafetyKorea 카테고리 ID
-        korea_category_id = self._get_foodsafety_category_id()
+        # '기타' 카테고리 ID
+        other_category_id = self._get_other_category_id()
         
         # 재료 파싱 (예: "양파 1개, 마늘 3쪽, 간장 2큰술")
         ingredient_parts = re.split(r'[,·]', ingredients_text)
@@ -194,13 +194,13 @@ class Command(BaseCommand):
                         name_ko=ing_name
                     ).first()
                 
-                # [4] 그래도 없으면 자동 생성
+                # [4] 그래도 없으면 자동 생성 ('기타' 카테고리)
                 if not ingredient:
                     try:
                         from ingredients.models import IngredientMaster, IngredientCategory
                         
                         # 카테고리 가져오기
-                        category = IngredientCategory.objects.get(category_id=korea_category_id)
+                        category = IngredientCategory.objects.get(category_id=other_category_id)
                         
                         # 새로 생성
                         ingredient = IngredientMaster.objects.create(
@@ -210,7 +210,7 @@ class Command(BaseCommand):
                             aliases=[]
                         )
                         created_count += 1
-                        self.stdout.write(f'   ➕ 식재료 자동 생성: {ing_name}')
+                        self.stdout.write(f'   ➕ 식재료 자동 생성 (기타): {ing_name}')
                             
                     except Exception as e:
                         self.stdout.write(self.style.WARNING(
@@ -232,27 +232,26 @@ class Command(BaseCommand):
                         )
         
         if created_count > 0:
-            self.stdout.write(f'   ✨ 새 식재료 {created_count}개 자동 생성됨')
+            self.stdout.write(f'   ✨ 새 식재료 {created_count}개 자동 생성됨 (기타 카테고리)')
     
-    def _get_foodsafety_category_id(self):
-        """FoodSafetyKorea 카테고리 ID 가져오기 (고정: 18번)"""
+    def _get_other_category_id(self):
+        """'기타' 카테고리 ID 가져오기 (고정: 16번)"""
         from ingredients.models import IngredientCategory
         
-        # FoodSafetyKorea 카테고리 찾기 (pk=18)
-        category = IngredientCategory.objects.filter(pk=18).first()
+        # '기타' 카테고리 찾기 (pk=16)
+        category = IngredientCategory.objects.filter(pk=16).first()
         
         if not category:
             # fixtures에 없으면 생성 (비상 대비)
             category, created = IngredientCategory.objects.get_or_create(
-                name='FoodSafetyKorea',
+                name='기타',
                 defaults={
-                    'icon': '🇰🇷',
-                    'parent': None,
-                    'is_parent': False
+                    'icon_url': '/static/images/categories/else.png',
+                    'parent': None
                 }
             )
             if created:
-                self.stdout.write(f'   🆕 FoodSafetyKorea 카테고리 생성 (ID: {category.category_id})')
+                self.stdout.write(f'   🆕 기타 카테고리 생성 (ID: {category.category_id})')
         
         return category.category_id
     

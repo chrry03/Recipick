@@ -626,17 +626,17 @@ class IngredientMapper:
         return created_count
     
     @classmethod
-    def get_or_create_user_ingredient(cls, user_input_name, category_id=17):
+    def get_or_create_user_ingredient(cls, user_input_name, category_id=16):
         """
-        사용자가 직접 추가한 식재료 처리
+        사용자가 직접 추가한 식재료 처리 (기타 카테고리 사용)
         
         1. 기존 매핑 찾기
-        2. 없으면 "직접 추가" 카테고리에 새로 생성
+        2. 없으면 "기타" 카테고리에 새로 생성
         3. 매핑 테이블에 등록
         
         Args:
             user_input_name: 사용자가 입력한 식재료 이름
-            category_id: 직접 추가 카테고리 ID (기본값: 17)
+            category_id: 기타 카테고리 ID (기본값: 16)
         
         Returns:
             IngredientMaster 객체
@@ -660,17 +660,17 @@ class IngredientMapper:
                 )
                 return ingredient
         
-        # 3. 새로 생성 (직접 추가 카테고리)
+        # 3. 새로 생성 (기타 카테고리)
         from ingredients.models import IngredientCategory
         
         try:
             category = IngredientCategory.objects.get(category_id=category_id)
         except IngredientCategory.DoesNotExist:
-            # 직접 추가 카테고리가 없으면 생성
+            # 기타 카테고리가 없으면 생성
             category = IngredientCategory.objects.create(
                 category_id=category_id,
-                name='직접 추가',
-                icon_url='➕'
+                name='기타',
+                icon_url='/static/images/categories/else.png'
             )
         
         # 한글/영어 판별

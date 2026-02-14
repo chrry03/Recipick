@@ -233,9 +233,7 @@ def get_recipe_recommendations(request):
         user_ingredients = UserIngredient.objects.filter(
             user=user,
             is_consumed=False
-        ).select_related('ingredient', 'ingredient__category').exclude(
-            ingredient__category__name__in=['Spoonacular API', 'FoodSafetyKorea', 'HARDCODED']
-        )
+        ).select_related('ingredient', 'ingredient__category')
         logger.info(f"✅ 사용자: {user.username}, 식재료: {user_ingredients.count()}개")
     else:
         user = None
