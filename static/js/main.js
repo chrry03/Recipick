@@ -85,7 +85,7 @@
     const CAROUSEL_MAX_VISIBILITY = 3;
     const CAROUSEL_MAX_CARDS = 6;
     const FAVORITES_MAX_HOME = 3;  /* 홈 화면 찜한 레시피 최대 개수 */
-    const DIARY_SCROLL_AMOUNT = 150;
+    const DIARY_SCROLL_AMOUNT = 300;
     const CAROUSEL_DEFAULT_INDEX = 2;
 
     // 전역 변수
@@ -710,7 +710,7 @@
             const card = document.createElement('div');
             card.className = 'diary-card';
             card.innerHTML = `
-                <div class="diary-card-inner">
+                <div class="diary-card-inner" data-log-id="${entry.id}">
                     <div class="diary-image">
                         <img src="${escapeHtml(entry.image)}" alt="${escapeHtml(entry.title)}" loading="lazy">
                     </div>
@@ -718,6 +718,9 @@
                     <div class="diary-date">${escapeHtml(entry.date)}</div>
                 </div>
             `;
+            card.addEventListener('click', () => {
+                window.location.href = `/logs/${entry.id}/`;
+            });
             slider.appendChild(card);
         });
         
@@ -742,6 +745,43 @@
     }
 
     /**
+     * 검색창 초기화 - 레시피 탭으로 이동하며 검색
+     */
+    function initSearchInput() {
+        const searchInput = document.getElementById('searchInput');
+        const searchIconBtn = document.getElementById('searchIconBtn');
+        const mainHeader = document.getElementById('mainHeader');
+        if (!searchInput) return;
+
+        const goToRecipeSearch = (focusSearch) => {
+            const keyword = (searchInput.value || '').trim();
+            const baseUrl = searchInput.dataset.recipeListUrl || '/recipes/';
+            const params = new URLSearchParams();
+            if (keyword) params.set('q', keyword);
+            if (focusSearch) params.set('focus', 'search');
+            const query = params.toString();
+            const url = query ? `${baseUrl}?${query}` : baseUrl;
+            window.location.href = url;
+        };
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                goToRecipeSearch(false);
+            }
+        });
+
+        if (searchIconBtn && mainHeader) {
+            searchIconBtn.addEventListener('click', () => {
+                if (mainHeader.classList.contains('scrolled')) {
+                    goToRecipeSearch(true);
+                } else {
+                    searchInput.focus();
+                }
+            });
+        }
+    }
+
+    /**
      * 플로팅 추가 버튼 초기화
      */
     function initFloatingButton() {
@@ -749,7 +789,8 @@
         if (!btn) return;
         
         btn.addEventListener('click', () => {
-            console.log('레시피 추가 기능');
+            const addUrl = btn.dataset.addUrl || '/ingredients/add/';
+            window.location.href = addUrl;
         });
     }
 
@@ -802,6 +843,7 @@
         await initFavoriteRecipes();  // API에서 불러옴
         initIngredients();
         initDiarySlider();
+        initSearchInput();
         initFloatingButton();
         
         // 찜 상태 다시 업데이트 (찜한 레시피 카드가 생성된 후)
