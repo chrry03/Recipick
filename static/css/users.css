@@ -58,6 +58,7 @@
     text-decoration: none;
     margin: 0 auto;
     border: none;
+    font-family: 'MemomentKkukkukk', sans-serif;
 }
 
 .btn-primary-mw { background-color: #FF7043; color: #FFEEDB; margin-top: 10px; }
@@ -205,6 +206,7 @@
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    font-family: 'MemomentKkukkukk', sans-serif;
 }
 
 /* --- STEP 2: 제외 식재료 --- */
@@ -278,6 +280,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2;
+    font-family: 'Gowun Dodum', sans-serif;
 }
 
 .category-item.active {
@@ -348,6 +351,7 @@
     font-size: 13px;
     color: #555;
     padding: 2px 0;
+    font-family: 'Gowun Dodum', sans-serif;
 }
 
 .ing-check-item input[type="checkbox"] {

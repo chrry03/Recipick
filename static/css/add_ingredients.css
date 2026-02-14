@@ -80,7 +80,7 @@
 }
 .category-sidebar::-webkit-scrollbar { display: none; }
 
-/* 카테고리 아이템 (수정) */
+/* [수정] 약 87번째 줄 ~ 103번째 줄 (category-item 관련) */
 .category-item {
     width: 100%;
     height: 31px;
@@ -88,8 +88,8 @@
     background: #F6EEE3;
     display: flex;
     align-items: center;
-    /* justify-content: center;  <-- 제거 (아이콘+텍스트 좌측 정렬 위해) */
-    padding-left: 8px; /* 아이콘과 왼쪽 벽 간격 */
+    padding-left: 8px;
+    padding-right: 4px; /* 텍스트 여백 */
     cursor: pointer;
     transition: all 0.2s;
     
@@ -97,7 +97,24 @@
     font-size: 13px;
     color: #555555;
     flex-shrink: 0;
-    gap: 6px; /* 아이콘과 텍스트 사이 간격 */
+    gap: 6px;
+    box-sizing: border-box;
+}
+
+/* [추가] 텍스트 말줄임 처리를 위한 클래스 */
+.category-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+/* [추가] 리스트 내부에 뜰 '직접 추가' 카드 스타일 */
+.ingredient-item.direct-add-card {
+    justify-content: center;
+    color: #FF7043;
+    font-weight: bold;
 }
 
 /* 카테고리 아이콘 (신규 추가) */
@@ -118,6 +135,37 @@
     background: #FFFFFF;
     border: 1px dashed #FF7043;
     color: #FF7043;
+}
+
+.direct-add-action-btn {
+    width: 100%;
+    height: 50px; /* 적당한 높이 */
+    border: 1.5px dashed #FF7043; /* 점선 테두리 */
+    border-radius: 15px;
+    background-color: #fff;
+    color: #FF7043;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+    gap: 8px; /* 아이콘과 텍스트 간격 */
+}
+
+.direct-add-action-btn:hover {
+    background-color: #FFF5F2; /* 살짝 배경색 변경 */
+    transform: translateY(-2px);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.direct-add-plus-mark {
+    font-size: 18px;
+    line-height: 1;
+    font-weight: normal;
 }
 
 /* (2) 세로 점선 (users.css .vertical-dashed-line 복사) */
@@ -196,19 +244,19 @@
     border-color: #FF7043;
 }
 
-/* 체크 이미지 (users.css 처럼 가상요소 사용) */
 .ingredient-item.added .checkbox-icon::after {
     content: '';
     position: absolute;
     width: 15px;
     height: 15px;
-    /* 체크마크 이미지를 base64로 넣거나 이미지 경로 사용 */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF7043' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    /* [변경] SVG 코드 대신 이미지 사용 */
+    background-image: url('/static/images/check_mark.png');
     background-size: contain;
     background-repeat: no-repeat;
+    background-position: center;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -60%);
+    transform: translate(-40%, -60%);
 }
 
 .ingredient-item.added .ingredient-name {

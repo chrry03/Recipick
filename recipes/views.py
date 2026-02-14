@@ -77,9 +77,18 @@ class FavoriteRecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
+        # ========== [수정] recipe_ingredients를 prefetch하여 재료 정보 포함 ==========
         return FavoriteRecipe.objects.filter(
             user=self.request.user
-        ).select_related('recipe').order_by('-created_at')
+        ).select_related('recipe').prefetch_related(
+            'recipe__recipe_ingredients__ingredient'
+        ).order_by('-created_at')
+    
+    def get_serializer_context(self):
+        # ========== [추가] context에 request 포함 (재료 상태 계산용) ==========
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
     
     def create(self, request, *args, **kwargs):
         """레시피 찜하기"""
@@ -140,6 +149,66 @@ class FavoriteRecipeViewSet(viewsets.ModelViewSet):
                 {'error': '찜한 레시피가 아닙니다'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+    
+    @action(detail=False, methods=['post'])
+    def toggle(self, request):
+        """
+        찜 토글 (추가/취소)
+        
+        POST /recipes/api/favorites/toggle/
+        Body: {"recipe_id": 123}
+        
+        Returns:
+            {
+                "is_favorite": true/false,
+                "recipe_id": 123,
+                "message": "찜이 추가/취소되었습니다"
+            }
+        """
+        recipe_id = request.data.get('recipe_id')
+        
+        if not recipe_id:
+            return Response(
+                {'error': 'recipe_id가 필요합니다'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Recipe 객체 찾기
+            recipe = Recipe.objects.get(recipe_id=recipe_id)
+        except Recipe.DoesNotExist:
+            return Response(
+                {'error': '존재하지 않는 레시피입니다'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # 찜 상태 확인
+        favorite = FavoriteRecipe.objects.filter(
+            user=request.user, 
+            recipe=recipe
+        ).first()
+        
+        if favorite:
+            # 찜 취소
+            favorite.delete()
+            return Response({
+                'is_favorite': False,
+                'recipe_id': recipe_id,
+                'message': '찜이 취소되었습니다'
+            })
+        else:
+            # 찜 추가
+            favorite = FavoriteRecipe.objects.create(
+                user=request.user, 
+                recipe=recipe
+            )
+            serializer = self.get_serializer(favorite)
+            return Response({
+                'is_favorite': True,
+                'recipe_id': recipe_id,
+                'message': '찜이 추가되었습니다',
+                'data': serializer.data
+            }, status=status.HTTP_201_CREATED)
 
 
 # ==================== API Views (Function Based) ==================== #
@@ -165,7 +234,7 @@ def get_recipe_recommendations(request):
             user=user,
             is_consumed=False
         ).select_related('ingredient', 'ingredient__category').exclude(
-            ingredient__category__name__in=['Spoonacular API', 'FoodSafetyKorea']
+            ingredient__category__name__in=['Spoonacular API', 'FoodSafetyKorea', 'HARDCODED']
         )
         logger.info(f"✅ 사용자: {user.username}, 식재료: {user_ingredients.count()}개")
     else:
@@ -179,7 +248,10 @@ def get_recipe_recommendations(request):
     max_results = request.data.get('max_results', 100)  # 20 → 100으로 증가
     keyword = request.data.get('keyword', '').strip()
     
-    logger.info(f"📥 요청: use_all={use_all}, keyword='{keyword}', ingredient_ids={ingredient_ids}")
+    # ========== [핵심] 내 재료만 필터 ==========
+    only_owned_ingredients = request.data.get('only_owned_ingredients', False)
+    
+    logger.info(f"📥 요청: use_all={use_all}, keyword='{keyword}', ingredient_ids={ingredient_ids}, only_owned={only_owned_ingredients}")
     
     # ============ Spoonacular API 활성화 (수정!) ============
     include_spoonacular = request.data.get('include_spoonacular', True)
@@ -292,6 +364,94 @@ def get_recipe_recommendations(request):
         user_ingredients_dict=user_ingredients_dict,
         user_skill_level=user_skill_level
     )
+    
+    # ========== [수정] 내 재료만 필터링 (완전 재작성) ==========
+    if only_owned_ingredients and user and selected_ingredient_ids:
+        logger.info("=" * 50)
+        logger.info("🔒 '내 재료만' 필터 적용 시작")
+        logger.info(f"🔒 보유 식재료 개수: {len(selected_ingredient_ids)}개")
+        logger.info(f"🔒 보유 식재료 ID: {selected_ingredient_ids[:10]}..." if len(selected_ingredient_ids) > 10 else f"🔒 보유 식재료 ID: {selected_ingredient_ids}")
+        
+        owned_ingredient_ids = set(selected_ingredient_ids)
+        filtered_recipes = []
+        
+        # result에서 레시피 추출
+        recipes_to_filter = []
+        
+        if 'recipes' in result and result['recipes']:
+            recipes_to_filter = result['recipes']
+            logger.info(f"📦 필터링 대상: result['recipes']에서 {len(recipes_to_filter)}개")
+        elif 'categories' in result:
+            # categories에서 모든 레시피 수집
+            for category_key in ['urgent_ready', 'ready', 'almost_ready']:
+                if category_key in result['categories']:
+                    cat_recipes = result['categories'][category_key].get('recipes', [])
+                    recipes_to_filter.extend(cat_recipes)
+            logger.info(f"📦 필터링 대상: categories에서 {len(recipes_to_filter)}개")
+        else:
+            logger.warning("⚠️ result 구조를 파악할 수 없음")
+            logger.info(f"⚠️ result keys: {result.keys()}")
+        
+        # 각 레시피 필터링
+        for idx, recipe in enumerate(recipes_to_filter):
+            # Recipe 객체 확인
+            if not hasattr(recipe, 'recipe_ingredients'):
+                logger.warning(f"  ⚠️ [{idx}] Recipe 객체 아님: {type(recipe)}")
+                continue
+            
+            try:
+                # 필수 재료만 확인 (is_optional=False)
+                required_ingredients = recipe.recipe_ingredients.filter(is_optional=False)
+                required_ingredient_ids = set(
+                    required_ingredients.values_list('ingredient_id', flat=True)
+                )
+                
+                # None 제거
+                required_ingredient_ids = {id for id in required_ingredient_ids if id is not None}
+                
+                if not required_ingredient_ids:
+                    # 필수 재료가 없으면 모든 재료 확인
+                    all_ingredients = recipe.recipe_ingredients.all()
+                    required_ingredient_ids = set(
+                        all_ingredients.values_list('ingredient_id', flat=True)
+                    )
+                    required_ingredient_ids = {id for id in required_ingredient_ids if id is not None}
+                
+                # 디버깅: 첫 5개만 상세 로그
+                if idx < 5:
+                    logger.info(f"  [{idx}] {recipe.get_display_title()[:30]}")
+                    logger.info(f"       필수 재료: {required_ingredient_ids}")
+                    logger.info(f"       보유 여부: {required_ingredient_ids.issubset(owned_ingredient_ids)}")
+                
+                # 모든 필수 재료를 보유하고 있는지 확인
+                if required_ingredient_ids.issubset(owned_ingredient_ids):
+                    filtered_recipes.append(recipe)
+                    if idx < 5:
+                        logger.info(f"       ✅ 포함")
+                else:
+                    missing = required_ingredient_ids - owned_ingredient_ids
+                    if idx < 5:
+                        logger.info(f"       ❌ 제외 (부족: {missing})")
+            
+            except Exception as e:
+                logger.error(f"  ❌ [{idx}] 필터링 에러: {e}")
+                continue
+        
+        # 필터링된 레시피로 결과 재구성
+        logger.info(f"🔒 필터링 전: {len(recipes_to_filter)}개")
+        logger.info(f"🔒 필터링 후: {len(filtered_recipes)}개")
+        logger.info("=" * 50)
+        
+        result = {
+            'categories': {
+                'ready': {
+                    'recipes': filtered_recipes,
+                    'count': len(filtered_recipes)
+                }
+            },
+            'total_count': len(filtered_recipes),
+            'recipes': filtered_recipes
+        }
     
     logger.info(f"✅ 최종 결과: {result.get('total_count', 0)}개")
     

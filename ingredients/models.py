@@ -122,14 +122,14 @@ class IngredientMaster(models.Model):
     
     # 한글 식재료명
     name_ko = models.CharField(
-        max_length=50,
+        max_length=100,
         verbose_name='한글명',
         db_index=True
     )
 
     # Spoonacular API 매핑용 공식 영문명
     name_en = models.CharField(
-        max_length=100,
+        max_length=255,
         null=True,
         blank=True,
         verbose_name='영문명',

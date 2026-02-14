@@ -22,6 +22,7 @@ class RecipeLogCreateSerializer(serializers.ModelSerializer):
         choices=RecipeLog.PerceivedDifficulty.choices,
         source='perceived_difficulty'
     )
+    image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = RecipeLog
@@ -32,6 +33,12 @@ class RecipeLogCreateSerializer(serializers.ModelSerializer):
         if not (1 <= value <= 5):
             raise serializers.ValidationError("평점은 1~5 사이의 정수여야 합니다.")
         return value
+
+    def update(self, instance, validated_data):
+        # 수정 시 image가 넘어오지 않았거나 비어 있으면 기존 이미지 유지
+        if 'image' in validated_data and validated_data['image'] is None:
+            validated_data.pop('image')
+        return super().update(instance, validated_data)
 
 
 # ===============================================================

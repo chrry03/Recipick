@@ -12,7 +12,7 @@
     {% include 'header.html' %}
 
     <div class="title-section">
-        <button class="back-btn" onclick="window.history.back();" aria-label="뒤로가기">
+        <button type="button" class="back-btn" id="logBackBtn" aria-label="뒤로가기">
             <svg width="23" height="21" viewBox="0 0 23 21" fill="none">
                 <path d="M22 10.5H1M1 10.5L11 1M1 10.5L11 20" stroke="#555555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -20,7 +20,7 @@
         <h1 class="page-title">{% if is_edit %}일지 수정하기{% else %}오늘 요리는 어떠셨나요?{% endif %}</h1>
     </div>
 
-    <form id="log-create-form" method="POST" enctype="multipart/form-data">
+    <form id="log-create-form" method="POST" enctype="multipart/form-data" {% if is_edit %}action="{% url 'logs:update' log.recipe_log_id %}" data-is-edit="true"{% endif %}>
         {% csrf_token %}
         <input type="hidden" name="recipe" value="{{ recipe_id }}">
 
@@ -29,10 +29,15 @@
                 <img src="{% static 'images/image_upload.svg' %}" alt="이미지 업로드" class="camera-icon">
             </div>
             <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
-            
-            <img class="image-preview" id="imagePreview" alt="업로드된 사진" 
-                 src="{% if log.image %}{{ log.image.url }}{% endif %}" 
-                 style="{% if log.image %}display: block;{% else %}display: none;{% endif %}">
+            <div class="image-preview-wrap" id="imagePreviewWrap" style="{% if log.image %}display: flex;{% else %}display: none;{% endif %}">
+                <div class="image-preview-inner">
+                    <img class="image-preview" id="imagePreview" alt="업로드된 사진" 
+                         src="{% if log.image %}{{ log.image.url }}{% endif %}">
+                    {% if is_edit %}
+                    <span class="image-edit-icon" aria-hidden="true"></span>
+                    {% endif %}
+                </div>
+            </div>
         </div>
 
         <div class="cooking-info">

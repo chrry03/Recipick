@@ -56,11 +56,11 @@ def create_custom_ingredient(request):
     existing = IngredientMaster.objects.filter(name_ko=name).first()
     
     if existing:
-        # 2. API 카테고리인지 확인
-        if existing.category.name in ['Spoonacular API', 'FoodSafetyKorea']:
-            # API 카테고리 → 직접 추가로 이동 (ingredient_id 유지)
+        # 2. API 카테고리 또는 HARDCODED인지 확인
+        if existing.category.name in ['Spoonacular API', 'FoodSafetyKorea', 'HARDCODED']:
+            # API/HARDCODED 카테고리 → 직접 추가로 이동 (ingredient_id 유지)
             try:
-                direct_category = IngredientCategory.objects.get(pk=16)
+                direct_category = IngredientCategory.objects.get(name='직접 추가')
                 existing.category = direct_category
                 existing.save()
                 print(f"   🔄 식재료 이동: {name} ({existing.category.name} → 직접 추가)")
@@ -80,7 +80,7 @@ def create_custom_ingredient(request):
     else:
         # 3. 없으면 새로 생성
         try:
-            category = IngredientCategory.objects.get(pk=16)
+            category = IngredientCategory.objects.get(name='직접 추가')
         except IngredientCategory.DoesNotExist:
             category = IngredientCategory.objects.create(
                 name='직접 추가',
@@ -184,6 +184,9 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
     pagination_class = None
     
     def get_queryset(self):
+        # ========== [수정] exclude 제거 - 모든 식재료 표시 ==========
+        # 직접 추가 시 ingredient 카테고리가 "직접 추가"로 변경되므로
+        # 여기서 exclude할 필요 없음
         return UserIngredient.objects.filter(
             user=self.request.user,
             is_consumed=False
@@ -625,7 +628,7 @@ def add_ingredient_view(request):
 def category_list_view(request):
     """카테고리 목록 JSON (API 카테고리 제외)"""
     categories = IngredientCategory.objects.exclude(
-        name__in=['Spoonacular API', 'FoodSafetyKorea']
+        name__in=['Spoonacular API', 'FoodSafetyKorea', 'HARDCODED']
     ).order_by('category_id')
     data = []
     for cat in categories:

@@ -114,11 +114,48 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
     recipe = RecipeListSerializer(read_only=True)
+    # ========== [추가] 재료 상태 정보 ==========
+    ingredients_status = serializers.SerializerMethodField()
 
     class Meta:
         model = FavoriteRecipe
         fields = [
             'favorite_id',
             'recipe',
-            'created_at'
+            'created_at',
+            'ingredients_status'  # 추가
         ]
+    
+    def get_ingredients_status(self, obj):
+        """
+        사용자의 보유 재료를 기반으로 레시피 재료 상태 계산
+        """
+        from ingredients.models import UserIngredient
+        
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return None
+        
+        # 사용자의 보유 재료
+        user_ingredients = UserIngredient.objects.filter(
+            user=request.user,
+            is_consumed=False
+        ).select_related('ingredient')
+        
+        user_ingredient_ids = set(user_ingredients.values_list('ingredient_id', flat=True))
+        
+        # 레시피 재료
+        recipe_ingredients = obj.recipe.recipe_ingredients.select_related('ingredient')
+        
+        status_map = {}
+        for ri in recipe_ingredients:
+            if ri.ingredient:
+                name = ri.ingredient.name_ko or ri.ingredient.name_en or ri.ingredient_name or '알 수 없는 재료'
+                status_map[name] = {
+                    'is_owned': ri.ingredient_id in user_ingredient_ids,
+                    'is_optional': ri.is_optional
+                }
+        
+        return {
+            'ingredients_status': status_map
+        }

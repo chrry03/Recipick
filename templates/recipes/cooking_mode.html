@@ -13,20 +13,18 @@
 <div class="recipe-container" 
      data-recipe-id="{{ recipe.recipe_id }}" 
      data-total-steps="{{ total_steps }}"
-     data-current-step="{{ current_step }}">
+     data-current-step="{{ current_step }}"
+     data-initial-timer-seconds="{{ step_data.timer_seconds|default:0 }}">
     
-    {# 단계 번호 #}
+    {# 1. 단계 번호 #}
     <div class="step-number" aria-label="현재 단계">
         <p>{{ current_step }}</p>
     </div>
 
-    {# ============ 한글 조리법 표시 (수정!) ============ #}
+    {# 2. 설명 #}
     <div class="description" role="article">
         {% if step_data %}
-            {# step_data.description에 한글 조리법이 들어있음 #}
             <p>{{ step_data.description|linebreaksbr }}</p>
-            
-            {# 타이머 정보가 있으면 표시 #}
             {% if step_data.timer_seconds %}
             <div class="timer-info">
                 ⏱️ 타이머: {{ step_data.timer_seconds|floatformat:0 }}초
@@ -39,7 +37,7 @@
         {% endif %}
     </div>
 
-    {# 이미지 영역 #}
+    {# 3. 사진 + 4. 타이머 #}
     <div class="mask-group">
         {% if step_data.image %}
             <div class="image-container">
@@ -68,21 +66,13 @@
                 </div>
             </div>
         {% endif %}
-        
         {# 타이머 앱 #}
         <div id="timer-app"></div>
-        
         {# 타이머 추가 버튼 #}
         <div class="timer-add-buttons">
-            <button type="button" class="timer-add-btn" data-seconds="30" aria-label="30초 추가">
-                +30초
-            </button>
-            <button type="button" class="timer-add-btn" data-seconds="60" aria-label="1분 추가">
-                +1분
-            </button>
-            <button type="button" class="timer-add-btn" data-seconds="300" aria-label="5분 추가">
-                +5분
-            </button>
+            <button type="button" class="timer-add-btn" data-seconds="30" aria-label="30초 추가">+30초</button>
+            <button type="button" class="timer-add-btn" data-seconds="60" aria-label="1분 추가">+1분</button>
+            <button type="button" class="timer-add-btn" data-seconds="300" aria-label="5분 추가">+5분</button>
         </div>
     </div>
 

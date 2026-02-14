@@ -1,0 +1,102 @@
+{
+  "recipes": [
+    {
+      "external_id": "hardcoded_001",
+      "source": "HARDCODED",
+      "title_ko": "매운해장국수",
+      "title": "Spicy Hangover Noodle Soup",
+      "difficulty": "EASY",
+      "ready_minutes": 15,
+      "servings": 1,
+      "image_url": "/static/images/recipes/SpicyNoodleSoup_4",
+      "instructions_ko": [
+        {
+          "step_number": 1,
+          "description": "소면을 3~4분정도 삶고 찬물에 충분히 헹군다",
+          "timer_minutes": 4,
+          "image": "/static/images/recipes/SpicyNoodleSoup_1"
+        },
+        {
+          "step_number": 2,
+          "description": "물 500ml, 고추가루 한 스푼, 간장 한 스푼, 참치액 한 스푼, 치킨스톡 반 스푼을 넣는다",
+          "timer_minutes": 0,
+          "image": "/static/images/recipes/SpicyNoodleSoup_2"
+        },
+        {
+          "step_number": 3,
+          "description": "충분히 끓으면 청양고추 1-2개, 대파를 넣고 끓인다",
+          "timer_minutes": 5,
+          "image": "/static/images/recipes/SpicyNoodleSoup_3"
+        },
+        {
+          "step_number": 4,
+          "description": "면을 국물에 넣고 김가루와 깨를 뿌려 마무리한다",
+          "timer_minutes": 0,
+          "image": "/static/images/recipes/SpicyNoodleSoup_4"
+        }
+      ],
+      "ingredients": [
+        {
+          "name_ko": "소면",
+          "name_en": "somen noodles",
+          "quantity": "1인분",
+          "is_optional": false
+        },
+        {
+          "name_ko": "물",
+          "name_en": "water",
+          "quantity": "500ml",
+          "is_optional": false
+        },
+        {
+          "name_ko": "고추가루",
+          "name_en": "red pepper powder",
+          "quantity": "1스푼",
+          "is_optional": false
+        },
+        {
+          "name_ko": "간장",
+          "name_en": "soy sauce",
+          "quantity": "1스푼",
+          "is_optional": false
+        },
+        {
+          "name_ko": "참치액",
+          "name_en": "fish sauce",
+          "quantity": "1스푼",
+          "is_optional": false
+        },
+        {
+          "name_ko": "치킨스톡",
+          "name_en": "chicken stock",
+          "quantity": "반 스푼",
+          "is_optional": false
+        },
+        {
+          "name_ko": "청양고추",
+          "name_en": "cheongyang chili pepper",
+          "quantity": "1-2개",
+          "is_optional": false
+        },
+        {
+          "name_ko": "대파",
+          "name_en": "green onion",
+          "quantity": "적당량",
+          "is_optional": false
+        },
+        {
+          "name_ko": "김가루",
+          "name_en": "seaweed flakes",
+          "quantity": "적당량",
+          "is_optional": true
+        },
+        {
+          "name_ko": "깨",
+          "name_en": "sesame seeds",
+          "quantity": "적당량",
+          "is_optional": true
+        }
+      ]
+    }
+  ]
+}
