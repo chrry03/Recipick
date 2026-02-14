@@ -356,14 +356,7 @@ def get_recipe_recommendations(request):
     
     logger.info(f"🧮 점수 계산 시작: {len(final_list)}개")
     
-    result = calculate_final_recommendations(
-        recipes=final_list[:max_results],
-        user=user,
-        user_ingredients_dict=user_ingredients_dict,
-        user_skill_level=user_skill_level
-    )
-    
-    # ========== [수정] 내 재료만 필터링 (완전 재작성) ==========
+    # ========== [수정] "내 재료만" 필터링 - calculate_final_recommendations 전에 적용 ==========
     if only_owned_ingredients and user and selected_ingredient_ids:
         logger.info("=" * 50)
         logger.info("🔒 '내 재료만' 필터 적용 시작")
@@ -373,30 +366,8 @@ def get_recipe_recommendations(request):
         owned_ingredient_ids = set(selected_ingredient_ids)
         filtered_recipes = []
         
-        # result에서 레시피 추출
-        recipes_to_filter = []
-        
-        if 'recipes' in result and result['recipes']:
-            recipes_to_filter = result['recipes']
-            logger.info(f"📦 필터링 대상: result['recipes']에서 {len(recipes_to_filter)}개")
-        elif 'categories' in result:
-            # categories에서 모든 레시피 수집
-            for category_key in ['urgent_ready', 'ready', 'almost_ready']:
-                if category_key in result['categories']:
-                    cat_recipes = result['categories'][category_key].get('recipes', [])
-                    recipes_to_filter.extend(cat_recipes)
-            logger.info(f"📦 필터링 대상: categories에서 {len(recipes_to_filter)}개")
-        else:
-            logger.warning("⚠️ result 구조를 파악할 수 없음")
-            logger.info(f"⚠️ result keys: {result.keys()}")
-        
-        # 각 레시피 필터링
-        for idx, recipe in enumerate(recipes_to_filter):
-            # Recipe 객체 확인
-            if not hasattr(recipe, 'recipe_ingredients'):
-                logger.warning(f"  ⚠️ [{idx}] Recipe 객체 아님: {type(recipe)}")
-                continue
-            
+        # Recipe 객체에서 필터링
+        for idx, recipe in enumerate(final_list):
             try:
                 # 필수 재료만 확인 (is_optional=False)
                 required_ingredients = recipe.recipe_ingredients.filter(is_optional=False)
@@ -433,23 +404,24 @@ def get_recipe_recommendations(request):
             
             except Exception as e:
                 logger.error(f"  ❌ [{idx}] 필터링 에러: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
                 continue
         
-        # 필터링된 레시피로 결과 재구성
-        logger.info(f"🔒 필터링 전: {len(recipes_to_filter)}개")
+        logger.info(f"🔒 필터링 전: {len(final_list)}개")
         logger.info(f"🔒 필터링 후: {len(filtered_recipes)}개")
         logger.info("=" * 50)
         
-        result = {
-            'categories': {
-                'ready': {
-                    'recipes': filtered_recipes,
-                    'count': len(filtered_recipes)
-                }
-            },
-            'total_count': len(filtered_recipes),
-            'recipes': filtered_recipes
-        }
+        # 필터링된 레시피로 교체
+        final_list = filtered_recipes
+    
+    # 이제 calculate_final_recommendations 호출
+    result = calculate_final_recommendations(
+        recipes=final_list[:max_results],
+        user=user,
+        user_ingredients_dict=user_ingredients_dict,
+        user_skill_level=user_skill_level
+    )
     
     logger.info(f"✅ 최종 결과: {result.get('total_count', 0)}개")
     
