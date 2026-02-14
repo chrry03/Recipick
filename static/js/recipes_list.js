@@ -204,21 +204,33 @@
     }
 
     function updateStarIcons() {
-        document.querySelectorAll('.card-like-btn').forEach(btn => {
+        console.log('🌟 updateStarIcons 시작');
+        console.log('💛 현재 favoritedIds:', Array.from(currentState.favoritedIds));
+        
+        const buttons = document.querySelectorAll('.card-like-btn');
+        console.log('🔘 찾은 버튼 개수:', buttons.length);
+        
+        buttons.forEach(btn => {
             const recipeId = parseInt(btn.dataset.recipeId);
             
             if (currentState.processingIds.has(recipeId)) {
                 return;
             }
             
-            if (currentState.favoritedIds.has(recipeId)) {
+            const isFavorited = currentState.favoritedIds.has(recipeId);
+            
+            if (isFavorited) {
                 btn.classList.remove('inactive');
                 btn.classList.add('active');
+                console.log(`  ⭐ ${recipeId}: active (노란색)`);
             } else {
                 btn.classList.remove('active');
                 btn.classList.add('inactive');
+                console.log(`  ☆ ${recipeId}: inactive (회색)`);
             }
         });
+        
+        console.log('🌟 updateStarIcons 완료');
     }
 
     /**
@@ -353,12 +365,19 @@
                 keyword: keyword
             };
 
+            // ========== [추가] 토큰 헤더 추가 ==========
+            const token = RecipeUtils.getAccessToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': RecipeUtils.getCsrfToken()
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const res = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': RecipeUtils.getCsrfToken()
-                },
+                headers: headers,
                 body: JSON.stringify(payload)
             });
 
@@ -376,6 +395,12 @@
 
             console.log('✅ 최종 레시피:', recipeList.length, '개');
             renderToDOM(recipeList, keyword);
+            
+            // ========== [추가] 렌더링 후 별 상태 한 번 더 업데이트 ==========
+            setTimeout(() => {
+                updateStarIcons();
+                console.log('🌟 별 상태 재확인 완료');
+            }, 100);
 
         } catch (err) {
             console.error('❌ 레시피 로드 오류:', err);

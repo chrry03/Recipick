@@ -149,6 +149,66 @@ class FavoriteRecipeViewSet(viewsets.ModelViewSet):
                 {'error': '찜한 레시피가 아닙니다'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+    
+    @action(detail=False, methods=['post'])
+    def toggle(self, request):
+        """
+        찜 토글 (추가/취소)
+        
+        POST /recipes/api/favorites/toggle/
+        Body: {"recipe_id": 123}
+        
+        Returns:
+            {
+                "is_favorite": true/false,
+                "recipe_id": 123,
+                "message": "찜이 추가/취소되었습니다"
+            }
+        """
+        recipe_id = request.data.get('recipe_id')
+        
+        if not recipe_id:
+            return Response(
+                {'error': 'recipe_id가 필요합니다'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Recipe 객체 찾기
+            recipe = Recipe.objects.get(recipe_id=recipe_id)
+        except Recipe.DoesNotExist:
+            return Response(
+                {'error': '존재하지 않는 레시피입니다'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # 찜 상태 확인
+        favorite = FavoriteRecipe.objects.filter(
+            user=request.user, 
+            recipe=recipe
+        ).first()
+        
+        if favorite:
+            # 찜 취소
+            favorite.delete()
+            return Response({
+                'is_favorite': False,
+                'recipe_id': recipe_id,
+                'message': '찜이 취소되었습니다'
+            })
+        else:
+            # 찜 추가
+            favorite = FavoriteRecipe.objects.create(
+                user=request.user, 
+                recipe=recipe
+            )
+            serializer = self.get_serializer(favorite)
+            return Response({
+                'is_favorite': True,
+                'recipe_id': recipe_id,
+                'message': '찜이 추가되었습니다',
+                'data': serializer.data
+            }, status=status.HTTP_201_CREATED)
 
 
 # ==================== API Views (Function Based) ==================== #
