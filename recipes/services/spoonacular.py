@@ -236,14 +236,14 @@ class SpoonacularService:
         2. 한글 번역 (RecipeTranslator 사용)
         3. 번역된 이름으로도 중복 검사
         4. IngredientMapper + 전체 DB 검색
-        5. Spoonacular 전용 카테고리 사용
+        5. '기타' 카테고리 사용 (Spoonacular 전용 카테고리 대신)
         """
         # 이미 추가된 식재료 ID 추적 (중복 방지)
         added_ingredient_ids = set()
         created_count = 0
         
-        # Spoonacular API 카테고리 ID 가져오기
-        spoon_category_id = self._get_spoonacular_category_id()
+        # '기타' 카테고리 ID 가져오기
+        other_category_id = self._get_other_category_id()
         
         for ingredient_data in recipe_data.get('extendedIngredients', []):
             # 원본 이름
@@ -251,113 +251,82 @@ class SpoonacularService:
             if not ing_name_raw:
                 continue
             
-            # ============ 1. 수량 표현 제거 ============
+            # [1단계] 수량 표현 제거
             ing_name_clean = self._clean_ingredient_name(ing_name_raw)
             
-            # ============ 2. IngredientMapper로 영문명 매핑 시도 ============
-            ing_master = IngredientMapper.find_ingredient(ing_name_clean)
+            # [2단계] 한글 번역
+            ing_name_ko = self._translate_ingredient_name(ing_name_clean)
             
-            # ============ 3. 한글 번역 + 정리 ============
-            if not ing_master:
-                # [3-1] 번역
-                ing_name_ko_raw = self._translate_ingredient_name(ing_name_clean)
-                
-                # [3-2] 번역 결과 정리 (핵심!)
-                ing_name_ko = self._clean_translated_name(ing_name_ko_raw, ing_name_clean)
-                
-                # [4] 정리된 이름으로 검색 (중복 방지)
-                if ing_name_ko and ing_name_ko != ing_name_clean:
-                    # [4-1] IngredientMapper로 한글명 매핑
-                    ing_master = IngredientMapper.find_ingredient(ing_name_ko)
-                    
-                    # [4-2] 전체 DB에서 한글명 검색
-                    if not ing_master:
-                        from ingredients.models import IngredientMaster
-                        ing_master = IngredientMaster.objects.filter(
-                            name_ko=ing_name_ko
-                        ).first()
+            # [3단계] 번역된 한글 이름 정리 (중복 제거, 불필요한 수식어 제거)
+            ing_name_ko = self._clean_translated_name(ing_name_ko, ing_name_clean)
             
-            # ============ 5. ingredients.json에 없으면 자동 생성 ============
-            if not ing_master:
-                # [5-1] 한글 번역 + 정리 (아직 안 했으면)
-                if 'ing_name_ko' not in locals() or not ing_name_ko:
-                    ing_name_ko_raw = self._translate_ingredient_name(ing_name_clean)
-                    ing_name_ko = self._clean_translated_name(ing_name_ko_raw, ing_name_clean)
-                
-                print(f"   ➕ 식재료 자동 생성: {ing_name_raw} → {ing_name_ko}")
-                
+            # [4단계] IngredientMapper로 매핑 시도
+            ingredient = IngredientMapper.find_ingredient(ing_name_ko)
+            
+            # [5단계] 영문으로 재시도
+            if not ingredient:
+                ingredient = IngredientMapper.find_ingredient(ing_name_clean)
+            
+            # [6단계] 전체 DB 검색 (정규화된 이름으로)
+            if not ingredient:
+                from ingredients.models import IngredientMaster
+                ingredient = IngredientMaster.objects.filter(
+                    name_ko=ing_name_ko
+                ).first()
+            
+            # [7단계] 그래도 없으면 자동 생성 ('기타' 카테고리)
+            if not ingredient:
                 try:
-                    # Spoonacular 전용 카테고리에 생성
                     from ingredients.models import IngredientMaster, IngredientCategory
                     
-                    # 카테고리 가져오기
-                    category = IngredientCategory.objects.get(category_id=spoon_category_id)
+                    # '기타' 카테고리 가져오기
+                    category = IngredientCategory.objects.get(category_id=other_category_id)
                     
-                    # [최종 중복 확인] 한글명 또는 영문명
-                    existing = IngredientMaster.objects.filter(
-                        name_ko=ing_name_ko
-                    ).first() or IngredientMaster.objects.filter(
-                        name_en__iexact=ing_name_clean
-                    ).first()
-                    
-                    if existing:
-                        ing_master = existing
-                        print(f"     ✅ 기존 식재료 사용: {existing.name_ko} (ID: {existing.ingredient_id})")
-                    else:
-                        # 새로 생성
-                        ing_master = IngredientMaster.objects.create(
-                            category=category,
-                            name_ko=ing_name_ko,
-                            name_en=ing_name_clean,
-                            aliases=[]
-                        )
-                        created_count += 1
-                        print(f"     ✅ 생성 완료: {ing_name_ko} (ID: {ing_master.ingredient_id})")
+                    # 새로 생성
+                    ingredient = IngredientMaster.objects.create(
+                        category=category,
+                        name_ko=ing_name_ko,
+                        name_en=ing_name_clean,
+                        aliases=[ing_name_raw, ing_name_clean] if ing_name_raw != ing_name_clean else [ing_name_raw]
+                    )
+                    created_count += 1
+                    print(f'   ➕ 식재료 자동 생성 (기타): {ing_name_ko} (영문: {ing_name_clean})')
                         
                 except Exception as e:
-                    print(f"   ❌ 생성 실패: {ing_name_clean} - {str(e)}")
+                    print(f'   ⚠️  생성 실패: {ing_name_ko} - {str(e)}')
                     continue
             
-            if ing_master:
-                # 중복 체크
-                if ing_master.ingredient_id in added_ingredient_ids:
-                    continue
-                
-                # get_or_create로 안전하게 생성
-                RecipeIngredient.objects.get_or_create(
+            # [8단계] 중복 확인 후 RecipeIngredient 추가
+            if ingredient and ingredient.ingredient_id not in added_ingredient_ids:
+                RecipeIngredient.objects.create(
                     recipe=recipe,
-                    ingredient=ing_master,
-                    defaults={
-                        'ingredient_name': ingredient_data.get('original', ing_name_raw),
-                        'is_optional': False
-                    }
+                    ingredient=ingredient,
+                    ingredient_name=ing_name_ko,
+                    is_optional=False
                 )
-                
-                # 추가된 식재료 ID 기록
-                added_ingredient_ids.add(ing_master.ingredient_id)
+                added_ingredient_ids.add(ingredient.ingredient_id)
         
         if created_count > 0:
-            print(f"   ✨ 새 식재료 {created_count}개 자동 생성됨")
+            print(f"   ✨ 새 식재료 {created_count}개 자동 생성됨 (기타 카테고리)")
     
-    def _get_spoonacular_category_id(self):
-        """Spoonacular API 카테고리 ID 가져오기 (고정: 17번)"""
+    def _get_other_category_id(self):
+        """'기타' 카테고리 ID 가져오기 (고정: 16번)"""
         from ingredients.models import IngredientCategory
         
-        # Spoonacular API 카테고리 찾기 (pk=17)
-        category = IngredientCategory.objects.filter(pk=17).first()
+        # '기타' 카테고리 찾기 (pk=16)
+        category = IngredientCategory.objects.filter(pk=16).first()
         
         if not category:
             # fixtures에 없으면 생성 (비상 대비)
             category, created = IngredientCategory.objects.get_or_create(
-                name='Spoonacular API',
+                name='기타',
                 defaults={
-                    'icon': '🌐',
-                    'parent': None,
-                    'is_parent': False
+                    'icon_url': '/static/images/categories/else.png',
+                    'parent': None
                 }
             )
             if created:
-                print(f"   🆕 Spoonacular API 카테고리 생성 (ID: {category.category_id})")
+                print(f"   🆕 기타 카테고리 생성 (ID: {category.category_id})")
         
         return category.category_id
     

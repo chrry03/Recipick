@@ -39,7 +39,7 @@ def log_list_view(request):
             'id': log.recipe_log_id,
             'day': log.cooked_at.day,
             'time': timezone.localtime(log.created_at).strftime('%H:%M'),
-            'recipe_name': log.recipe.title,
+            'recipe_name': log.recipe.get_display_title(),  # ✅ 한글 우선
             # 이미지가 있으면 URL, 없으면 None
             'image': log.image.url if log.image else None,
             # 난이도 3개 별, 만족도 5개 별
@@ -95,7 +95,7 @@ def log_detail_view(request, pk):
             'id': log.recipe_log_id,
             'date': log.cooked_at.strftime('%m월 %d일'),
             'time': timezone.localtime(log.created_at).strftime('%H:%M'),
-            'recipe_name': recipe.title,
+            'recipe_name': recipe.get_display_title(),  # ✅ 한글 우선
             'recipe_image': recipe.image_url,
             'difficulty': '★' * diff_score + '☆' * (3 - diff_score),
             'satisfaction': '★' * log.rating + '☆' * (5 - log.rating),
@@ -185,7 +185,7 @@ def log_update_view(request, pk):
     # GET 요청: 기존 데이터를 화면에 뿌려줌
     context = {
         'log': log, # 기존 일지 객체
-        'recipe_name': log.recipe.title,
+        'recipe_name': log.recipe.get_display_title(),  # ✅ 한글 우선
         'recipe_id': log.recipe.recipe_id,
         'is_edit': True # 템플릿에서 '작성' vs '수정' 구분용
     }

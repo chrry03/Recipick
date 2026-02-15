@@ -119,37 +119,20 @@
       "icon_url": "/static/images/categories/soda.png"
     }
   },
-
   {
     "model": "ingredients.ingredientcategory",
     "pk": 16,
     "fields": {
-      "name": "직접 추가",
-      "icon_url": "/static/images/categories/add-button.png"
+      "name": "기타",
+      "icon_url": "/static/images/categories/else.png"
     }
   },
   {
     "model": "ingredients.ingredientcategory",
     "pk": 17,
     "fields": {
-      "name": "Spoonacular API",
-      "icon_url": "/static/images/categories/spoonacular.png"
-    }
-  },
-  {
-    "model": "ingredients.ingredientcategory",
-    "pk": 18,
-    "fields": {
-      "name": "FoodSafetyKorea",
-      "icon_url": "/static/images/categories/foodsafetykorea.png"
-    }
-  },
-  {
-    "model": "ingredients.ingredientcategory",
-    "pk": 19,
-    "fields": {
-      "name": "HARDCODED",
-      "icon_url": "/static/images/categories/hardcoded.png"
+      "name": "직접 추가",
+      "icon_url": "/static/images/categories/add-button.png"
     }
   }
 ]

@@ -110,10 +110,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         """API 카테고리 제외 (Spoonacular, FoodSafetyKorea)"""
-        # [핵심!] 사용자 UI에서 API 카테고리 식재료 숨김
-        queryset = IngredientMaster.objects.exclude(
-            category__name__in=['Spoonacular API', 'FoodSafetyKorea']
-        ).order_by('name_ko')
+        queryset = IngredientMaster.objects.all().order_by('name_ko')
         
         category_id = self.request.query_params.get('category_id')
         if category_id:
@@ -135,14 +132,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
         if not keyword:
             return Response([])
         
-        # [핵심!] API 카테고리 제외하고 검색
-        suggestions = IngredientMaster.objects.exclude(
-            category__name__in=['Spoonacular API', 'FoodSafetyKorea']
-        ).filter(
-            Q(name_ko__icontains=keyword) |
-            Q(name_en__icontains=keyword) |
-            Q(aliases__icontains=keyword)
-        )[:50]
+        suggestions = IngredientMaster.objects.filter(...)
         
         serializer = self.get_serializer(suggestions, many=True)
         return Response(serializer.data)
@@ -155,9 +145,7 @@ class IngredientCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         """API 전용 카테고리 제외"""
-        return IngredientCategory.objects.exclude(
-            name__in=['Spoonacular API', 'FoodSafetyKorea']
-        )
+        return IngredientCategory.objects.all()
     
     @action(detail=False, methods=['get'])
     def with_counts(self, request):
@@ -626,10 +614,8 @@ def add_ingredient_view(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def category_list_view(request):
-    """카테고리 목록 JSON (API 카테고리 제외)"""
-    categories = IngredientCategory.objects.exclude(
-        name__in=['Spoonacular API', 'FoodSafetyKorea', 'HARDCODED']
-    ).order_by('category_id')
+    """카테고리 목록 JSON"""
+    categories = IngredientCategory.objects.all().order_by('category_id')
     data = []
     for cat in categories:
         data.append({
