@@ -34,6 +34,9 @@ class RecipeListSerializer(serializers.ModelSerializer):
     # ========== [수정] SerializerMethodField로 변경 (500 에러 해결) ==========
     total_ingredients_count = serializers.SerializerMethodField()
 
+    # [🔥 추가] 찜 여부 필드 (기본값 False)
+    is_favorited = serializers.BooleanField(default=False, read_only=True)
+
     class Meta:
         model = Recipe
         fields = [
@@ -50,7 +53,8 @@ class RecipeListSerializer(serializers.ModelSerializer):
             'difficulty_display',
             'servings',
             'total_ingredients_count',
-            'created_at'
+            'created_at',
+            'is_favorited',  # [🔥 추가]
         ]
 
     def get_display_title(self, obj):
