@@ -266,5 +266,7 @@ htmlcov/
 # Django Cache
 cache/
 *.djcache
-
-.elasticbeanstalk/
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
