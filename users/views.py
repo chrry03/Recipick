@@ -107,7 +107,10 @@ def google_login_view(request):
     
     # settings.py (또는 .env)에서 설정한 키 값 가져오기
     client_id = settings.GOOGLE_CLIENT_ID
-    redirect_uri = settings.GOOGLE_REDIRECT_URI
+
+    # [★ 수정] 현재 접속한 도메인(localhost 또는 aws주소)을 자동으로 감지
+    current_domain = request.get_host()
+    redirect_uri = f"http://{current_domain}/users/google/callback/"
     
     # 구글 인증 페이지 URL 생성
     google_auth_url = (
@@ -131,6 +134,10 @@ def google_callback_view(request):
     
     if not code:
         return Response({"message": "구글 인증 코드가 없습니다."}, status=400)
+    
+    # [★ 추가]
+    current_domain = request.get_host()
+    redirect_uri = f"http://{current_domain}/users/google/callback/"
 
     # 2. 인증 코드를 주고 "액세스 토큰" 받아오기
     token_req = requests.post(
@@ -140,7 +147,7 @@ def google_callback_view(request):
             "client_secret": settings.GOOGLE_CLIENT_SECRET,
             "code": code,
             "grant_type": "authorization_code",
-            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+            "redirect_uri": redirect_uri, # <--- settings 변수 대신 위에서 만든 변수 사용
         }
     )
     token_req_json = token_req.json()
@@ -216,7 +223,11 @@ def google_callback_view(request):
 @permission_classes([AllowAny])
 def naver_login_view(request):
     client_id = settings.NAVER_CLIENT_ID
-    redirect_uri = settings.NAVER_REDIRECT_URI
+
+    # [★ 수정] 자동 감지
+    current_domain = request.get_host()
+    redirect_uri = f"http://{current_domain}/users/naver/callback/"
+
     state = "STATE_STRING"  # CSRF 방지용 랜덤 문자열 (간단히 고정값 사용)
 
     # 네이버 인증 페이지 URL 생성
@@ -342,7 +353,10 @@ def naver_callback_view(request):
 @permission_classes([AllowAny])
 def kakao_login_view(request):
     client_id = settings.KAKAO_CLIENT_ID
-    redirect_uri = settings.KAKAO_REDIRECT_URI
+
+    # [★ 수정] 자동 감지
+    current_domain = request.get_host()
+    redirect_uri = f"http://{current_domain}/users/kakao/callback/"
     
     # 카카오 인증 페이지 URL 생성
     kakao_auth_url = (
@@ -361,6 +375,10 @@ def kakao_callback_view(request):
     code = request.GET.get('code')
     if not code:
         return Response({"message": "카카오 인증 코드가 없습니다."}, status=400)
+    
+    # [★ 추가]
+    current_domain = request.get_host()
+    redirect_uri = f"http://{current_domain}/users/kakao/callback/"
 
     # 2. 인증 코드로 "액세스 토큰" 요청 (POST 방식)
     token_url = "https://kauth.kakao.com/oauth/token"
@@ -368,7 +386,7 @@ def kakao_callback_view(request):
         "grant_type": "authorization_code",
         "client_id": settings.KAKAO_CLIENT_ID,
         "client_secret": settings.KAKAO_CLIENT_SECRET,
-        "redirect_uri": settings.KAKAO_REDIRECT_URI,
+        "redirect_uri": redirect_uri, # <--- settings 변수 대신 위에서 만든 변수 사용
         "code": code,
     }
     

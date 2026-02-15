@@ -1,43 +1,46 @@
-# 1. Web Framework & API
-Django==5.2.10
-djangorestframework==3.15.2
-
-# 2. Database (PostgreSQL) binary version
-psycopg[binary]==3.1.18
-
-# 3. Environment Variables(.env)
-python-dotenv==1.0.1
-
-# 4. External API & Utilities
-requests==2.32.3
-Pillow==10.3.0
-
-# 5. Deployment (Docker/AWS)
-# WSGI server used for real service instead of django embedded server
-gunicorn==21.2.0
-
-# 6. Security & Auth (option)
-# It is recommended to add CORS error prevention when communicating with the front end (JS).
-django-cors-headers==4.3.1
-# Social Login
-django-allauth==0.63.6
-
-# 7. JWT Authentication
-djangorestframework-simplejwt==5.3.1
-
-# 8. API Documentation (Swagger)
-drf-yasg==1.21.7
-
-# 9. Filtering
-django-filter==23.5
-
-# 10. Date Utilities
-python-dateutil==2.8.2
-
-# 11. Caching
-django-redis==5.4.0
-redis==5.0.1
-
-# 12. Translation
+asgiref==3.11.0
+beautifulsoup4==4.14.3
+certifi==2026.1.4
+chardet==3.0.4
+charset-normalizer==3.4.4
 deep-translator==1.11.4
+Django==5.2.10
+django-allauth==0.63.6
+django-cors-headers==4.3.1
+django-filter==23.5
+django-redis==5.4.0
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.3.1
+drf-yasg==1.21.7
 googletrans==3.1.0a0
+gunicorn==21.2.0
+h11==0.9.0
+h2==3.2.0
+hpack==3.0.0
+hstspreload==2025.1.1
+httpcore==0.9.1
+httpx==0.13.3
+hyperframe==5.2.0
+idna==2.10
+inflection==0.5.1
+packaging==26.0
+pillow==10.3.0
+psycopg==3.1.18
+psycopg-binary==3.1.18
+PyJWT==2.11.0
+python-dateutil==2.8.2
+python-dotenv==1.0.1
+pytz==2025.2
+PyYAML==6.0.3
+redis==5.0.1
+requests==2.32.3
+rfc3986==1.5.0
+six==1.17.0
+sniffio==1.3.1
+soupsieve==2.8.3
+sqlparse==0.5.5
+typing_extensions==4.15.0
+tzdata==2025.3
+uritemplate==4.2.0
+urllib3==2.6.3
+whitenoise==6.11.0
