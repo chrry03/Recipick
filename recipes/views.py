@@ -423,9 +423,14 @@ def get_recipe_recommendations(request):
         user_skill_level=user_skill_level
     )
 
-    # ==================== [🔥 핵심 추가: 찜 상태 주입] ====================
+    # ==================== [수정됨: 찜 상태 주입 (Dict/Object 호환)] ====================
     if user and user.is_authenticated:
-        # 1. 현재 결과에 포함된 모든 레시피 ID 수집
+        # 1. ID 추출 헬퍼 함수 (딕셔너리와 객체 모두 처리)
+        def get_id_safe(item):
+            if isinstance(item, dict):
+                return item.get('recipe_id') or item.get('id')
+            return getattr(item, 'recipe_id', None)
+
         all_recipe_ids = []
         
         # (A) 카테고리 구조일 경우
@@ -433,23 +438,32 @@ def get_recipe_recommendations(request):
             for cat_key in ['urgent_ready', 'ready', 'almost_ready']:
                 if cat_key in result['categories']:
                     recipes = result['categories'][cat_key].get('recipes', [])
-                    all_recipe_ids.extend([r.recipe_id for r in recipes])
+                    # 여기서 get_id_safe 사용
+                    ids = [get_id_safe(r) for r in recipes]
+                    all_recipe_ids.extend([i for i in ids if i is not None])
                     
-        # (B) 리스트 구조일 경우 (recipes 키가 있는 경우)
+        # (B) 리스트 구조일 경우
         if 'recipes' in result:
-            all_recipe_ids.extend([r.recipe_id for r in result['recipes']])
+            ids = [get_id_safe(r) for r in result['recipes']]
+            all_recipe_ids.extend([i for i in ids if i is not None])
             
-        # 2. 사용자가 찜한 레시피 ID 조회 (한 방 쿼리)
+        # 2. 사용자가 찜한 레시피 ID 조회
         favorited_ids = set(FavoriteRecipe.objects.filter(
             user=user,
             recipe_id__in=all_recipe_ids
         ).values_list('recipe_id', flat=True))
         
-        # 3. 각 레시피 객체에 is_favorited 속성 강제 주입
+        # 3. 찜 상태 주입 헬퍼 함수 (딕셔너리와 객체 모두 처리)
         def inject_favorite_status(recipe_list):
             for recipe in recipe_list:
-                # 동적으로 속성 추가 (Serializer가 없어도 동작하도록)
-                recipe.is_favorited = recipe.recipe_id in favorited_ids
+                rid = get_id_safe(recipe)
+                is_fav = rid in favorited_ids
+                
+                if isinstance(recipe, dict):
+                    recipe['is_favorited'] = is_fav  # 딕셔너리인 경우
+                else:
+                    # 객체인 경우 (동적 속성 추가)
+                    setattr(recipe, 'is_favorited', is_fav)
 
         # (A) 카테고리 구조 주입
         if 'categories' in result:
