@@ -266,3 +266,5 @@ htmlcov/
 # Django Cache
 cache/
 *.djcache
+
+.elasticbeanstalk/
