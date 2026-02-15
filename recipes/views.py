@@ -422,6 +422,46 @@ def get_recipe_recommendations(request):
         user_ingredients_dict=user_ingredients_dict,
         user_skill_level=user_skill_level
     )
+
+    # ==================== [🔥 핵심 추가: 찜 상태 주입] ====================
+    if user and user.is_authenticated:
+        # 1. 현재 결과에 포함된 모든 레시피 ID 수집
+        all_recipe_ids = []
+        
+        # (A) 카테고리 구조일 경우
+        if 'categories' in result:
+            for cat_key in ['urgent_ready', 'ready', 'almost_ready']:
+                if cat_key in result['categories']:
+                    recipes = result['categories'][cat_key].get('recipes', [])
+                    all_recipe_ids.extend([r.recipe_id for r in recipes])
+                    
+        # (B) 리스트 구조일 경우 (recipes 키가 있는 경우)
+        if 'recipes' in result:
+            all_recipe_ids.extend([r.recipe_id for r in result['recipes']])
+            
+        # 2. 사용자가 찜한 레시피 ID 조회 (한 방 쿼리)
+        favorited_ids = set(FavoriteRecipe.objects.filter(
+            user=user,
+            recipe_id__in=all_recipe_ids
+        ).values_list('recipe_id', flat=True))
+        
+        # 3. 각 레시피 객체에 is_favorited 속성 강제 주입
+        def inject_favorite_status(recipe_list):
+            for recipe in recipe_list:
+                # 동적으로 속성 추가 (Serializer가 없어도 동작하도록)
+                recipe.is_favorited = recipe.recipe_id in favorited_ids
+
+        # (A) 카테고리 구조 주입
+        if 'categories' in result:
+            for cat_key in ['urgent_ready', 'ready', 'almost_ready']:
+                if cat_key in result['categories']:
+                    inject_favorite_status(result['categories'][cat_key].get('recipes', []))
+                    
+        # (B) 리스트 구조 주입
+        if 'recipes' in result:
+            inject_favorite_status(result['recipes'])
+            
+    # ====================================================================
     
     logger.info(f"✅ 최종 결과: {result.get('total_count', 0)}개")
     
