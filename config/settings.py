@@ -136,9 +136,34 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # WhiteNoise가 정적 파일을 압축해서 전송하도록 설정 (속도 향상)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files (사용자 업로드)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# ==========================================
+# [Media files] 사용자 업로드 파일 (AWS S3)
+# ==========================================
+# 기존 로컬 저장 설정은 주석 처리
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = BASE_DIR / 'media'
+
+# AWS S3 접근 정보 (.env에서 가져옴)
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_REGION = 'ap-northeast-2'
+
+# S3 버킷 설정 (아까 확인한 버킷 이름!)
+AWS_STORAGE_BUCKET_NAME = 'recipick-media-2026'
+
+# S3 도메인 주소 자동 생성
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com'
+
+# [핵심] 미디어 파일(이미지 등)만 S3에 저장하도록 설정
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# 이미지 URL을 S3 주소로 변경
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+
+# (선택) 같은 파일명이 올라와도 덮어쓰지 않도록 설정 (False 추천)
+AWS_S3_FILE_OVERWRITE = False
+
+# ==========================================
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
