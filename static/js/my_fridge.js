@@ -187,7 +187,7 @@ class MyFridgeManager {
             });
         });
     }
-// [수정] 필터링 로직 (ID 대신 이름 사용)
+    // [수정] 필터링 로직 (ID 대신 이름 사용)
     filterIngredients(keyword) {
         let filtered = this.ingredients;
 
@@ -243,10 +243,11 @@ class MyFridgeManager {
                 <div class="ingredient-name">${item.ingredient_name}</div>
             `;
 
-            // [수정] 클릭 시 행동 분기: 편집 모드면 삭제, 아니면 모달 열기
+            // [수정] 클릭 시 행동 분기: 편집 모드면 삭제(이름도 같이 전달), 아니면 모달 열기
             itemDiv.addEventListener('click', () => {
                 if (this.isEditMode) {
-                    this.deleteIngredient(item.user_ingredient_id);
+                    // id와 식재료 이름을 같이 보냅니다
+                    this.deleteIngredient(item.user_ingredient_id, item.ingredient_name);
                 } else {
                     this.openEditModal(item);
                 }
@@ -300,6 +301,36 @@ class MyFridgeManager {
                 alert('수정 실패');
             }
         } catch (err) { console.error(err); }
+    }
+    
+    // =========================================================
+    // 삭제 전용 함수 추가 (MyFridgeManager 클래스 내부 맨 아래)
+    // =========================================================
+    async deleteIngredient(id, name) {
+        if (!id) return;
+        
+        // 브라우저 기본 confirm 창 사용 (경고창이 뜨며, 엔터키를 누르면 자동으로 '확인' 처리됩니다!)
+        if (!confirm(`'${name}'을(를) 냉장고에서 삭제하시겠습니까?`)) {
+            return;
+        }
+        
+        try {
+            const res = await fetch(`/ingredients/api/user-ingredients/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': Utils.getCsrfToken()
+                }
+            });
+
+            if (res.ok) {
+                // 성공 시 목록 갱신 (편집 모드는 자동으로 유지됨)
+                await this.fetchMyIngredients(); 
+            } else {
+                alert('삭제에 실패했습니다.');
+            }
+        } catch (err) {
+            console.error('삭제 중 오류:', err);
+        }
     }
 }
 
