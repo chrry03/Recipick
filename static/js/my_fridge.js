@@ -51,6 +51,9 @@ class MyFridgeManager {
         this.ingredients = []; 
         this.currentCategory = 'all'; // 현재 선택된 카테고리
         this.currentTargetId = null;
+        // [추가] 편집 모드 요소 연결
+        this.editModeBtn = document.getElementById('editModeBtn');
+        this.isEditMode = false; // 기본은 편집 모드 아님
     }
 
     async init() {
@@ -69,7 +72,27 @@ class MyFridgeManager {
         // 모달 버튼 이벤트
         if (this.cancelBtn) this.cancelBtn.addEventListener('click', () => this.closeModal());
         if (this.confirmBtn) this.confirmBtn.addEventListener('click', () => this.updateIngredient());
+        
+        // [추가] 편집 버튼 이벤트
+        if (this.editModeBtn) {
+            this.editModeBtn.addEventListener('click', () => this.toggleEditMode());
+        }
     }
+
+    toggleEditMode() {
+        this.isEditMode = !this.isEditMode;
+        const container = document.querySelector('.fridge-container');
+        
+        if (this.isEditMode) {
+            container.classList.add('edit-mode');
+            this.editModeBtn.classList.add('active');
+            this.editModeBtn.textContent = '완료';
+        } else {
+            container.classList.remove('edit-mode');
+            this.editModeBtn.classList.remove('active');
+            this.editModeBtn.textContent = '편집';
+        }
+    }   
 
     async fetchCategories() {
         if (!this.categoryFilter) return;
@@ -210,8 +233,9 @@ class MyFridgeManager {
             
             const dDayClass = dDay.isUrgent ? 'd-day-tag urgent' : 'd-day-tag';
 
-            // [핵심 수정] onerror 무한루프 방지 코드 추가
+            // [수정] delete-badge (X 표시) 추가
             itemDiv.innerHTML = `
+                <div class="delete-badge">✕</div>
                 <div class="${dDayClass}">${dDay.label}</div>
                 <img src="${iconUrl}" class="ingredient-icon" alt="${item.ingredient_name}" 
                      onerror="this.onerror=null; this.src='/static/images/categories/etc.png';">
@@ -219,8 +243,14 @@ class MyFridgeManager {
                 <div class="ingredient-name">${item.ingredient_name}</div>
             `;
 
-            // 클릭 시 수정 모달 열기
-            itemDiv.addEventListener('click', () => this.openEditModal(item));
+            // [수정] 클릭 시 행동 분기: 편집 모드면 삭제, 아니면 모달 열기
+            itemDiv.addEventListener('click', () => {
+                if (this.isEditMode) {
+                    this.deleteIngredient(item.user_ingredient_id);
+                } else {
+                    this.openEditModal(item);
+                }
+            });
             container.appendChild(itemDiv);
         });
     }
