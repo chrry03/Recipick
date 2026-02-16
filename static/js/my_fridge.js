@@ -210,10 +210,11 @@ class MyFridgeManager {
             
             const dDayClass = dDay.isUrgent ? 'd-day-tag urgent' : 'd-day-tag';
 
+            // [핵심 수정] onerror 무한루프 방지 코드 추가
             itemDiv.innerHTML = `
                 <div class="${dDayClass}">${dDay.label}</div>
                 <img src="${iconUrl}" class="ingredient-icon" alt="${item.ingredient_name}" 
-                     onerror="this.src='/static/images/categories/etc.png'">
+                     onerror="this.onerror=null; this.src='/static/images/categories/etc.png';">
                 <div class="shelf-base"></div>
                 <div class="ingredient-name">${item.ingredient_name}</div>
             `;

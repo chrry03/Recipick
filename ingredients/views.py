@@ -395,17 +395,27 @@ def my_fridge_view(request):
     today = date.today()
     category_counts = {}
     
-    # 데이터 가공
+# 데이터 가공
     for ui in user_ingredients:
         cat_name = ui.ingredient.category.name if ui.ingredient.category else '기타'
         category_counts[cat_name] = category_counts.get(cat_name, 0) + 1
         
-        # [추가] 카테고리 아이콘 URL을 템플릿으로 전달
-        if ui.ingredient.category and ui.ingredient.category.icon_url:
-            ui.display_icon = ui.ingredient.category.icon_url
+        # ==============================================================
+        # [수정] 무한 루프 방지: API 카테고리는 강제로 기본 아이콘 할당
+        # ==============================================================
+        api_categories = ['FoodSafetyKorea', 'Spoonacular API', 'HARDCODED']
+        
+        if ui.ingredient.category:
+            if ui.ingredient.category.name in api_categories:
+                # API 데이터는 아이콘이 없으므로 기본(기타) 아이콘으로 고정
+                ui.display_icon = '/static/images/categories/etc.png'
+            elif ui.ingredient.category.icon_url:
+                ui.display_icon = ui.ingredient.category.icon_url
+            else:
+                ui.display_icon = '/static/images/categories/etc.png'
         else:
-            # 카테고리가 없거나 아이콘이 없는 경우 기본 이미지 (예: 기타)
             ui.display_icon = '/static/images/categories/etc.png'
+        # ==============================================================
 
         # D-Day 태그 생성
         if ui.expire_at:

@@ -19,6 +19,9 @@ class IngredientAdder {
         this.ownedMap = {};      
         this.currentCategory = '';
         
+        // [수정 1] 방금 직접 추가한 식재료를 기억할 배열 추가
+        this.sessionCustomItems = []; 
+        
         this.initElements();
         if (this.container) this.init();
     }
@@ -127,7 +130,7 @@ class IngredientAdder {
     }
 
     async fetchIngredients(categoryId = '', keyword = '') {
-        // [핵심 로직] 직접 추가 카테고리면 -> API 호출 안하고 -> 버튼 생성
+        // 직접 추가 카테고리면 API 호출 안하고 버튼 생성
         if (categoryId === 'custom-direct') {
             this.currentCategory = 'custom-direct';
             this.renderDirectAddButton();
@@ -170,7 +173,7 @@ class IngredientAdder {
                      </div>`;
         });
         
-        // [수정] 사이드바 맨 아래가 아닌, 리스트 끝에 '직접 추가' 탭 추가
+        // 사이드바 맨 끝에 '직접 추가' 탭 추가
         html += `<div class="category-item" data-id="custom-direct" style="color: #FF7043; font-weight:bold;">
                     <span style="font-size:14px; margin-right:4px;">+</span> 
                     <span class="category-name">직접 추가</span>
@@ -189,7 +192,7 @@ class IngredientAdder {
         });
     }
 
-    // [신규] 화이트박스 내부에 버튼 그리기
+    // [수정 3] 화이트박스 내부에 버튼 그리기 + 내가 방금 만든 식재료 유지
     renderDirectAddButton() {
         this.container.innerHTML = ''; // 기존 내용 지움
 
@@ -204,6 +207,13 @@ class IngredientAdder {
         btn.addEventListener('click', () => this.openDirectAddModal());
         
         this.container.appendChild(btn);
+
+        // [핵심 추가] 탭을 이동했다 돌아와도, 이번 세션에 만든 식재료들을 다시 그려줍니다!
+        if (this.sessionCustomItems && this.sessionCustomItems.length > 0) {
+            this.sessionCustomItems.forEach(ing => {
+                this.createCardElement(ing);
+            });
+        }
     }
 
     renderIngredients(ingredients) {
@@ -220,7 +230,9 @@ class IngredientAdder {
     }
 
     createCardElement(ing) {
-        const masterId = ing.id;
+        // [안전 장치] 백엔드 응답(id vs ingredient_id) 차이 때문에 나는 오류 방지
+        const masterId = ing.id || ing.ingredient_id; 
+        
         const isOwned = this.ownedMap.hasOwnProperty(masterId);
         const isSelected = this.selectedItems.hasOwnProperty(masterId);
 
@@ -237,7 +249,7 @@ class IngredientAdder {
     }
 
     handleItemClick(ingredient, cardElement) {
-        const masterId = ingredient.id;
+        const masterId = ingredient.id || ingredient.ingredient_id;
         
         if (this.ownedMap[masterId]) {
             if (confirm('냉장고에서 삭제하시겠습니까?')) {
@@ -292,8 +304,10 @@ class IngredientAdder {
         let dateVal = this.expiryInput.value;
         if (this.noExpiryCheck.checked || !dateVal) dateVal = null;
 
-        this.selectedItems[ingredient.id] = {
-            id: ingredient.id,
+        const masterId = ingredient.id || ingredient.ingredient_id;
+
+        this.selectedItems[masterId] = {
+            id: masterId,
             name: ingredient.name_ko,
             expiry_date: dateVal
         };
@@ -321,6 +335,9 @@ class IngredientAdder {
             const newIngredient = await res.json(); 
 
             this.closeModal(this.directAddModal);
+            
+            // [수정 2] 새로 만든 식재료를 기억 바구니에 저장
+            this.sessionCustomItems.push(newIngredient);
             
             // 직접 추가된 재료 카드 생성 (자동 선택)
             this.createCardElement(newIngredient);
