@@ -140,6 +140,10 @@ ENV/
 env.bak/
 venv.bak/
 
+.env*
+.env.prod
+.env.dev
+
 # Spyder project settings
 .spyderproject
 .spyproject
