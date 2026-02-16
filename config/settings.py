@@ -139,7 +139,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ==========================================
-# [Media files] 사용자 업로드 파일 (AWS S3)
+# [Media files] 사용자 업로드 파일 (AWS S3) - 최신 Django 방식
 # ==========================================
 # 기존 로컬 저장 설정은 주석 처리
 # MEDIA_URL = '/media/'
@@ -156,8 +156,17 @@ AWS_STORAGE_BUCKET_NAME = 'recipick-media-2026'
 # S3 도메인 주소 자동 생성
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com'
 
-# [핵심] 미디어 파일(이미지 등)만 S3에 저장하도록 설정
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# [핵심] Django 4.2 이상 / 5.0 필수 설정 (STORAGES)
+STORAGES = {
+    # 정적 파일 (CSS, JS) -> 화이트노이즈 사용 (기존 유지)
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+    # 미디어 파일 (이미지 업로드) -> AWS S3 사용
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+}
 
 # 이미지 URL을 S3 주소로 변경
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
