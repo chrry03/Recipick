@@ -51,6 +51,9 @@ class MyFridgeManager {
         this.ingredients = []; 
         this.currentCategory = 'all'; // 현재 선택된 카테고리
         this.currentTargetId = null;
+        // [추가] 편집 모드 요소 연결
+        this.editModeBtn = document.getElementById('editModeBtn');
+        this.isEditMode = false; // 기본은 편집 모드 아님
     }
 
     async init() {
@@ -69,7 +72,27 @@ class MyFridgeManager {
         // 모달 버튼 이벤트
         if (this.cancelBtn) this.cancelBtn.addEventListener('click', () => this.closeModal());
         if (this.confirmBtn) this.confirmBtn.addEventListener('click', () => this.updateIngredient());
+        
+        // [추가] 편집 버튼 이벤트
+        if (this.editModeBtn) {
+            this.editModeBtn.addEventListener('click', () => this.toggleEditMode());
+        }
     }
+
+    toggleEditMode() {
+        this.isEditMode = !this.isEditMode;
+        const container = document.querySelector('.fridge-container');
+        
+        if (this.isEditMode) {
+            container.classList.add('edit-mode');
+            this.editModeBtn.classList.add('active');
+            this.editModeBtn.textContent = '완료';
+        } else {
+            container.classList.remove('edit-mode');
+            this.editModeBtn.classList.remove('active');
+            this.editModeBtn.textContent = '편집';
+        }
+    }   
 
     async fetchCategories() {
         if (!this.categoryFilter) return;
@@ -164,7 +187,7 @@ class MyFridgeManager {
             });
         });
     }
-// [수정] 필터링 로직 (ID 대신 이름 사용)
+    // [수정] 필터링 로직 (ID 대신 이름 사용)
     filterIngredients(keyword) {
         let filtered = this.ingredients;
 
@@ -210,16 +233,25 @@ class MyFridgeManager {
             
             const dDayClass = dDay.isUrgent ? 'd-day-tag urgent' : 'd-day-tag';
 
+            // [수정] delete-badge (X 표시) 추가
             itemDiv.innerHTML = `
+                <div class="delete-badge">✕</div>
                 <div class="${dDayClass}">${dDay.label}</div>
                 <img src="${iconUrl}" class="ingredient-icon" alt="${item.ingredient_name}" 
-                     onerror="this.src='/static/images/categories/etc.png'">
+                     onerror="this.onerror=null; this.src='/static/images/categories/etc.png';">
                 <div class="shelf-base"></div>
                 <div class="ingredient-name">${item.ingredient_name}</div>
             `;
 
-            // 클릭 시 수정 모달 열기
-            itemDiv.addEventListener('click', () => this.openEditModal(item));
+            // [수정] 클릭 시 행동 분기: 편집 모드면 삭제(이름도 같이 전달), 아니면 모달 열기
+            itemDiv.addEventListener('click', () => {
+                if (this.isEditMode) {
+                    // id와 식재료 이름을 같이 보냅니다
+                    this.deleteIngredient(item.user_ingredient_id, item.ingredient_name);
+                } else {
+                    this.openEditModal(item);
+                }
+            });
             container.appendChild(itemDiv);
         });
     }
@@ -269,6 +301,36 @@ class MyFridgeManager {
                 alert('수정 실패');
             }
         } catch (err) { console.error(err); }
+    }
+    
+    // =========================================================
+    // 삭제 전용 함수 추가 (MyFridgeManager 클래스 내부 맨 아래)
+    // =========================================================
+    async deleteIngredient(id, name) {
+        if (!id) return;
+        
+        // 브라우저 기본 confirm 창 사용 (경고창이 뜨며, 엔터키를 누르면 자동으로 '확인' 처리됩니다!)
+        if (!confirm(`'${name}'을(를) 냉장고에서 삭제하시겠습니까?`)) {
+            return;
+        }
+        
+        try {
+            const res = await fetch(`/ingredients/api/user-ingredients/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': Utils.getCsrfToken()
+                }
+            });
+
+            if (res.ok) {
+                // 성공 시 목록 갱신 (편집 모드는 자동으로 유지됨)
+                await this.fetchMyIngredients(); 
+            } else {
+                alert('삭제에 실패했습니다.');
+            }
+        } catch (err) {
+            console.error('삭제 중 오류:', err);
+        }
     }
 }
 
