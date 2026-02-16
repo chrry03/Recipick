@@ -198,11 +198,11 @@
 /* ==========================================================================
    3. 타이머 스타일 (크기 축소 수정 버전)
    ========================================================================== */
-/* [수정] 크기를 250px -> 180px로 축소 */
+/* [수정] 주황색 원형 타이머 크기 (220px) */
 .base-timer { 
     position: relative; 
-    width: 180px; 
-    height: 180px; 
+    width: 220px; 
+    height: 220px; 
     margin: 0 auto; 
     display: block; 
     visibility: visible; 
@@ -222,7 +222,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    margin-top: -75px;
+    margin-top: -65px;
     z-index: 1;
     width: 32px;
     height: 32px;
@@ -249,8 +249,8 @@
     height: 24px;
     display: block;
 }
-.base-timer__left-label { font-size: 18px; font-weight: 500; color: rgba(85, 85, 85, 1); text-transform: uppercase; margin-bottom: 0; letter-spacing: 0.5px; font-family: 'MemomentKkukkukk', sans-serif; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: -45px; z-index: 1; }
-.base-timer__time { font-size: 65px; font-weight: normal; color: #000000; line-height: 1; margin: 0; font-family: 'MemomentKkukkukk', sans-serif; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); user-select: none; display: flex; align-items: center; justify-content: center; gap: 4px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; }
+.base-timer__left-label { font-size: 18px; font-weight: 500; color: rgba(85, 85, 85, 1); text-transform: uppercase; margin-bottom: 0; letter-spacing: 0.5px; font-family: 'MemomentKkukkukk', sans-serif; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: -35px; z-index: 1; }
+.base-timer__time { font-size: 65px; font-weight: normal; color: #000000; line-height: 1; margin: 0; font-family: 'MemomentKkukkukk', sans-serif; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); user-select: none; display: flex; align-items: center; justify-content: center; gap: 4px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: 10px; z-index: 1; }
 .timer-time-part { display: inline-block; min-width: 50px; text-align: center; transition: background-color 0.2s ease; border-radius: 4px; padding: 0 4px; }
 .timer-time-part:hover { background-color: rgba(255, 110, 64, 0.1); }
 .timer-time-separator { display: inline-block; user-select: none; font-family: 'MemomentKkukkukk', sans-serif; }
@@ -283,7 +283,7 @@
     top: 50%; 
     left: 50%; 
     transform: translate(-50%, -50%); 
-    margin-top: 30px; /* 40px -> 30px (위치 조정) */
+    margin-top: 42px;
     width: 0; 
     height: 0; 
     border-left: 18px solid #ff6e40; /* 24px -> 18px */
@@ -307,7 +307,7 @@
     background-color: transparent; 
     position: absolute; 
     transform: translate(-50%, -50%); 
-    margin-top: 30px; 
+    margin-top: 42px; 
 }
 .base-timer__play-button.paused::before, .base-timer__play-button.paused::after { 
     content: ''; 
