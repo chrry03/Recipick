@@ -255,10 +255,13 @@
 
             let favoritesList = Array.isArray(data) ? data : (data.results || []);
             
-            // 찜 목록 데이터 구조 변환 (Recipe 객체 추출 + is_favorited 강제 True)
+            // 찜 목록 데이터 구조 변환 (Recipe 객체 추출 + ingredients_status 병합 + is_favorited 강제 True)
             let recipeList = favoritesList.map(item => {
                 let recipe = item.recipe || item;
                 recipe.is_favorited = true; // 찜 목록이니까 당연히 True
+                if (item.ingredients_status) {
+                    recipe.ingredients_status = item.ingredients_status;
+                }
                 return recipe;
             });
 
@@ -406,6 +409,16 @@
 
     // === 5. 초기화 ===
     document.addEventListener('DOMContentLoaded', () => {
+        // URL 파라미터에서 filter 확인 (예: /recipes/?filter=favorites)
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterFromUrl = urlParams.get('filter');
+        if (filterFromUrl && ['all', 'favorites', 'my-ingredients'].includes(filterFromUrl)) {
+            currentState.filter = filterFromUrl;
+            DOM.filterChips.forEach(c => c.classList.remove('active'));
+            const targetChip = document.querySelector(`.filter-chip[data-filter="${filterFromUrl}"]`);
+            if (targetChip) targetChip.classList.add('active');
+        }
+
         // 필터 칩 클릭 이벤트
         DOM.filterChips.forEach(chip => {
             chip.addEventListener('click', () => {
