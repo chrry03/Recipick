@@ -2174,6 +2174,3695 @@
         {"name_ko": "설탕", "name_en": "sugar", "quantity": "1스푼", "is_optional": false}
         ]
     },
+
+    {
+        "external_id": "hardcoded_201",
+        "source": "HARDCODED",
+        "title_ko": "알리오올리오 파스타",
+        "title": "Aglio e Olio Pasta",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/201_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "팬에 올리브유 네 스푼과 다진마늘 한 스푼을 넣어주고, 다진마늘의 색이 변할 때까지 익혀준다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/201_1.png"
+          },
+          {
+            "step": 2,
+            "description": "크러쉬드 레드페퍼홀을 한 스푼 넣어준다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/201_2.png"
+          },
+          {
+            "step": 3,
+            "description": "물 550ml와 파스타면 1인분, 참치액젓 한 스푼을 넣어주고 잘 익을 때까지 기다린다.",
+            "timer_minutes": 10,
+            "image": "/static/images/recipes/sy/201_3.png"
+          },
+          {
+            "step": 4,
+            "description": "불을 끄고 다진마늘 반 스푼과 올리브유 한 스푼을 넣고 잘 섞어준다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/201_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "파스타",
+            "name_en": "pasta",
+            "quantity": "120g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "다진마늘",
+            "name_en": "minced garlic",
+            "quantity": "2T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "크러쉬드 레드페퍼홀",
+            "name_en": "crushed red pepper flakes",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "올리브유",
+            "name_en": "olive oil",
+            "quantity": "5T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물",
+            "name_en": "water",
+            "quantity": "550ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참치액",
+            "name_en": "tuna fish sauce",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "파마산치즈가루",
+            "name_en": "parmesan cheese powder",
+            "quantity": "4g",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_202",
+        "source": "HARDCODED",
+        "title_ko": "불닭 치즈 파스타",
+        "title": "Buldak Spicy Cheese Pasta",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/202_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "파스타면 1인분, 버터 한스푼, 체다치즈 3장, 자른 베이컨, 참치액 1스푼, 불닭소스 두 스푼, 케찹 1스푼, 우유 200ml, 물 360ml 넣어준다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/202_1.png"
+          },
+          {
+            "step": 2,
+            "description": "강불인 상태로 뭉친 소스를 잘 풀어주고 잘 풀어줬으면 중불로 줄여서 5분정도 졸여준다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/202_2.png"
+          },
+          {
+            "step": 3,
+            "description": "면의 상태를 확인해서 너무 덜익었으면 물을 좀 더 추가해주고, 거의 다 익었으면 강불로 올려서 조금만 더 졸여준 뒤 마무리한다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/202_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "파스타",
+            "name_en": "pasta",
+            "quantity": "1인분",
+            "is_optional": false
+          },
+          {
+            "name_ko": "베이컨",
+            "name_en": "bacon",
+            "quantity": "2줄",
+            "is_optional": false
+          },
+          {
+            "name_ko": "버터",
+            "name_en": "butter",
+            "quantity": "20g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "체다치즈",
+            "name_en": "cheddar cheese",
+            "quantity": "3장",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참치액",
+            "name_en": "tuna fish sauce",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "불닭소스",
+            "name_en": "Buldak sauce",
+            "quantity": "2T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "케찹",
+            "name_en": "ketchup",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "우유",
+            "name_en": "milk",
+            "quantity": "200ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물",
+            "name_en": "water",
+            "quantity": "360ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "파슬리 가루",
+            "name_en": "parsley flakes",
+            "quantity": "약간",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_203",
+        "source": "HARDCODED",
+        "title_ko": "나폴리탄 파스타",
+        "title": "Neapolitan Pasta",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/203_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "팬에 파스타면 1인분, 버터 1스푼, 얇게 썬 양파 ½개, 얇게 썬 소시지 1~2개, 간장 1스푼, 케첩 4스푼을 넣습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/203_1.png"
+          },
+          {
+            "step": 2,
+            "description": "물 600ml를 넣고 강불로 끓이기 시작합니다.",
+            "timer_minutes": 4,
+            "image": "/static/images/recipes/sy/203_2.png"
+          },
+          {
+            "step": 3,
+            "description": "물이 끓기 시작하면 약 5분 정도 그대로 두었다가 면이 눌어붙지 않게 저어주면서 물이 거의 증발할 때까지 졸여줍니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/203_3.png"
+          },
+          {
+            "step": 4,
+            "description": "물이 거의 없어지면 면의 익힘 정도와 간을 확인합니다. 면이 덜 익었으면 물을 더 넣고 졸이고, 간이 싱거우면 케첩을 더 넣어줍니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/203_4.png"
+          },
+          {
+            "step": 5,
+            "description": "불을 끄고 후춧가루 ½스푼을 넣고 잘 섞어줍니다. 파마산 치즈가루가 있다면 추가하면 맛이 더욱 좋아집니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/203_5.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "파스타",
+            "name_en": "pasta",
+            "quantity": "1인분",
+            "is_optional": false
+          },
+          {
+            "name_ko": "버터",
+            "name_en": "butter",
+            "quantity": "20g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "양파",
+            "name_en": "onion",
+            "quantity": "1/2개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "소시지",
+            "name_en": "sausage",
+            "quantity": "1~2개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "케찹",
+            "name_en": "ketchup",
+            "quantity": "4T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "간장",
+            "name_en": "soy sauce",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물",
+            "name_en": "water",
+            "quantity": "600ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "후추가루",
+            "name_en": "black pepper powder",
+            "quantity": "1/2T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "버섯",
+            "name_en": "mushroom",
+            "quantity": "조금",
+            "is_optional": true
+          },
+          {
+            "name_ko": "파마산치즈가루",
+            "name_en": "parmesan cheese powder",
+            "quantity": "4g",
+            "is_optional": true
+          },
+          {
+            "name_ko": "파슬리가루",
+            "name_en": "parsley flakes",
+            "quantity": "약간",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_204",
+        "source": "HARDCODED",
+        "title_ko": "버섯 우유크림 파스타",
+        "title": "Mushroom Milk Cream Pasta",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/204_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "느타리버섯은 밑동을 잘라 버리고 먹기 좋게 다져줍니다. 팬에 올리브유 5스푼을 두르고 중강불에 달군 후 다진 느타리버섯을 넣고 색이 갈색이 될 때까지 볶습니다. 맛소금 1스푼을 넣어 간을 해줍니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/204_1.png"
+          },
+          {
+            "step": 2,
+            "description": "버섯이 갈색이 되면 불을 중약불로 줄이고 다진 마늘 1스푼을 넣어 마늘 향이 올라올 때까지 볶습니다. 마늘 향이 올라오면 불을 끄고 크러시드 레드 페퍼 또는 페페론치노 1스푼을 넣어 잔열로 볶아줍니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/204_2.png"
+          },
+          {
+            "step": 3,
+            "description": "팬에 파스타 1인분, 참치액젓 1스푼, 버터 1스푼, 우유 200ml, 물 360ml를 넣어줍니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/204_3.png"
+          },
+          {
+            "step": 4,
+            "description": "불을 중강불로 켜고 파스타면을 잘 풀어준 후, 물이 끓기 시작하면 약 4~5분 정도 그대로 둡니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/204_4.png"
+          },
+          {
+            "step": 5,
+            "description": "물이 잘 졸아들면 면의 상태를 확인합니다. 면이 덜 익었으면 물을 더 넣고 끓이고, 너무 빨리 익었으면 불을 강불로 올려줍니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/204_5.png"
+          },
+          {
+            "step": 6,
+            "description": "면을 당겼을 때 팬 바닥이 보이면 완성입니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/204_6.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "느타리버섯",
+            "name_en": "oyster mushroom",
+            "quantity": "160g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "맛소금",
+            "name_en": "seasoned salt",
+            "quantity": "1/4T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "올리브유",
+            "name_en": "olive oil",
+            "quantity": "5T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "다진마늘",
+            "name_en": "minced garlic",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "페페론치노",
+            "name_en": "dried chili pepper",
+            "quantity": "1/3T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "파스타면",
+            "name_en": "pasta",
+            "quantity": "1인분",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참치액젓",
+            "name_en": "tuna fish sauce",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "우유",
+            "name_en": "milk",
+            "quantity": "200ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물",
+            "name_en": "water",
+            "quantity": "360ml",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_205",
+        "source": "HARDCODED",
+        "title_ko": "명란 파스타",
+        "title": "Myeongnan (Pollock Roe) Pasta",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/205_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "팬에 올리브유 3스푼을 넣고 약불로 다진 마늘 1스푼을 볶습니다. 마늘 색이 변하기 시작하면 크러시드 레드 페퍼 또는 페페론치노 1스푼을 넣고 마늘과 페퍼의 향이 잘 올라오도록 갈색으로 볶은 후 불을 끕니다.",
+            "timer_minutes": 4,
+            "image": "/static/images/recipes/sy/205_1.png"
+          },
+          {
+            "step": 2,
+            "description": "물 550ml와 파스타면 1인분을 팬에 넣고 참치액젓 1스푼을 넣어줍니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/205_2.png"
+          },
+          {
+            "step": 3,
+            "description": "강불로 끓이기 시작하여 물이 끓으면 중강불로 줄여 졸여줍니다. 면이 눌어붙지 않게 중간중간 잘 펼쳐주세요.",
+            "timer_minutes": 8,
+            "image": "/static/images/recipes/sy/205_3.png"
+          },
+          {
+            "step": 4,
+            "description": "파스타가 졸여지는 동안 쪽파 2대를 송송 썰고, 명란젓은 껍질을 분리하여 준비합니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/205_4.png"
+          },
+          {
+            "step": 5,
+            "description": "물이 거의 졸아들면 면의 상태를 확인합니다. 덜 익었으면 물을 더 넣고 졸이고, 너무 많이 익었으면 물을 살짝 버려줍니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/205_5.png"
+          },
+          {
+            "step": 6,
+            "description": "불을 끄고 버터 1스푼과 손질한 명란젓을 넣고 잘 섞어줍니다. 소스처럼 변할 수 있게 열심히 치대줍니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/205_6.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "파스타면",
+            "name_en": "pasta",
+            "quantity": "1인분",
+            "is_optional": false
+          },
+          {
+            "name_ko": "올리브유",
+            "name_en": "olive oil",
+            "quantity": "3T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "다진마늘",
+            "name_en": "minced garlic",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "페퍼론치노",
+            "name_en": "dried chili pepper",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물",
+            "name_en": "water",
+            "quantity": "550ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참치액",
+            "name_en": "tuna fish sauce",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "버터",
+            "name_en": "butter",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "명란젓",
+            "name_en": "salted pollock roe",
+            "quantity": "30g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "쪽파",
+            "name_en": "chives",
+            "quantity": "1/2컵",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_206",
+        "source": "HARDCODED",
+        "title_ko": "고추참치 파스타",
+        "title": "Spicy Tuna Pasta",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/206_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "팬에 파스타 1인분, 고추참치 1캔, 다진 마늘 1스푼, 버터 1스푼, 체다 치즈 2장, 케첩 2스푼을 넣어줍니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/206_1.png"
+          },
+          {
+            "step": 2,
+            "description": "참치액젓 ½스푼과 물 600ml를 넣고 강불로 끓이기 시작합니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/206_2.png"
+          },
+          {
+            "step": 3,
+            "description": "팬의 두께에 따라 강불 또는 중간불에서 물이 졸아들 때까지 끓여줍니다. 면이 바닥에 붙지 않게 중간중간 저어줍니다.",
+            "timer_minutes": 10,
+            "image": "/static/images/recipes/sy/206_3.png"
+          },
+          {
+            "step": 4,
+            "description": "어느 정도 졸아들면 면을 맛보면서 확인합니다. 면이 덜 익었으면 물을 조금 더 넣고 졸여주고, 싱거우면 참치액젓이나 맛소금으로 추가 간을 해줍니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/206_4.png"
+          },
+          {
+            "step": 5,
+            "description": "잘 졸아들었으면 불을 끄고 파슬리가루 1T를 뿌려 마무리합니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/206_5.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "파스타면",
+            "name_en": "pasta",
+            "quantity": "1인분",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고추참치",
+            "name_en": "spicy canned tuna",
+            "quantity": "1캔",
+            "is_optional": false
+          },
+          {
+            "name_ko": "다진마늘",
+            "name_en": "minced garlic",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "버터",
+            "name_en": "butter",
+            "quantity": "20g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "체다치즈",
+            "name_en": "cheddar cheese",
+            "quantity": "2장",
+            "is_optional": false
+          },
+          {
+            "name_ko": "케찹",
+            "name_en": "ketchup",
+            "quantity": "2T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참치액젓",
+            "name_en": "tuna fish sauce",
+            "quantity": "0.5T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물",
+            "name_en": "water",
+            "quantity": "600ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "송이버섯",
+            "name_en": "pine mushroom",
+            "quantity": "2개",
+            "is_optional": true
+          },
+          {
+            "name_ko": "다진양파",
+            "name_en": "minced onion",
+            "quantity": "1/2개",
+            "is_optional": true
+          },
+          {
+            "name_ko": "파슬리가루",
+            "name_en": "parsley flakes",
+            "quantity": "약간",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_207",
+        "source": "HARDCODED",
+        "title_ko": "까르보나라 파스타",
+        "title": "Carbonara Pasta",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/207_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "팬에 올리브유 1스푼을 두르고 베이컨 3줄을 구워줍니다. 물 반 컵을 넣고 뚜껑을 덮어 익힌 후 설탕 1스푼을 뿌려 구워 식혀줍니다.",
+            "timer_minutes": 7,
+            "image": "/static/images/recipes/sy/207_1.png"
+          },
+          {
+            "step": 2,
+            "description": "베이컨 기름을 정리한 팬에 파스타 1인분과 물 550ml, 치킨 스톡 ½스푼을 넣어줍니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/207_2.png"
+          },
+          {
+            "step": 3,
+            "description": "강불로 켜고 물이 끓기 시작하면 중강불로 줄여 5~6분 정도 졸여줍니다.",
+            "timer_minutes": 6,
+            "image": "/static/images/recipes/sy/207_3.png"
+          },
+          {
+            "step": 4,
+            "description": "파스타가 졸여지는 동안 달걀 노른자 2개, 맛소금 ⅓스푼, 파마산 치즈가루 3스푼을 넣고 섞어줍니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/207_4.png"
+          },
+          {
+            "step": 5,
+            "description": "면의 익힘 정도를 확인하고 물이 면을 당겼을 때 바로 차지 않을 정도로 졸여줍니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/207_5.png"
+          },
+          {
+            "step": 6,
+            "description": "불을 끄고 30초 정도 식힌 후 준비한 소스를 넣고 잘 치대어 소스화합니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/207_6.png"
+          },
+          {
+            "step": 7,
+            "description": "간을 보고 후추 1/2T와 구운 베이컨을 올려 마무리합니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/207_7.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "베이컨",
+            "name_en": "bacon",
+            "quantity": "3줄",
+            "is_optional": false
+          },
+          {
+            "name_ko": "파스타면",
+            "name_en": "pasta",
+            "quantity": "1인분",
+            "is_optional": false
+          },
+          {
+            "name_ko": "치킨스톡",
+            "name_en": "chicken stock",
+            "quantity": "1/2T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물",
+            "name_en": "water",
+            "quantity": "550ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg (yolks)",
+            "quantity": "2알",
+            "is_optional": false
+          },
+          {
+            "name_ko": "맛소금",
+            "name_en": "seasoned salt",
+            "quantity": "1/4T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "파마산치즈가루",
+            "name_en": "parmesan cheese powder",
+            "quantity": "3T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "후추",
+            "name_en": "black pepper",
+            "quantity": "약간",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_208",
+        "source": "HARDCODED",
+        "title_ko": "고추참치 순두부찌개",
+        "title": "Spicy Tuna Soft Tofu Stew",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/208_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "대파 흰 부분은 송송 썰고, 양파는 채 썰고, 청양고추도 송송 썰어 준비합니다. 팽이버섯은 밑동을 제거합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/208_1.png"
+          },
+          {
+            "step": 2,
+            "description": "뚝배기에 참기름 1스푼, 다진 마늘 1/2스푼, 대파 1대, 양파 1/4개를 넣고 중약불에서 양파가 투명해질 때까지 볶습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/208_2.png"
+          },
+          {
+            "step": 3,
+            "description": "고추참치 1캔(기름 포함)과 고춧가루 1스푼을 넣고 1분간 더 볶아 비린 맛을 잡습니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/208_3.png"
+          },
+          {
+            "step": 4,
+            "description": "물 350ml, 국간장 1스푼, 양조간장 2스푼, 후추 세 꼬집을 넣고 강불로 끓입니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/208_4.png"
+          },
+          {
+            "step": 5,
+            "description": "바글바글 끓으면 순두부, 청양고추, 팽이버섯, 계란 1개를 넣고 1분간 더 끓여 마무리합니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/208_5.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "순두부",
+            "name_en": "soft tofu",
+            "quantity": "1팩",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고추참치",
+            "name_en": "spicy canned tuna",
+            "quantity": "1캔(150g)",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물",
+            "name_en": "water",
+            "quantity": "350ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "대파",
+            "name_en": "green onion",
+            "quantity": "약간",
+            "is_optional": false
+          },
+          {
+            "name_ko": "양파",
+            "name_en": "onion",
+            "quantity": "1/4개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "청양고추",
+            "name_en": "cheongyang chili pepper",
+            "quantity": "2개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "팽이버섯",
+            "name_en": "enoki mushroom",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참기름",
+            "name_en": "sesame oil",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "다진 마늘",
+            "name_en": "minced garlic",
+            "quantity": "1/2스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고춧가루",
+            "name_en": "red pepper powder",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "국간장",
+            "name_en": "soup soy sauce",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "양조간장",
+            "name_en": "soy sauce",
+            "quantity": "2스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "후추",
+            "name_en": "black pepper",
+            "quantity": "약간",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "1개",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_209",
+        "source": "HARDCODED",
+        "title_ko": "계란 순두부국",
+        "title": "Egg Soft Tofu Soup",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/209_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "냄비에 물 2컵과 코인육수 1알을 넣고 끓입니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/209_1.png"
+          },
+          {
+            "step": 2,
+            "description": "육수가 끓으면 순두부 1팩과 다진 마늘 0.5스푼을 넣습니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/209_2.png"
+          },
+          {
+            "step": 3,
+            "description": "계란을 풀어 줄을 치듯 넣어주고, 대파 1대를 송송 썰어 넣습니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/209_3.png"
+          },
+          {
+            "step": 4,
+            "description": "소금 1/2T, 참치액젓 1/2T 또는 다시다로 간을 맞추고 후추 1/2T를 뿌려 마무리합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/209_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "순두부",
+            "name_en": "soft tofu",
+            "quantity": "1팩",
+            "is_optional": false
+          },
+          {
+            "name_ko": "코인육수",
+            "name_en": "broth tablet",
+            "quantity": "1알",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "1개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "다진 마늘",
+            "name_en": "minced garlic",
+            "quantity": "0.5스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "대파",
+            "name_en": "green onion",
+            "quantity": "약간",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참치액젓",
+            "name_en": "tuna fish sauce",
+            "quantity": "약간",
+            "is_optional": true
+          },
+          {
+            "name_ko": "소금",
+            "name_en": "salt",
+            "quantity": "약간",
+            "is_optional": false
+          },
+          {
+            "name_ko": "후추",
+            "name_en": "pepper",
+            "quantity": "약간",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_210",
+        "source": "HARDCODED",
+        "title_ko": "불닭 팽이쌈",
+        "title": "Spicy Buldak Enoki Mushroom Wraps",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/210_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "팬에 물 2스푼을 넣고 팽이버섯 1-2봉을 넣어 숨이 죽을 정도로 쪄줍니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/210_1.png"
+          },
+          {
+            "step": 2,
+            "description": "고추장 2큰술, 불닭소스 5큰술, 물엿 2큰술을 섞어 소스를 만든 뒤 버섯에 붓고 졸이듯 끓입니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/210_2.png"
+          },
+          {
+            "step": 3,
+            "description": "라이스페이퍼를 찬물에 3초간 담갔다 뺀 뒤 넓게 폅니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/210_3.png"
+          },
+          {
+            "step": 4,
+            "description": "라이스페이퍼 위에 양념된 팽이버섯과 치즈 50g을 올리고 돌돌 말아줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/210_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "팽이버섯",
+            "name_en": "enoki mushroom",
+            "quantity": "1-2봉",
+            "is_optional": false
+          },
+          {
+            "name_ko": "라이스페이퍼",
+            "name_en": "rice paper",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고추장",
+            "name_en": "gochujang",
+            "quantity": "2큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "불닭소스",
+            "name_en": "buldak sauce",
+            "quantity": "5큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물엿",
+            "name_en": "corn syrup",
+            "quantity": "2큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "치즈",
+            "name_en": "cheese",
+            "quantity": "취향껏",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_211",
+        "source": "HARDCODED",
+        "title_ko": "카레 볶음밥",
+        "title": "Curry Fried Rice",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/211_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "양파 1/2개, 당근 1/4개, 햄 50g은 잘게 다지고 대파 1대는 송송 썹니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/211_1.png"
+          },
+          {
+            "step": 2,
+            "description": "식용유 1T를 두른 팬에 대파 1/2단과 다진 마늘 1/2T를 볶아 향을 냅니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/211_2.png"
+          },
+          {
+            "step": 3,
+            "description": "다진 채소 1컵과 햄 50g을 넣고 소금 1/2T로 간을 하며 볶다가 한쪽에서 계란 스크램블을 만듭니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/211_3.png"
+          },
+          {
+            "step": 4,
+            "description": "카레가루 2스푼을 넣고 살짝 볶은 뒤, 밥 1공기를 넣어 골고루 섞어가며 볶습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/211_4.png"
+          },
+          {
+            "step": 5,
+            "description": "마지막에 후추 1/2T와 버터 한 조각을 넣어 풍미를 더합니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/211_5.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "1공기",
+            "is_optional": false
+          },
+          {
+            "name_ko": "카레가루",
+            "name_en": "curry powder",
+            "quantity": "2스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "1개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "햄",
+            "name_en": "ham",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "채소",
+            "name_en": "vegetables",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "버터",
+            "name_en": "butter",
+            "quantity": "1조각",
+            "is_optional": true
+          },
+          {
+            "name_ko": "다진 마늘",
+            "name_en": "minced garlic",
+            "quantity": "약간",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_212",
+        "source": "HARDCODED",
+        "title_ko": "김치말이국수",
+        "title": "Kimchi Noodle Soup",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/212_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "잘게 썬 김치에 설탕 0.5스푼, 참기름 1.5스푼을 넣고 버무립니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/212_1.png"
+          },
+          {
+            "step": 2,
+            "description": "물 180ml, 김치국물 60ml에 설탕 1, 고춧가루 0.5, 간장 3.5, 식초 2스푼을 섞어 육수를 만듭니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/212_2.png"
+          },
+          {
+            "step": 3,
+            "description": "소면을 삶아 찬물에 헹궈 준비합니다.",
+            "timer_minutes": 4,
+            "image": "/static/images/recipes/sy/212_3.png"
+          },
+          {
+            "step": 4,
+            "description": "육수에 얼음을 띄우고 소면, 양념 김치, 오이 고명을 올려 완성합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/212_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "소면",
+            "name_en": "somen noodles",
+            "quantity": "1인분",
+            "is_optional": false
+          },
+          {
+            "name_ko": "김치",
+            "name_en": "kimchi",
+            "quantity": "4스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "김치국물",
+            "name_en": "kimchi brine",
+            "quantity": "60ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "식초",
+            "name_en": "vinegar",
+            "quantity": "2스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "오이",
+            "name_en": "cucumber",
+            "quantity": "적당량",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_213",
+        "source": "HARDCODED",
+        "title_ko": "스팸 땡초 김밥",
+        "title": "Spam and Chili Pepper Kimbap",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/213_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "청양고추는 잘게 다지고, 스팸은 비닐팩에 넣어 으깨줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/213_1.png"
+          },
+          {
+            "step": 2,
+            "description": "팬에 스팸을 넣고 수분이 날아가 노릇해질 때까지 볶습니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/213_2.png"
+          },
+          {
+            "step": 3,
+            "description": "청양고추와 간장, 굴소스, 설탕(각 1스푼)을 넣고 가볍게 더 볶아줍니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/213_3.png"
+          },
+          {
+            "step": 4,
+            "description": "밥 2.5공기와 볶은 재료를 잘 섞은 뒤 김밥용 김 4장 위에 얇게 펴서 말아줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/213_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "2.5공기",
+            "is_optional": false
+          },
+          {
+            "name_ko": "스팸",
+            "name_en": "spam",
+            "quantity": "300g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "청양고추",
+            "name_en": "cheongyang chili pepper",
+            "quantity": "5개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "김밥용 김",
+            "name_en": "dried seaweed",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "굴소스",
+            "name_en": "oyster sauce",
+            "quantity": "1스푼",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_214",
+        "source": "HARDCODED",
+        "title_ko": "콩나물국밥",
+        "title": "Bean Sprout Soup with Rice",
+        "difficulty": "MEDIUM",
+        "ready_minutes": 25,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/214_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "냄비에 물 2L와 콩나물, 육수 재료를 넣고 10분간 끓입니다.",
+            "timer_minutes": 10,
+            "image": "/static/images/recipes/sy/214_1.png"
+          },
+          {
+            "step": 2,
+            "description": "오징어를 국물에 넣어 2분간 데친 후 꺼내어 썰어둡니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/214_2.png"
+          },
+          {
+            "step": 3,
+            "description": "그릇에 참기름을 바르고 계란을 담아 국물 열기로 반숙 수란을 만듭니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/214_3.png"
+          },
+          {
+            "step": 4,
+            "description": "뚝배기에 밥과 국물을 붓고 데친 오징어, 김치, 고춧가루 고명을 올립니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/214_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "콩나물",
+            "name_en": "bean sprouts",
+            "quantity": "1봉지",
+            "is_optional": false
+          },
+          {
+            "name_ko": "오징어",
+            "name_en": "squid",
+            "quantity": "1마리",
+            "is_optional": false
+          },
+          {
+            "name_ko": "멸치다시다",
+            "name_en": "anchovy dashida",
+            "quantity": "1포",
+            "is_optional": false
+          },
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "0.5공기",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "1개",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_215",
+        "source": "HARDCODED",
+        "title_ko": "케찹 볶음밥",
+        "title": "Ketchup Fried Rice",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/215_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "케찹 3, 간장 1, 굴소스 1, 물 반 컵을 섞어 소스를 만듭니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/215_1.png"
+          },
+          {
+            "step": 2,
+            "description": "팬에 다진 채소를 볶다가 계란 3개를 넣어 노릇하게 익힙니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/215_2.png"
+          },
+          {
+            "step": 3,
+            "description": "만들어둔 소스를 붓고 끓이다가 밥 위에 얹어 마무리합니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/215_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "1공기",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "3개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "케찹",
+            "name_en": "ketchup",
+            "quantity": "3스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "자투리 채소",
+            "name_en": "chopped vegetables",
+            "quantity": "적당량",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_216",
+        "source": "HARDCODED",
+        "title_ko": "김치 치즈 주먹밥",
+        "title": "Kimchi Cheese Rice Balls",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/216_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "김치 1컵과 대파 1대를 잘게 썰어 준비합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/216_1.png"
+          },
+          {
+            "step": 2,
+            "description": "설탕 1/2, 진간장 1, 고춧가루 1/2스푼을 섞어 양념장을 만듭니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/216_2.png"
+          },
+          {
+            "step": 3,
+            "description": "볼에 밥 1공기, 김치 1컵, 대파 1대, 양념장을 넣고 잘 섞어준 뒤 한입 크기로 뭉칩니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/216_3.png"
+          },
+          {
+            "step": 4,
+            "description": "뭉친 밥 속에 모짜렐라 치즈 50g을 넣고 동그랗게 모양을 잡습니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/216_4.png"
+          },
+          {
+            "step": 5,
+            "description": "프라이팬에 기름을 두르고 주먹밥을 올려 치즈가 녹을 때까지 노릇하게 굽습니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/216_5.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "1공기",
+            "is_optional": false
+          },
+          {
+            "name_ko": "김치",
+            "name_en": "kimchi",
+            "quantity": "1컵",
+            "is_optional": false
+          },
+          {
+            "name_ko": "대파",
+            "name_en": "green onion",
+            "quantity": "1대",
+            "is_optional": false
+          },
+          {
+            "name_ko": "모짜렐라 치즈",
+            "name_en": "mozzarella cheese",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "설탕",
+            "name_en": "sugar",
+            "quantity": "1/2스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "진간장",
+            "name_en": "soy sauce",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고춧가루",
+            "name_en": "red pepper powder",
+            "quantity": "1/2스푼",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_217",
+        "source": "HARDCODED",
+        "title_ko": "치즈 김치전",
+        "title": "Kimchi Pancakes with Cheese",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/217_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "김치를 잘게 자르고 부침가루 2/3컵, 튀김가루 2/3컵, 물 2/3컵, 김칫국물 1/4컵을 섞어 반죽을 만듭니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/217_1.png"
+          },
+          {
+            "step": 2,
+            "description": "팬에 기름을 넉넉히 두르고 반죽을 올려 앞뒤로 바삭하게 2장을 구워줍니다.",
+            "timer_minutes": 10,
+            "image": "/static/images/recipes/sy/217_2.png"
+          },
+          {
+            "step": 3,
+            "description": "구워진 김치전 한 장 위에 모짜렐라 치즈 50g을 듬뿍 올리고 나머지 한 장을 덮어 치즈를 녹입니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/217_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "신김치",
+            "name_en": "sour kimchi",
+            "quantity": "450g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "부침가루",
+            "name_en": "korean pancake mix",
+            "quantity": "2/3컵",
+            "is_optional": false
+          },
+          {
+            "name_ko": "튀김가루",
+            "name_en": "frying mix",
+            "quantity": "2/3컵",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물",
+            "name_en": "water",
+            "quantity": "2/3컵",
+            "is_optional": false
+          },
+          {
+            "name_ko": "모짜렐라 치즈",
+            "name_en": "mozzarella cheese",
+            "quantity": "적당량",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_218",
+        "source": "HARDCODED",
+        "title_ko": "들기름 막국수",
+        "title": "Perilla Oil Buckwheat Noodles",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/218_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "면을 삶아 찬물에 헹군 뒤 물기를 꽉 짜서 준비합니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/218_1.png"
+          },
+          {
+            "step": 2,
+            "description": "쪽파는 4cm 길이로 썰어 끓는 물에 15초간 데친 후 식힙니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/218_2.png"
+          },
+          {
+            "step": 3,
+            "description": "볼에 면 220g, 쪽파 3줄, 들기름 3큰술, 간장 2.5큰술을 넣고 간을 맞추며 버무립니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/218_3.png"
+          },
+          {
+            "step": 4,
+            "description": "그릇에 담고 조선김 2큰술과 통깨 1T를 듬뿍 뿌려 완성합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/218_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "메밀면",
+            "name_en": "buckwheat noodles",
+            "quantity": "220g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "쪽파",
+            "name_en": "chives",
+            "quantity": "3줄",
+            "is_optional": false
+          },
+          {
+            "name_ko": "들기름",
+            "name_en": "perilla oil",
+            "quantity": "3큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "조선김",
+            "name_en": "dried seaweed",
+            "quantity": "많이",
+            "is_optional": false
+          },
+          {
+            "name_ko": "간장",
+            "name_en": "soy sauce",
+            "quantity": "2.5큰술",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_219",
+        "source": "HARDCODED",
+        "title_ko": "컵누들 마라탕",
+        "title": "Healthy Bone Broth Mala Soup",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/219_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "냄비에 사골곰탕 육수와 컵누들 마라탕 스프를 넣고 끓입니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/219_1.png"
+          },
+          {
+            "step": 2,
+            "description": "마라소스 2큰술을 추가하여 간을 봅니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/219_2.png"
+          },
+          {
+            "step": 3,
+            "description": "준비한 야채(배추, 청경채 등) 1컵을 먼저 넣어 숨을 죽입니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/219_3.png"
+          },
+          {
+            "step": 4,
+            "description": "두부면 1팩과 돼지고기 100g을 넣고 고기가 익을 때까지 끓여 완성합니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/219_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "사골곰탕",
+            "name_en": "beef bone broth",
+            "quantity": "1-2팩",
+            "is_optional": false
+          },
+          {
+            "name_ko": "컵누들 마라탕",
+            "name_en": "cup noodle mala taste",
+            "quantity": "1개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "두부면",
+            "name_en": "tofu noodles",
+            "quantity": "1팩",
+            "is_optional": false
+          },
+          {
+            "name_ko": "돼지고기",
+            "name_en": "pork",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "야채(배추, 청경채 등)",
+            "name_en": "mixed vegetables",
+            "quantity": "취향껏",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_220",
+        "source": "HARDCODED",
+        "title_ko": "마라샹궈",
+        "title": "Mala Xiang Guo (Stir-fried Mala)",
+        "difficulty": "MEDIUM",
+        "ready_minutes": 30,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/220_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "야채와 고기 등 모든 재료를 손질한 뒤 끓는 물에 1분간 데쳐 물기를 뺍니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/220_1.png"
+          },
+          {
+            "step": 2,
+            "description": "웍에 대파 1대와 페퍼론치노를 볶아 기름을 내고 고기 150g을 넣어 갈색이 될 때까지 볶습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/220_2.png"
+          },
+          {
+            "step": 3,
+            "description": "마라소스 2큰술과 양파 1/2개, 다진 마늘 1T를 넣고 볶다가 데친 재료들을 모두 넣습니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/220_3.png"
+          },
+          {
+            "step": 4,
+            "description": "굴소스 1.5큰술, 물엿 1큰술을 넣고 중강불에서 빠르게 볶아 완성합니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/220_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "차돌박이",
+            "name_en": "thinly sliced beef",
+            "quantity": "150g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "대패삼겹살",
+            "name_en": "thinly sliced pork belly",
+            "quantity": "150g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "마라소스",
+            "name_en": "mala sauce",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "중국당면",
+            "name_en": "chinese glass noodles",
+            "quantity": "한줌",
+            "is_optional": false
+          },
+          {
+            "name_ko": "숙주",
+            "name_en": "bean sprouts",
+            "quantity": "취향껏",
+            "is_optional": false
+          },
+          {
+            "name_ko": "청경채",
+            "name_en": "bok choy",
+            "quantity": "취향껏",
+            "is_optional": false
+          },
+          {
+            "name_ko": "배추",
+            "name_en": "napa cabbage",
+            "quantity": "취향껏",
+            "is_optional": false
+          },
+          {
+            "name_ko": "굴소스",
+            "name_en": "oyster sauce",
+            "quantity": "1.5큰술",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_221",
+        "source": "HARDCODED",
+        "title_ko": "부추 비빔밥",
+        "title": "Chive Bibimbap",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/221_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "부추를 쫑쫑 썰어 밥 위에 듬뿍 올립니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/221_1.png"
+          },
+          {
+            "step": 2,
+            "description": "고추장 0.5스푼, 참기름 1바퀴, 계란 노른자 1개를 올립니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/221_2.png"
+          },
+          {
+            "step": 3,
+            "description": "기호에 따라 고추참치를 추가하여 맛있게 비벼줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/221_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "부추",
+            "name_en": "chives",
+            "quantity": "한줌",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고추장",
+            "name_en": "gochujang",
+            "quantity": "0.5스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란 노른자",
+            "name_en": "egg yolk",
+            "quantity": "1개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참기름",
+            "name_en": "sesame oil",
+            "quantity": "1바퀴",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고추참치",
+            "name_en": "spicy canned tuna",
+            "quantity": "1캔",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_222",
+        "source": "HARDCODED",
+        "title_ko": "부추 계란 새우 볶음",
+        "title": "Stir-fried Chives with Egg and Shrimp",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/222_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "부추는 먹기 좋게 자르고 계란은 후추를 넣어 풀어줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/222_1.png"
+          },
+          {
+            "step": 2,
+            "description": "팬에 새우를 익히다가 계란물을 부어 스크램블을 만듭니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/222_2.png"
+          },
+          {
+            "step": 3,
+            "description": "부추 150g과 굴소스 1큰술을 넣고 짧고 강하게 볶아냅니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/222_3.png"
+          },
+          {
+            "step": 4,
+            "description": "참기름 1T와 통깨 1T를 뿌려 마무리합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/222_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "부추",
+            "name_en": "chives",
+            "quantity": "150g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "새우",
+            "name_en": "shrimp",
+            "quantity": "6마리",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "3알",
+            "is_optional": false
+          },
+          {
+            "name_ko": "굴소스",
+            "name_en": "oyster sauce",
+            "quantity": "1큰술",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_223",
+        "source": "HARDCODED",
+        "title_ko": "두부 부추 된장 비빔밥",
+        "title": "Tofu Chive Soybean Paste Bibimbap",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/223_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "두부를 깍둑썰기하여 찬밥 위에 올린 뒤 전자레인지에 3분간 데웁니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/223_1.png"
+          },
+          {
+            "step": 2,
+            "description": "양파는 찬물에 담가 매운기를 빼고 부추는 송송 썹니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/223_2.png"
+          },
+          {
+            "step": 3,
+            "description": "된장 2/3스푼, 알룰로스 1/2스푼, 식초 1/2스푼, 참기름 1T, 고추 1개를 섞어 소스를 만듭니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/223_3.png"
+          },
+          {
+            "step": 4,
+            "description": "데운 밥에 야채와 소스, 계란 후라이를 올려 비벼 먹습니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/223_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "두부",
+            "name_en": "tofu",
+            "quantity": "1/4모",
+            "is_optional": false
+          },
+          {
+            "name_ko": "부추",
+            "name_en": "chives",
+            "quantity": "한줌",
+            "is_optional": false
+          },
+          {
+            "name_ko": "된장",
+            "name_en": "soybean paste",
+            "quantity": "2/3스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "양파",
+            "name_en": "onion",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "알룰로스",
+            "name_en": "allulose",
+            "quantity": "약간",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_224",
+        "source": "HARDCODED",
+        "title_ko": "부추 계란 덮밥",
+        "title": "Chive Egg Rice Bowl",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 3,
+        "image_url": "/static/images/recipes/sy/224_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "부추를 7cm 길이로 썰고 계란은 소금을 넣어 풀어줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/224_1.png"
+          },
+          {
+            "step": 2,
+            "description": "팬에 계란 스크램블을 만든 뒤 부추와 굴소스를 넣고 볶습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/224_2.png"
+          },
+          {
+            "step": 3,
+            "description": "후추 1/2T, 페퍼론치노 1/2T, 참기름 1T를 넣고 한 번 더 볶아 밥 위에 올립니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/224_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "7개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "부추",
+            "name_en": "chives",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "굴소스",
+            "name_en": "oyster sauce",
+            "quantity": "1.5큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "3공기",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_225",
+        "source": "HARDCODED",
+        "title_ko": "케찹 밥",
+        "title": "Simple Ketchup Rice",
+        "difficulty": "EASY",
+        "ready_minutes": 5,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/225_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "따뜻한 밥 1공기 위에 케찹 2큰술을 넉넉히 뿌립니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/225_1.png"
+          },
+          {
+            "step": 2,
+            "description": "간장 1스푼과 참기름 2스푼을 넣습니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/225_2.png"
+          },
+          {
+            "step": 3,
+            "description": "모든 재료가 골고루 섞이도록 비벼주면 완성입니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/225_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "1공기",
+            "is_optional": false
+          },
+          {
+            "name_ko": "케찹",
+            "name_en": "ketchup",
+            "quantity": "넉넉히",
+            "is_optional": false
+          },
+          {
+            "name_ko": "간장",
+            "name_en": "soy sauce",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참기름",
+            "name_en": "sesame oil",
+            "quantity": "2스푼",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_226",
+        "source": "HARDCODED",
+        "title_ko": "쫀득한 우유떡",
+        "title": "Milk Mochi (Milk Rice Cake)",
+        "difficulty": "MEDIUM",
+        "ready_minutes": 50,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/226_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "믹싱볼에 감자 전분 70g과 설탕 50g을 섞은 뒤 냄비에 넣습니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/226_1.png"
+          },
+          {
+            "step": 2,
+            "description": "우유 500ml를 조금씩 부어가며 덩어리가 생기지 않게 주걱으로 잘 섞어줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/226_2.png"
+          },
+          {
+            "step": 3,
+            "description": "바닐라 오일을 넣고 중약불에서 약 5분 이상 계속 저으며 걸쭉해질 때까지 끓입니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/226_3.png"
+          },
+          {
+            "step": 4,
+            "description": "반죽이 녹은 치즈 같은 질감이 되면 짤주머니에 담아 냉장실에서 30분간 식힙니다.",
+            "timer_minutes": 30,
+            "image": "/static/images/recipes/sy/226_4.png"
+          },
+          {
+            "step": 5,
+            "description": "식은 반죽을 길게 짜서 가위로 자른 뒤 얼음물에 살짝 담갔다 건져 물기를 제거합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/226_5.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "우유",
+            "name_en": "milk",
+            "quantity": "500ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "감자 전분",
+            "name_en": "potato starch",
+            "quantity": "70g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "백설탕",
+            "name_en": "white sugar",
+            "quantity": "50g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "바닐라 오일",
+            "name_en": "vanilla oil",
+            "quantity": "5방울",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_227",
+        "source": "HARDCODED",
+        "title_ko": "새송이 버섯덮밥",
+        "title": "King Oyster Mushroom Rice Bowl",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/227_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "새송이버섯은 결대로 찢거나 썰고 대파는 송송 썰어 준비합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/227_1.png"
+          },
+          {
+            "step": 2,
+            "description": "간장 3큰술, 맛술 2큰술, 올리고당 1큰술, 다진 마늘 0.5스푼, 참기름 1큰술, 통깨 1T를 섞어 양념장을 만듭니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/227_2.png"
+          },
+          {
+            "step": 3,
+            "description": "팬에 기름 1T를 두르고 마늘 3알과 대파 1대를 볶아 향을 낸 뒤 버섯과 양념장을 넣고 졸이듯 볶습니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/227_3.png"
+          },
+          {
+            "step": 4,
+            "description": "밥 2공기 위에 볶은 버섯을 얹고 통깨 1T를 뿌려 마무리합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/227_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "새송이버섯",
+            "name_en": "king oyster mushroom",
+            "quantity": "3~4개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "2공기",
+            "is_optional": false
+          },
+          {
+            "name_ko": "간장",
+            "name_en": "soy sauce",
+            "quantity": "3큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "맛술",
+            "name_en": "cooking wine",
+            "quantity": "2큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "올리고당",
+            "name_en": "oligosaccharide",
+            "quantity": "1큰술",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_228",
+        "source": "HARDCODED",
+        "title_ko": "돼지고기 고추장찌개",
+        "title": "Spicy Pork and Red Chili Paste Stew",
+        "difficulty": "MEDIUM",
+        "ready_minutes": 25,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/228_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "냄비에 기름을 두르고 돼지고기와 고추장 1스푼을 약불에서 볶다가 고춧가루를 넣어 더 볶습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/228_1.png"
+          },
+          {
+            "step": 2,
+            "description": "물 2컵을 붓고 끓으면 한입 크기로 썬 감자를 먼저 넣습니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/228_2.png"
+          },
+          {
+            "step": 3,
+            "description": "대파(흰 부분) 1대, 양파 1/2개, 애호박 1/4개, 마늘 3알, 국간장 2스푼, 멸치액젓 1스푼을 넣고 끓입니다.",
+            "timer_minutes": 10,
+            "image": "/static/images/recipes/sy/228_3.png"
+          },
+          {
+            "step": 4,
+            "description": "두부 0.5모와 팽이버섯 1봉, 대파(초록 부분) 1대를 넣고 한소끔 더 끓여 완성합니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/228_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "돼지고기",
+            "name_en": "pork",
+            "quantity": "100g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고추장",
+            "name_en": "gochujang",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "감자",
+            "name_en": "potato",
+            "quantity": "1개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "국간장",
+            "name_en": "soup soy sauce",
+            "quantity": "2스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "멸치액젓",
+            "name_en": "anchovy fish sauce",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "두부",
+            "name_en": "tofu",
+            "quantity": "0.5모",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_229",
+        "source": "HARDCODED",
+        "title_ko": "황태 해장국",
+        "title": "Dried Pollack Hangover Soup",
+        "difficulty": "MEDIUM",
+        "ready_minutes": 35,
+        "servings": 3,
+        "image_url": "/static/images/recipes/sy/229_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "황태는 가위로 자른 뒤 물에 헹궈 짜고, 무는 나박 썰기 합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/229_1.png"
+          },
+          {
+            "step": 2,
+            "description": "냄비에 참기름 3, 마늘 0.5스푼과 황태를 넣고 수분기를 날리며 볶습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/229_2.png"
+          },
+          {
+            "step": 3,
+            "description": "물 2L, 무, 식초 1, 국간장 3, 참치액 3, 소금을 넣고 중약불에서 20분간 끓입니다.",
+            "timer_minutes": 20,
+            "image": "/static/images/recipes/sy/229_3.png"
+          },
+          {
+            "step": 4,
+            "description": "두부와 대파를 넣고 끓이다가 푼 계란을 얇게 줄을 치듯 붓고 불을 끕니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/229_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "황태채",
+            "name_en": "dried pollack",
+            "quantity": "60g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "무",
+            "name_en": "radish",
+            "quantity": "500g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참기름",
+            "name_en": "sesame oil",
+            "quantity": "3스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참치액",
+            "name_en": "tuna fish sauce",
+            "quantity": "3스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "2개",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_230",
+        "source": "HARDCODED",
+        "title_ko": "매콤 오징어 볶음",
+        "title": "Spicy Stir-fried Squid",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/230_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "기름 6스푼에 대파를 볶아 파기름을 내고 모든 양념 재료를 넣어 볶습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/230_1.png"
+          },
+          {
+            "step": 2,
+            "description": "양파를 넣고 볶다가 손질한 오징어를 넣어 센 불에 빠르게 볶아냅니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/230_2.png"
+          },
+          {
+            "step": 3,
+            "description": "참기름과 깨를 둘러 고소하게 마무리합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/230_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "오징어",
+            "name_en": "squid",
+            "quantity": "2마리",
+            "is_optional": false
+          },
+          {
+            "name_ko": "양파",
+            "name_en": "onion",
+            "quantity": "1개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고추장",
+            "name_en": "gochujang",
+            "quantity": "1큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "굴소스",
+            "name_en": "oyster sauce",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참기름",
+            "name_en": "sesame oil",
+            "quantity": "2스푼",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_231",
+        "source": "HARDCODED",
+        "title_ko": "우삼겹 갈비탕",
+        "title": "Quick Beef Short Rib Style Soup",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/231_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "팬에 우삼겹과 다진 마늘을 넣고 고기가 익을 때까지 볶습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/231_1.png"
+          },
+          {
+            "step": 2,
+            "description": "물 300ml, 굴소스 1스푼, 참치액 0.5스푼, 불린 당면 한줌, 대파 1대를 넣고 한소끔 끓입니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/231_2.png"
+          },
+          {
+            "step": 3,
+            "description": "후추 1/2T와 소금 1/2T로 부족한 간을 맞춥니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/231_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "우삼겹",
+            "name_en": "beef short plate",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "당면",
+            "name_en": "glass noodles",
+            "quantity": "한줌",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물",
+            "name_en": "water",
+            "quantity": "300ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "굴소스",
+            "name_en": "oyster sauce",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참치액",
+            "name_en": "tuna fish sauce",
+            "quantity": "0.5스푼",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_232",
+        "source": "HARDCODED",
+        "title_ko": "얼큰 계란국",
+        "title": "Spicy Egg Soup",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/232_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "기름 2T 두른 팬에 대파 1대와 양파 1/2개를 볶다가 고춧가루 2스푼을 넣어 고추기름을 냅니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/232_1.png"
+          },
+          {
+            "step": 2,
+            "description": "물 700ml와 멸치원액 2스푼을 넣고 끓어오르면 푼 계란을 넣습니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/232_2.png"
+          },
+          {
+            "step": 3,
+            "description": "계란이 익으면 살짝 저어준 뒤 참치액 2스푼과 후추 1/2T로 간을 합니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/232_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "2개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물",
+            "name_en": "water",
+            "quantity": "700ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고춧가루",
+            "name_en": "red pepper powder",
+            "quantity": "2스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "멸치원액",
+            "name_en": "anchovy extract",
+            "quantity": "2스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "다시다",
+            "name_en": "dashida",
+            "quantity": "2스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참치액",
+            "name_en": "tuna fish sauce",
+            "quantity": "2스푼",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_233",
+        "source": "HARDCODED",
+        "title_ko": "스팸 고추장 덮밥",
+        "title": "Spam and Gochujang Rice Bowl",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/233_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "스팸을 깍둑썰기하여 팬에 기름 없이 노릇하게 굽습니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/233_1.png"
+          },
+          {
+            "step": 2,
+            "description": "불을 끄고 고추장, 마늘, 물엿, 간장을 각 1스푼씩 넣습니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/233_2.png"
+          },
+          {
+            "step": 3,
+            "description": "다시 중불을 켜서 양념이 스팸에 잘 배도록 빠르게 볶아 밥 위에 올립니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/233_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "스팸",
+            "name_en": "spam",
+            "quantity": "200g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고추장",
+            "name_en": "gochujang",
+            "quantity": "1큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "다진 마늘",
+            "name_en": "minced garlic",
+            "quantity": "1큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "물엿",
+            "name_en": "corn syrup",
+            "quantity": "1큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "간장",
+            "name_en": "soy sauce",
+            "quantity": "1큰술",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_234",
+        "source": "HARDCODED",
+        "title_ko": "계란 김 국수",
+        "title": "Seaweed and Egg Noodle Soup",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/234_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "소면을 3~4분 삶아 찬물에 헹궈 물기를 뺍니다.",
+            "timer_minutes": 4,
+            "image": "/static/images/recipes/sy/234_1.png"
+          },
+          {
+            "step": 2,
+            "description": "물 500ml에 코인육수 1알, 마늘 1T, 국간장 1T를 넣고 끓입니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/234_2.png"
+          },
+          {
+            "step": 3,
+            "description": "부순 조미김 1봉지와 푼 계란 1개를 넣고 익힌 뒤 소금 1/2T로 간을 하고 대파 1대를 넣습니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/234_3.png"
+          },
+          {
+            "step": 4,
+            "description": "준비한 소면에 국물을 부어 완성합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/234_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "소면",
+            "name_en": "somen noodles",
+            "quantity": "1인분",
+            "is_optional": false
+          },
+          {
+            "name_ko": "조미김",
+            "name_en": "seasoned seaweed",
+            "quantity": "1봉지",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "1개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "코인육수",
+            "name_en": "broth tablet",
+            "quantity": "1알",
+            "is_optional": false
+          },
+          {
+            "name_ko": "국간장",
+            "name_en": "soup soy sauce",
+            "quantity": "1T",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_235",
+        "source": "HARDCODED",
+        "title_ko": "훈제오리 배추찜",
+        "title": "Steamed Cabbage and Smoked Duck",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/235_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "알배추와 각종 채소를 손질하여 차곡차곡 쌓고 그 위에 훈제오리를 올립니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/235_1.png"
+          },
+          {
+            "step": 2,
+            "description": "미림 1, 물 3스푼을 넣고 뚜껑을 닫아 중불에서 10~15분간 찝니다.",
+            "timer_minutes": 15,
+            "image": "/static/images/recipes/sy/235_2.png"
+          },
+          {
+            "step": 3,
+            "description": "간장 두 스푼, 식초 두 스푼, 설탕 한 스푼, 마늘 한 스푼, 액젓 등을 섞어 감칠맛 나는 전용 소스를 만듭니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/235_3.png"
+          },
+          {
+            "step": 4,
+            "description": "잘 쪄진 재료를 소스에 찍어 드세요.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/235_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "알배추",
+            "name_en": "napa cabbage",
+            "quantity": "적당량",
+            "is_optional": false
+          },
+          {
+            "name_ko": "훈제오리",
+            "name_en": "smoked duck",
+            "quantity": "1팩",
+            "is_optional": false
+          },
+          {
+            "name_ko": "숙주",
+            "name_en": "bean sprouts",
+            "quantity": "취향껏",
+            "is_optional": false
+          },
+          {
+            "name_ko": "부추",
+            "name_en": "chives",
+            "quantity": "취향껏",
+            "is_optional": false
+          },
+          {
+            "name_ko": "팽이버섯",
+            "name_en": "enoki mushroom",
+            "quantity": "취향껏",
+            "is_optional": false
+          },
+          {
+            "name_ko": "간장",
+            "name_en": "soy sauce",
+            "quantity": "2T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "식초",
+            "name_en": "vinegar",
+            "quantity": "2T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "설탕",
+            "name_en": "sugar",
+            "quantity": "2T",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_236",
+        "source": "HARDCODED",
+        "title_ko": "삼겹살 덮밥",
+        "title": "Pork Belly Rice Bowl",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/236_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "팬에 삼겹살 300g을 올리고 소금 1/2T, 후추 1/2T를 뿌려 앞뒤로 노릇하게 구운 뒤 잠시 따로 빼둡니다.",
+            "timer_minutes": 8,
+            "image": "/static/images/recipes/sy/236_1.png"
+          },
+          {
+            "step": 2,
+            "description": "삼겹살 기름이 남은 팬에 통마늘과 채 썬 양파를 넣고 볶습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/236_2.png"
+          },
+          {
+            "step": 3,
+            "description": "진간장 3, 설탕 1, 고춧가루 1스푼을 넣고 양념을 살짝 태우듯 볶아 풍미를 올립니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/236_3.png"
+          },
+          {
+            "step": 4,
+            "description": "구워둔 삼겹살을 다시 넣고 양념이 잘 배도록 한 번 더 볶아 밥 위에 올립니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/236_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "삼겹살",
+            "name_en": "pork belly",
+            "quantity": "300g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "양파",
+            "name_en": "onion",
+            "quantity": "0.5개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "통마늘",
+            "name_en": "whole garlic",
+            "quantity": "5-7알",
+            "is_optional": false
+          },
+          {
+            "name_ko": "진간장",
+            "name_en": "soy sauce",
+            "quantity": "3스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "설탕",
+            "name_en": "sugar",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고춧가루",
+            "name_en": "red pepper powder",
+            "quantity": "1스푼",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_237",
+        "source": "HARDCODED",
+        "title_ko": "굴소스 계란 볶음밥",
+        "title": "Oyster Sauce Egg Fried Rice",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/237_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "기름 두른 팬에 잘게 썬 대파를 넣어 파기름을 냅니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/237_1.png"
+          },
+          {
+            "step": 2,
+            "description": "대파를 한쪽으로 밀고 빈 공간에 계란 2개를 풀어 스크램블을 만듭니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/237_2.png"
+          },
+          {
+            "step": 3,
+            "description": "굴소스 2, 간장 2스푼을 넣고 계란, 대파와 함께 볶습니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/237_3.png"
+          },
+          {
+            "step": 4,
+            "description": "밥 1공기, 버터 0.5스푼, 소금 0.5스푼을 넣고 고슬고슬하게 볶아 마무리합니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/237_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "1공기",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "2개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "대파",
+            "name_en": "green onion",
+            "quantity": "0.5단",
+            "is_optional": false
+          },
+          {
+            "name_ko": "굴소스",
+            "name_en": "oyster sauce",
+            "quantity": "2스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "버터",
+            "name_en": "butter",
+            "quantity": "0.5스푼",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_238",
+        "source": "HARDCODED",
+        "title_ko": "명란 계란 덮밥",
+        "title": "Pollack Roe Egg Rice Bowl",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/238_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "계란 2개를 볼에 담아 잘 풀어줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/238_1.png"
+          },
+          {
+            "step": 2,
+            "description": "팬에 버터를 녹인 후 약불에서 계란물을 붓고 부드러운 스크램블을 만듭니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/238_2.png"
+          },
+          {
+            "step": 3,
+            "description": "불을 끄고 팬에 남은 버터 온기로 명란을 넣어 가볍게 섞습니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/238_3.png"
+          },
+          {
+            "step": 4,
+            "description": "밥 위에 명란 계란 볶음을 올려 완성합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/238_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "명란젓",
+            "name_en": "pollack roe",
+            "quantity": "1-2덩이",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "2개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "버터",
+            "name_en": "butter",
+            "quantity": "1조각",
+            "is_optional": false
+          },
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "1공기",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_239",
+        "source": "HARDCODED",
+        "title_ko": "들기름 깻잎 파스타",
+        "title": "Perilla Oil Pasta with Perilla Leaves",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/239_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "끓는 물에 소금 1T를 넣고 카펠리니 면 100g을 3분 삶은 뒤 찬물에 헹궈 물기를 뺍니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/239_1.png"
+          },
+          {
+            "step": 2,
+            "description": "깻잎은 아주 얇게 채 썰고 조미김은 부숴서 준비합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/239_2.png"
+          },
+          {
+            "step": 3,
+            "description": "식은 면에 간장 1, 쯔유 0.5, 들기름 2, 식초 0.5스푼을 넣고 잘 버무립니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/239_3.png"
+          },
+          {
+            "step": 4,
+            "description": "접시에 면을 담고 깻잎 7장과 조미김 1봉, 깨 1T를 올려 완성합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/239_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "카펠리니 면",
+            "name_en": "capellini pasta",
+            "quantity": "100g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "깻잎",
+            "name_en": "perilla leaves",
+            "quantity": "7장",
+            "is_optional": false
+          },
+          {
+            "name_ko": "들기름",
+            "name_en": "perilla oil",
+            "quantity": "2T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "조미김",
+            "name_en": "seasoned seaweed",
+            "quantity": "1봉",
+            "is_optional": false
+          },
+          {
+            "name_ko": "쯔유",
+            "name_en": "tsuyu",
+            "quantity": "0.5T",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_240",
+        "source": "HARDCODED",
+        "title_ko": "매콤 명란 두부 비빔밥",
+        "title": "Spicy Pollack Roe Tofu Rice Bowl",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/240_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "명란 두 덩이를 가위로 잘게 썰고 고춧가루 1스푼, 참기름 2스푼, 알룰로스 1스푼, 대파 1대를 섞어 전자레인지에 2분 돌립니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/240_1.png"
+          },
+          {
+            "step": 2,
+            "description": "따뜻한 밥과 작게 깍둑썰기한 두부를 추가로 넣고 전자레인지에 2분 더 돌립니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/240_2.png"
+          },
+          {
+            "step": 3,
+            "description": "기호에 따라 간장으로 간을 맞춘 뒤 김가루와 노른자를 올려 마무리합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/240_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "명란젓",
+            "name_en": "pollack roe",
+            "quantity": "2덩이",
+            "is_optional": false
+          },
+          {
+            "name_ko": "두부",
+            "name_en": "tofu",
+            "quantity": "1/4모",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고춧가루",
+            "name_en": "red pepper powder",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참기름",
+            "name_en": "sesame oil",
+            "quantity": "2스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란 노른자",
+            "name_en": "egg yolk",
+            "quantity": "1개",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_241",
+        "source": "HARDCODED",
+        "title_ko": "명란 오차즈케",
+        "title": "Pollack Roe Ochazuke",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/241_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "뜨거운 물 2컵에 녹차 티백을 우린 뒤 쯔유 1, 간장 0.5, 참치액 0.5스푼을 섞어 육수를 만듭니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/241_1.png"
+          },
+          {
+            "step": 2,
+            "description": "팬에 올리브오일을 두르고 명란젓을 약불에서 노릇하게 속까지 익힙니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/241_2.png"
+          },
+          {
+            "step": 3,
+            "description": "그릇에 밥 1공기를 담고 후리가케 1T(또는 깨), 구운 명란, 다진 파 1T를 올립니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/241_3.png"
+          },
+          {
+            "step": 4,
+            "description": "준비한 녹차 육수를 밥 주변으로 천천히 부어 완성합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/241_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "1공기",
+            "is_optional": false
+          },
+          {
+            "name_ko": "명란젓",
+            "name_en": "pollack roe",
+            "quantity": "1-2개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "녹차 티백",
+            "name_en": "green tea bag",
+            "quantity": "1개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "쯔유",
+            "name_en": "tsuyu",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "후리가케",
+            "name_en": "furikake",
+            "quantity": "약간",
+            "is_optional": true
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_242",
+        "source": "HARDCODED",
+        "title_ko": "명란 아보카도 비빔밥",
+        "title": "Pollack Roe Avocado Bibimbap",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/242_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "양파는 얇게 채 썰고 아보카도는 껍질과 씨를 제거한 뒤 먹기 좋게 슬라이스합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/242_1.png"
+          },
+          {
+            "step": 2,
+            "description": "계란 후라이를 하나 만듭니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/242_2.png"
+          },
+          {
+            "step": 3,
+            "description": "밥 위에 양파 약간, 계란 1개, 아보카도 0.5개, 명란젓 1덩이를 올리고 참기름 1T를 뿌립니다. 싱거우면 쯔유 1스푼을 추가합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/242_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "아보카도",
+            "name_en": "avocado",
+            "quantity": "0.5개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "명란젓",
+            "name_en": "pollack roe",
+            "quantity": "1덩이",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "1개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "양파",
+            "name_en": "onion",
+            "quantity": "약간",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참기름",
+            "name_en": "sesame oil",
+            "quantity": "1T",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_243",
+        "source": "HARDCODED",
+        "title_ko": "버터 명란밥",
+        "title": "Quick Butter Pollack Roe Rice",
+        "difficulty": "EASY",
+        "ready_minutes": 5,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/243_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "그릇에 밥과 명란 한 덩이를 올리고 젓가락으로 구멍을 몇 군데 뚫어줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/243_1.png"
+          },
+          {
+            "step": 2,
+            "description": "전자레인지에 2분 30초간 돌려 명란을 익힙니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/243_2.png"
+          },
+          {
+            "step": 3,
+            "description": "익은 명란 위에 버터 한 조각을 올리고 다시 전자레인지에 1분간 돌립니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/243_3.png"
+          },
+          {
+            "step": 4,
+            "description": "간장 1바퀴와 쪽파 1대를 넣고 맛있게 비벼줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/243_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "1공기",
+            "is_optional": false
+          },
+          {
+            "name_ko": "명란젓",
+            "name_en": "pollack roe",
+            "quantity": "1덩이",
+            "is_optional": false
+          },
+          {
+            "name_ko": "버터",
+            "name_en": "butter",
+            "quantity": "1조각",
+            "is_optional": false
+          },
+          {
+            "name_ko": "간장",
+            "name_en": "soy sauce",
+            "quantity": "1바퀴",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_244",
+        "source": "HARDCODED",
+        "title_ko": "순두부 명란 볶음밥",
+        "title": "Soft Tofu Pollack Roe Fried Rice",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/244_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "순두부를 전자레인지에 3분 돌려 물기를 충분히 빼둡니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/244_1.png"
+          },
+          {
+            "step": 2,
+            "description": "팬에 기름 1T를 두르고 다진 마늘 1T와 대파 1대를 볶다가 순두부 0.5팩, 계란 1개, 명란알 1덩이, 굴소스 1T, 밥 100g을 넣습니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/244_2.png"
+          },
+          {
+            "step": 3,
+            "description": "모든 재료가 잘 섞이도록 볶은 뒤 참기름 1T와 쪽파 1대를 뿌려 마무리합니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/244_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "순두부",
+            "name_en": "soft tofu",
+            "quantity": "0.5팩",
+            "is_optional": false
+          },
+          {
+            "name_ko": "명란젓",
+            "name_en": "pollack roe",
+            "quantity": "1덩이",
+            "is_optional": false
+          },
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "100g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "1개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "굴소스",
+            "name_en": "oyster sauce",
+            "quantity": "1T",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_245",
+        "source": "HARDCODED",
+        "title_ko": "명란 크림 우동",
+        "title": "Pollack Roe Cream Udon",
+        "difficulty": "MEDIUM",
+        "ready_minutes": 20,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/245_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "팬에 오일이나 버터를 두르고 다진 마늘과 채 썬 양파를 볶습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/245_1.png"
+          },
+          {
+            "step": 2,
+            "description": "우유 200ml, 생크림 200ml, 명란알 절반, 치킨스톡 1스푼을 넣고 끓입니다. (취향껏 고추 추가)",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/245_2.png"
+          },
+          {
+            "step": 3,
+            "description": "소스가 끓으면 우동면을 넣고 면이 익을 때까지 졸이듯 끓입니다.",
+            "timer_minutes": 4,
+            "image": "/static/images/recipes/sy/245_3.png"
+          },
+          {
+            "step": 4,
+            "description": "남은 명란을 고명으로 올리고 후추 1/2T를 뿌려 완성합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/245_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "우동면",
+            "name_en": "udon noodles",
+            "quantity": "1봉",
+            "is_optional": false
+          },
+          {
+            "name_ko": "우유",
+            "name_en": "milk",
+            "quantity": "200ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "생크림",
+            "name_en": "heavy cream",
+            "quantity": "200ml",
+            "is_optional": false
+          },
+          {
+            "name_ko": "명란젓",
+            "name_en": "pollack roe",
+            "quantity": "1-2덩이",
+            "is_optional": false
+          },
+          {
+            "name_ko": "양파",
+            "name_en": "onion",
+            "quantity": "0.5개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "치킨스톡",
+            "name_en": "chicken stock",
+            "quantity": "1스푼",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_246",
+        "source": "HARDCODED",
+        "title_ko": "베이컨 마늘 볶음밥",
+        "title": "Bacon Garlic Fried Rice",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/246_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "마늘은 편 썰고 베이컨과 대파는 잘게 썰어 준비합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/246_1.png"
+          },
+          {
+            "step": 2,
+            "description": "팬에 기름을 두르고 마늘과 베이컨을 볶다가 노릇해지면 대파와 계란을 넣어 섞습니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/246_2.png"
+          },
+          {
+            "step": 3,
+            "description": "밥 2공기와 간장 1스푼을 넣고 볶다가 굴소스 1큰술로 부족한 간을 맞춥니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/246_3.png"
+          },
+          {
+            "step": 4,
+            "description": "고슬고슬하게 볶아진 밥에 후추 1/2T를 뿌려 마무리합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/246_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "밥",
+            "name_en": "rice",
+            "quantity": "2공기",
+            "is_optional": false
+          },
+          {
+            "name_ko": "통마늘",
+            "name_en": "garlic",
+            "quantity": "10-12알",
+            "is_optional": false
+          },
+          {
+            "name_ko": "베이컨",
+            "name_en": "bacon",
+            "quantity": "6줄",
+            "is_optional": false
+          },
+          {
+            "name_ko": "계란",
+            "name_en": "egg",
+            "quantity": "2개",
+            "is_optional": false
+          },
+          {
+            "name_ko": "굴소스",
+            "name_en": "oyster sauce",
+            "quantity": "적당량",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_247",
+        "source": "HARDCODED",
+        "title_ko": "마요 명란찜",
+        "title": "Steamed Pollack Roe with Mayo",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/247_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "그릇에 명란 2-3덩이를 다져 넣고 대파 1대와 고추 1개를 작게 잘라 넣습니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/247_1.png"
+          },
+          {
+            "step": 2,
+            "description": "물 2T, 마요네즈 1스푼, 고춧가루 1T, 맛술 1T, 마늘 1T, 설탕 1/2T를 넣고 골고루 섞어줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/247_2.png"
+          },
+          {
+            "step": 3,
+            "description": "전자레인지에서 3분간 돌려 익힌 뒤 참기름 1T와 깨 1T를 섞어 완성합니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/247_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "저염 명란",
+            "name_en": "low-salt pollack roe",
+            "quantity": "2-3덩이",
+            "is_optional": false
+          },
+          {
+            "name_ko": "마요네즈",
+            "name_en": "mayonnaise",
+            "quantity": "1스푼",
+            "is_optional": false
+          },
+          {
+            "name_ko": "대파",
+            "name_en": "scallion",
+            "quantity": "약간",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고추",
+            "name_en": "chili",
+            "quantity": "약간",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참기름",
+            "name_en": "sesame oil",
+            "quantity": "1T",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_248",
+        "source": "HARDCODED",
+        "title_ko": "대패삼겹 깻잎 파스타",
+        "title": "Pork Belly Perilla Leaf Pasta",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 1,
+        "image_url": "/static/images/recipes/sy/248_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "파스타면을 소금물에 삶고, 팬에는 오일을 둘러 마늘과 고기를 볶습니다.",
+            "timer_minutes": 8,
+            "image": "/static/images/recipes/sy/248_1.png"
+          },
+          {
+            "step": 2,
+            "description": "간장 1, 맛술 1, 굴소스 1스푼을 넣고 끓이다가 삶은 면과 면수 두 국자를 넣습니다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/sy/248_2.png"
+          },
+          {
+            "step": 3,
+            "description": "면과 소스가 잘 어우러지면 불을 끄고 채 썬 깻잎을 듬뿍 넣어 섞어줍니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/248_3.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "파스타면",
+            "name_en": "pasta noodles",
+            "quantity": "1인분",
+            "is_optional": false
+          },
+          {
+            "name_ko": "대패삼겹살",
+            "name_en": "thinly sliced pork belly",
+            "quantity": "한줌",
+            "is_optional": false
+          },
+          {
+            "name_ko": "깻잎",
+            "name_en": "perilla leaves",
+            "quantity": "많이",
+            "is_optional": false
+          },
+          {
+            "name_ko": "굴소스",
+            "name_en": "oyster sauce",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "마늘",
+            "name_en": "garlic",
+            "quantity": "5알",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_249",
+        "source": "HARDCODED",
+        "title_ko": "참치 쌈장 깻잎 쌈밥",
+        "title": "Tuna Ssamjang Perilla Leaf Wraps",
+        "difficulty": "MEDIUM",
+        "ready_minutes": 25,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/249_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "잡곡밥에 참기름과 깨를 섞고, 참치와 쌈장 재료를 섞어 참치 쌈장을 만듭니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/249_1.png"
+          },
+          {
+            "step": 2,
+            "description": "깻잎을 끓는 소금물에 20초간 데친 뒤 찬물에 헹궈 물기를 짭니다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/sy/249_2.png"
+          },
+          {
+            "step": 3,
+            "description": "깻잎 위에 동그랗게 뭉친 밥을 올리고 돌돌 말아 쌈밥 모양을 만듭니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/249_3.png"
+          },
+          {
+            "step": 4,
+            "description": "쌈밥 위에 만들어둔 참치 쌈장을 올려 완성합니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/249_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "깻잎",
+            "name_en": "perilla leaves",
+            "quantity": "20장",
+            "is_optional": false
+          },
+          {
+            "name_ko": "참치캔",
+            "name_en": "canned tuna",
+            "quantity": "180g",
+            "is_optional": false
+          },
+          {
+            "name_ko": "잡곡밥",
+            "name_en": "multi-grain rice",
+            "quantity": "2인분",
+            "is_optional": false
+          },
+          {
+            "name_ko": "된장",
+            "name_en": "soybean paste",
+            "quantity": "1큰술",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고추장",
+            "name_en": "chili paste",
+            "quantity": "1큰술",
+            "is_optional": false
+          }
+        ]
+    },
+    {
+        "external_id": "hardcoded_250",
+        "source": "HARDCODED",
+        "title_ko": "매콤 짜장 떡볶이",
+        "title": "Spicy Jajang Tteokbokki",
+        "difficulty": "EASY",
+        "ready_minutes": 20,
+        "servings": 2,
+        "image_url": "/static/images/recipes/sy/250_end.png",
+        "instructions": [
+          {
+            "step": 1,
+            "description": "뜨거운 물 100ml에 짜장가루 4T를 넣어 미리 풀어줍니다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/sy/250_1.png"
+          },
+          {
+            "step": 2,
+            "description": "팬에 대파, 양파, 양배추를 순서대로 볶다가 짜장 소스를 넣고 살짝 졸입니다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/sy/250_2.png"
+          },
+          {
+            "step": 3,
+            "description": "물 500ml, 고추장 1, 설탕 1스푼을 넣고 떡과 어묵을 넣습니다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/sy/250_3.png"
+          },
+          {
+            "step": 4,
+            "description": "국물이 걸쭉해질 때까지 약불에서 졸여 완성합니다.",
+            "timer_minutes": 8,
+            "image": "/static/images/recipes/sy/250_4.png"
+          }
+        ],
+        "ingredients": [
+          {
+            "name_ko": "밀떡",
+            "name_en": "wheat rice cake",
+            "quantity": "2인분",
+            "is_optional": false
+          },
+          {
+            "name_ko": "짜장가루",
+            "name_en": "jajang powder",
+            "quantity": "4T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "어묵",
+            "name_en": "fish cake",
+            "quantity": "2-3장",
+            "is_optional": false
+          },
+          {
+            "name_ko": "고추장",
+            "name_en": "gochujang",
+            "quantity": "1T",
+            "is_optional": false
+          },
+          {
+            "name_ko": "양배추",
+            "name_en": "cabbage",
+            "quantity": "한줌",
+            "is_optional": false
+          }
+        ]
+    },
     {
     "external_id": "hardcoded_401",
     "source": "HARDCODED",
