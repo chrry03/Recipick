@@ -1351,6 +1351,830 @@
         ]
     },
     {
+        "external_id": "hardcoded_038",
+        "source": "HARDCODED",
+        "title_ko": "김치 콩나물 죽",
+        "title": "Kimchi Bean Sprout Porridge",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/KimchiBeanSproutPorridge/KimchiBeanSproutPorridge_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "냄비에 물 600ml와 씻은 콩나물, 잘게 썬 김치를 넣고 끓인다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/kw/KimchiBeanSproutPorridge/KimchiBeanSproutPorridge_1.png"
+        },
+        {
+            "step": 2,
+            "description": "물이 끓으면 밥 1공기를 넣고 밥알이 퍼질 때까지 푹 끓인다.",
+            "timer_minutes": 8,
+            "image": "/static/images/recipes/kw/KimchiBeanSproutPorridge/KimchiBeanSproutPorridge_2.png"
+        },
+        {
+            "step": 3,
+            "description": "국간장 1스푼으로 간을 하고 김가루를 뿌려 마무리한다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/kw/KimchiBeanSproutPorridge/KimchiBeanSproutPorridge_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "밥", "name_en": "cooked rice", "quantity": "1공기", "is_optional": false},
+        {"name_ko": "콩나물", "name_en": "bean sprouts", "quantity": "1줌", "is_optional": false},
+        {"name_ko": "김치", "name_en": "kimchi", "quantity": "1/2컵", "is_optional": false},
+        {"name_ko": "국간장", "name_en": "soup soy sauce", "quantity": "1스푼", "is_optional": false}
+        ]
+    },
+    {
+        "external_id": "hardcoded_039",
+        "source": "HARDCODED",
+        "title_ko": "오이 비빔밥",
+        "title": "Refreshing Cucumber Rice Bowl",
+        "difficulty": "EASY",
+        "ready_minutes": 5,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/RefreshingCucumberRiceBowl/RefreshingCucumberRiceBowl_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "오이를 얇게 썰어 소금 한 꼬집에 2분간 절인 뒤 물기를 짠다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/kw/RefreshingCucumberRiceBowl/RefreshingCucumberRiceBowl_1.png"
+        },
+        {
+            "step": 2,
+            "description": "밥 위에 오이를 듬뿍 올리고 고추장 1스푼, 들기름 1스푼을 넣는다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/RefreshingCucumberRiceBowl/RefreshingCucumberRiceBowl_2.png"
+        },
+        {
+            "step": 3,
+            "description": "취향에 따라 통깨를 뿌려 가볍게 비벼 먹는다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/RefreshingCucumberRiceBowl/RefreshingCucumberRiceBowl_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "밥", "name_en": "cooked rice", "quantity": "1공기", "is_optional": false},
+        {"name_ko": "오이", "name_en": "cucumber", "quantity": "1/2개", "is_optional": false},
+        {"name_ko": "고추장", "name_en": "gochujang", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "들기름", "name_en": "perilla oil", "quantity": "1스푼", "is_optional": false}
+        ]
+    },
+    {
+        "external_id": "hardcoded_040",
+        "source": "HARDCODED",
+        "title_ko": "대패삼겹 숙주 볶음",
+        "title": "Pork Belly with Bean Sprouts",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/PorkBellywithBeanSprouts/PorkBellywithBeanSprouts_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "팬에 대패삼겹살을 넣고 고기가 거의 익을 때까지 볶는다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/kw/PorkBellywithBeanSprouts/PorkBellywithBeanSprouts_1.png"
+        },
+        {
+            "step": 2,
+            "description": "숙주와 굴소스 1.5스푼, 다진 마늘 0.5스푼을 넣는다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/PorkBellywithBeanSprouts/PorkBellywithBeanSprouts_2.png"
+        },
+        {
+            "step": 3,
+            "description": "강불에서 숙주의 숨이 죽을 때까지만 빠르게 1~2분 볶아 완성한다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/kw/PorkBellywithBeanSprouts/PorkBellywithBeanSprouts_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "대패삼겹살", "name_en": "thinly sliced pork belly", "quantity": "150g", "is_optional": false},
+        {"name_ko": "숙주", "name_en": "bean sprouts", "quantity": "2줌", "is_optional": false},
+        {"name_ko": "굴소스", "name_en": "oyster sauce", "quantity": "1.5스푼", "is_optional": false},
+        {"name_ko": "다진 마늘", "name_en": "minced garlic", "quantity": "0.5스푼", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_041",
+        "source": "HARDCODED",
+        "title_ko": "어묵 김치 볶음",
+        "title": "Stir-fried Fish Cake with Kimchi",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/Stir-friedFishCakewithKimchi/Stir-friedFishCakewithKimchi_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "사각어묵과 김치를 먹기 좋은 크기로 썬다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/Stir-friedFishCakewithKimchi/Stir-friedFishCakewithKimchi_1.png"
+        },
+        {
+            "step": 2,
+            "description": "팬에 기름을 두르고 김치를 먼저 볶다가 어묵을 넣는다.",
+            "timer_minutes": 4,
+            "image": "/static/images/recipes/kw/Stir-friedFishCakewithKimchi/Stir-friedFishCakewithKimchi_2.png"
+        },
+        {
+            "step": 3,
+            "description": "진간장 1스푼, 올리고당 1스푼을 넣고 양념이 잘 배도록 볶아 마무리한다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/kw/Stir-friedFishCakewithKimchi/Stir-friedFishCakewithKimchi_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "사각어묵", "name_en": "fish cake", "quantity": "2장", "is_optional": false},
+        {"name_ko": "김치", "name_en": "kimchi", "quantity": "1/2컵", "is_optional": false},
+        {"name_ko": "진간장", "name_en": "soy sauce", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "올리고당", "name_en": "syrup", "quantity": "1스푼", "is_optional": false}
+        ]
+    },
+    {
+        "external_id": "hardcoded_042",
+        "source": "HARDCODED",
+        "title_ko": "전자레인지 순두부 계란찜",
+        "title": "Microwave Soft Tofu Egg Stew",
+        "difficulty": "EASY",
+        "ready_minutes": 8,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/MicrowaveSoftTofuEggStew/MicrowaveSoftTofuEggStew_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "전자레인지용 그릇에 순두부를 넣고 숟가락으로 큼직하게 으깬다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/MicrowaveSoftTofuEggStew/MicrowaveSoftTofuEggStew_1.png"
+        },
+        {
+            "step": 2,
+            "description": "계란 2개, 물 50ml, 참치액 1스푼을 넣고 순두부와 가볍게 섞는다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/MicrowaveSoftTofuEggStew/MicrowaveSoftTofuEggStew_2.png"
+        },
+        {
+            "step": 3,
+            "description": "랩을 씌워 구멍을 뚫고 전자레인지에서 5분간 조리한다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/kw/MicrowaveSoftTofuEggStew/MicrowaveSoftTofuEggStew_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "순두부", "name_en": "soft tofu", "quantity": "1봉", "is_optional": false},
+        {"name_ko": "계란", "name_en": "egg", "quantity": "2개", "is_optional": false},
+        {"name_ko": "참치액", "name_en": "fish sauce", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "쪽파", "name_en": "chives", "quantity": "약간", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_043",
+        "source": "HARDCODED",
+        "title_ko": "양배추 참치 스테이크",
+        "title": "Cabbage Tuna Steak",
+        "difficulty": "EASY",
+        "ready_minutes": 12,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/CabbageTunaSteak/CabbageTunaSteak_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "양배추를 2cm 두께로 통째로 썰어 팬에 올리고 기름에 굽는다.",
+            "timer_minutes": 4,
+            "image": "/static/images/recipes/kw/CabbageTunaSteak/CabbageTunaSteak_1.png"
+        },
+        {
+            "step": 2,
+            "description": "양배추가 익으면 위에 기름 뺀 참치를 올린다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/CabbageTunaSteak/CabbageTunaSteak_2.png"
+        },
+        {
+            "step": 3,
+            "description": "데리야끼 소스나 진간장 1스푼을 뿌리고 뚜껑을 덮어 2분간 더 익힌다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/kw/CabbageTunaSteak/CabbageTunaSteak_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "양배추", "name_en": "cabbage", "quantity": "1/4통", "is_optional": false},
+        {"name_ko": "참치캔", "name_en": "canned tuna", "quantity": "0.5캔", "is_optional": false},
+        {"name_ko": "진간장", "name_en": "soy sauce", "quantity": "1스푼", "is_optional": false}
+        ]
+    },
+    {
+        "external_id": "hardcoded_044",
+        "source": "HARDCODED",
+        "title_ko": "간장 멸치 국수",
+        "title": "Simple Soy Sauce Noodles",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/SimpleSoySauceNoodles/SimpleSoySauceNoodles_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "소면을 3~4분 삶아 찬물에 헹궈 준비한다.",
+            "timer_minutes": 4,
+            "image": "/static/images/recipes/kw/SimpleSoySauceNoodles/SimpleSoySauceNoodles_1.png"
+        },
+        {
+            "step": 2,
+            "description": "진간장 2, 참기름 1, 설탕 0.5스푼을 섞어 양념장을 만든다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/SimpleSoySauceNoodles/SimpleSoySauceNoodles_2.png"
+        },
+        {
+            "step": 3,
+            "description": "소면에 양념장과 김가루, 깨를 넣어 골고루 비빈다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/SimpleSoySauceNoodles/SimpleSoySauceNoodles_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "소면", "name_en": "somen noodles", "quantity": "1인분", "is_optional": false},
+        {"name_ko": "진간장", "name_en": "soy sauce", "quantity": "2스푼", "is_optional": false},
+        {"name_ko": "참기름", "name_en": "sesame oil", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "김가루", "name_en": "seaweed flakes", "quantity": "적당량", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_045",
+        "source": "HARDCODED",
+        "title_ko": "감자 채전",
+        "title": "Shredded Potato Pancake",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/ShreddedPotatoPancake/ShreddedPotatoPancake_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "감자를 아주 얇게 채 썰어 전분기가 빠지게 물에 한 번 헹군다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/ShreddedPotatoPancake/ShreddedPotatoPancake_1.png"
+        },
+        {
+            "step": 2,
+            "description": "물기를 뺀 감채에 부침가루 1스푼, 소금 한 꼬집을 넣고 버무린다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/ShreddedPotatoPancake/ShreddedPotatoPancake_2.png"
+        },
+        {
+            "step": 3,
+            "description": "기름을 넉넉히 두른 팬에 감자를 넓게 펴서 앞뒤로 바삭하게 굽는다.",
+            "timer_minutes": 8,
+            "image": "/static/images/recipes/kw/ShreddedPotatoPancake/ShreddedPotatoPancake_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "감자", "name_en": "potato", "quantity": "2개", "is_optional": false},
+        {"name_ko": "부침가루", "name_en": "pancake mix", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "소금", "name_en": "salt", "quantity": "한 꼬집", "is_optional": false}
+        ]
+    },
+    {
+        "external_id": "hardcoded_046",
+        "source": "HARDCODED",
+        "title_ko": "스팸 두부 샌드",
+        "title": "Spam Tofu Sandwiches",
+        "difficulty": "EASY",
+        "ready_minutes": 12,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/SpamTofuSandwiches/SpamTofuSandwiches_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "두부와 스팸을 비슷한 두께와 크기로 슬라이스한다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/SpamTofuSandwiches/SpamTofuSandwiches_1.png"
+        },
+        {
+            "step": 2,
+            "description": "두부 사이에 스팸을 끼우고 팬에 노릇노릇하게 굽는다.",
+            "timer_minutes": 6,
+            "image": "/static/images/recipes/kw/SpamTofuSandwiches/SpamTofuSandwiches_2.png"
+        },
+        {
+            "step": 3,
+            "description": "두부가 어느 정도 익으면 진간장 1스푼을 팬 가장자리에 둘러 향을 입힌다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/kw/SpamTofuSandwiches/SpamTofuSandwiches_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "두부", "name_en": "tofu", "quantity": "0.5모", "is_optional": false},
+        {"name_ko": "스팸", "name_en": "spam", "quantity": "1/2캔", "is_optional": false},
+        {"name_ko": "진간장", "name_en": "soy sauce", "quantity": "1스푼", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_047",
+        "source": "HARDCODED",
+        "title_ko": "구운 가지 덮밥",
+        "title": "Roasted Eggplant Rice Bowl",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/RoastedEggplantRiceBowl/RoastedEggplantRiceBowl_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "가지를 어긋썰기하여 팬에 기름 없이 앞뒤로 노릇하게 굽는다.",
+            "timer_minutes": 4,
+            "image": "/static/images/recipes/kw/RoastedEggplantRiceBowl/RoastedEggplantRiceBowl_1.png"
+        },
+        {
+            "step": 2,
+            "description": "진간장 2스푼, 올리고당 1스푼, 다진 마늘 0.5스푼을 섞어 양념장을 만든다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/RoastedEggplantRiceBowl/RoastedEggplantRiceBowl_2.png"
+        },
+        {
+            "step": 3,
+            "description": "구운 가지 위에 양념장을 붓고 살짝 졸인 뒤 밥 위에 얹는다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/kw/RoastedEggplantRiceBowl/RoastedEggplantRiceBowl_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "가지", "name_en": "eggplant", "quantity": "1개", "is_optional": false},
+        {"name_ko": "진간장", "name_en": "soy sauce", "quantity": "2스푼", "is_optional": false},
+        {"name_ko": "올리고당", "name_en": "syrup", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "밥", "name_en": "cooked rice", "quantity": "1공기", "is_optional": false}
+        ]
+    },
+    {
+        "external_id": "hardcoded_048",
+        "source": "HARDCODED",
+        "title_ko": "김치 콩나물국",
+        "title": "Kimchi Bean Sprout Soup",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/KimchiBeanSproutSoup/KimchiBeanSproutSoup_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "냄비에 물 600ml와 썰어놓은 김치, 김치국물 2스푼을 넣고 먼저 끓인다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/kw/KimchiBeanSproutSoup/KimchiBeanSproutSoup_1.png"
+        },
+        {
+            "step": 2,
+            "description": "국물이 끓어오르면 콩나물 한 줌과 다진 마늘 0.5스푼을 넣는다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/kw/KimchiBeanSproutSoup/KimchiBeanSproutSoup_2.png"
+        },
+        {
+            "step": 3,
+            "description": "소금이나 새우젓으로 간을 맞추고 대파를 송송 썰어 마무리한다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/kw/KimchiBeanSproutSoup/KimchiBeanSproutSoup_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "콩나물", "name_en": "bean sprouts", "quantity": "1줌", "is_optional": false},
+        {"name_ko": "김치", "name_en": "kimchi", "quantity": "1/2컵", "is_optional": false},
+        {"name_ko": "다진 마늘", "name_en": "minced garlic", "quantity": "0.5스푼", "is_optional": false},
+        {"name_ko": "대파", "name_en": "green onion", "quantity": "약간", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_049",
+        "source": "HARDCODED",
+        "title_ko": "계란 만두국",
+        "title": "Dumpling Soup with Egg",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/DumplingSoupwithEgg/DumplingSoupwithEgg_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "냄비에 물 500ml를 붓고 참치액 1스푼과 만두를 넣어 끓인다.",
+            "timer_minutes": 6,
+            "image": "/static/images/recipes/kw/DumplingSoupwithEgg/DumplingSoupwithEgg_1.png"
+        },
+        {
+            "step": 2,
+            "description": "만두가 익어 떠오르면 계란 1개를 풀어 국물에 원을 그리며 붓는다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/kw/DumplingSoupwithEgg/DumplingSoupwithEgg_2.png"
+        },
+        {
+            "step": 3,
+            "description": "후추와 대파를 넣고 한소끔 더 끓여 완성한다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/kw/DumplingSoupwithEgg/DumplingSoupwithEgg_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "냉동만두", "name_en": "frozen dumplings", "quantity": "5-6개", "is_optional": false},
+        {"name_ko": "계란", "name_en": "egg", "quantity": "1개", "is_optional": false},
+        {"name_ko": "참치액", "name_en": "fish sauce", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "후추", "name_en": "black pepper", "quantity": "약간", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_050",
+        "source": "HARDCODED",
+        "title_ko": "오이 탕탕이",
+        "title": "Crushed Cucumber Salad",
+        "difficulty": "EASY",
+        "ready_minutes": 5,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/CrushedCucumberSalad/CrushedCucumberSalad_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "오이를 비닐봉지에 넣고 병이나 밀대로 가볍게 두드려 깨뜨린 뒤 손으로 찢는다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/CrushedCucumberSalad/CrushedCucumberSalad_1.png"
+        },
+        {
+            "step": 2,
+            "description": "설탕 1스푼, 식초 2스푼, 소금 0.3스푼, 다진 마늘 0.5스푼을 섞어 양념을 만든다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/CrushedCucumberSalad/CrushedCucumberSalad_2.png"
+        },
+        {
+            "step": 3,
+            "description": "오이와 양념을 잘 버무린 뒤 통깨를 듬뿍 뿌려 완성한다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/CrushedCucumberSalad/CrushedCucumberSalad_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "오이", "name_en": "cucumber", "quantity": "1개", "is_optional": false},
+        {"name_ko": "식초", "name_en": "vinegar", "quantity": "2스푼", "is_optional": false},
+        {"name_ko": "설탕", "name_en": "sugar", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "다진 마늘", "name_en": "minced garlic", "quantity": "0.5스푼", "is_optional": false}
+        ]
+    },
+    {
+        "external_id": "hardcoded_051",
+        "source": "HARDCODED",
+        "title_ko": "베이컨 팽이버섯 덮밥",
+        "title": "Bacon and Enoki Mushroom Rice Bowl",
+        "difficulty": "EASY",
+        "ready_minutes": 8,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/BaconandEnokiMushroomRiceBowl/BaconandEnokiMushroomRiceBowl_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "팬에 베이컨을 썰어 구워 기름을 내고, 팽이버섯을 넣어 함께 볶는다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/kw/BaconandEnokiMushroomRiceBowl/BaconandEnokiMushroomRiceBowl_1.png"
+        },
+        {
+            "step": 2,
+            "description": "진간장 1스푼, 올리고당 0.5스푼을 넣어 버섯에 간이 배게 졸인다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/kw/BaconandEnokiMushroomRiceBowl/BaconandEnokiMushroomRiceBowl_2.png"
+        },
+        {
+            "step": 3,
+            "description": "밥 위에 볶은 재료를 얹고 취향에 따라 계란 노른자를 올린다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/BaconandEnokiMushroomRiceBowl/BaconandEnokiMushroomRiceBowl_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "베이컨", "name_en": "bacon", "quantity": "3줄", "is_optional": false},
+        {"name_ko": "팽이버섯", "name_en": "enoki mushroom", "quantity": "0.5봉", "is_optional": false},
+        {"name_ko": "진간장", "name_en": "soy sauce", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "밥", "name_en": "cooked rice", "quantity": "1공기", "is_optional": false}
+        ]
+    },
+    {
+        "external_id": "hardcoded_052",
+        "source": "HARDCODED",
+        "title_ko": "사골분말 떡국",
+        "title": "Instant Ox Bone Soup with Rice Cakes",
+        "difficulty": "EASY",
+        "ready_minutes": 7,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/InstantOxBoneSoupwithRiceCakes/InstantOxBoneSoupwithRiceCakes_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "냄비에 물 500ml를 끓이고 시판 사골분말을 풀어준다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/kw/InstantOxBoneSoupwithRiceCakes/InstantOxBoneSoupwithRiceCakes_1.png"
+        },
+        {
+            "step": 2,
+            "description": "국물이 끓으면 씻어둔 떡국 떡을 넣고 떡이 떠오를 때까지 끓인다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/kw/InstantOxBoneSoupwithRiceCakes/InstantOxBoneSoupwithRiceCakes_2.png"
+        },
+        {
+            "step": 3,
+            "description": "대파와 후추를 넣고 그릇에 담은 뒤 김가루를 올려 완성한다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/InstantOxBoneSoupwithRiceCakes/InstantOxBoneSoupwithRiceCakes_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "떡국 떡", "name_en": "sliced rice cakes", "quantity": "1.5종이컵", "is_optional": false},
+        {"name_ko": "사골분말", "name_en": "ox bone soup powder", "quantity": "1봉", "is_optional": false},
+        {"name_ko": "김가루", "name_en": "seaweed flakes", "quantity": "약간", "is_optional": true},
+        {"name_ko": "대파", "name_en": "green onion", "quantity": "약간", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_053",
+        "source": "HARDCODED",
+        "title_ko": "두부 유부초밥",
+        "title": "Tofu Filled Fried Bean Curd",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/TofuFilledFriedBeanCurd/TofuFilledFriedBeanCurd_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "두부를 면보나 키친타월에 싸서 물기를 꽉 짠 뒤 으깬다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/TofuFilledFriedBeanCurd/TofuFilledFriedBeanCurd_1.png"
+        },
+        {
+            "step": 2,
+            "description": "으깬 두부에 유부초밥 세트 속의 조미볶음 가루와 소스를 넣고 섞는다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/TofuFilledFriedBeanCurd/TofuFilledFriedBeanCurd_2.png"
+        },
+        {
+            "step": 3,
+            "description": "유부 피의 물기를 살짝 짜고 그 안에 두부 반죽을 가득 채운다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/TofuFilledFriedBeanCurd/TofuFilledFriedBeanCurd_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "유부초밥 세트", "name_en": "inari sushi kit", "quantity": "1/2봉", "is_optional": false},
+        {"name_ko": "두부", "name_en": "tofu", "quantity": "1모", "is_optional": false}
+        ]
+    },
+    {
+        "external_id": "hardcoded_054",
+        "source": "HARDCODED",
+        "title_ko": "참치 마요 비빔면",
+        "title": "Tuna Mayo Mixed Ramen",
+        "difficulty": "EASY",
+        "ready_minutes": 5,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/TunaMayoMixedRamen/TunaMayoMixedRamen_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "시판 비빔라면의 면을 삶아 찬물에 헹군 뒤 물기를 뺀다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/kw/TunaMayoMixedRamen/TunaMayoMixedRamen_1.png"
+        },
+        {
+            "step": 2,
+            "description": "면과 비빔 소스를 먼저 비빈 후, 기름 뺀 참치와 마요네즈 1스푼을 올린다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/TunaMayoMixedRamen/TunaMayoMixedRamen_2.png"
+        },
+        {
+            "step": 3,
+            "description": "모든 재료가 골고루 섞이도록 한 번 더 비벼서 먹는다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/TunaMayoMixedRamen/TunaMayoMixedRamen_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "비빔라면", "name_en": "instant spicy noodles", "quantity": "1봉", "is_optional": false},
+        {"name_ko": "참치캔", "name_en": "canned tuna", "quantity": "0.5캔", "is_optional": false},
+        {"name_ko": "마요네즈", "name_en": "mayonnaise", "quantity": "1스푼", "is_optional": false}
+        ]
+    },
+    {
+        "external_id": "hardcoded_055",
+        "source": "HARDCODED",
+        "title_ko": "애호박 명란 볶음밥",
+        "title": "Zucchini and Pollock Roe Fried Rice",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/ZucchiniandPollockRoeFriedRice/ZucchiniandPollockRoeFriedRice_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "애호박을 잘게 썰고 명란젓은 껍질을 제거해 알만 준비한다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/ZucchiniandPollockRoeFriedRice/ZucchiniandPollockRoeFriedRice_1.png"
+        },
+        {
+            "step": 2,
+            "description": "팬에 식용유를 두르고 애호박을 볶다가 밥과 명란을 넣는다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/kw/ZucchiniandPollockRoeFriedRice/ZucchiniandPollockRoeFriedRice_2.png"
+        },
+        {
+            "step": 3,
+            "description": "부족한 간은 소금으로 맞추고 마지막에 참기름을 살짝 두른다.",
+            "timer_minutes": 1,
+            "image": "/static/images/recipes/kw/ZucchiniandPollockRoeFriedRice/ZucchiniandPollockRoeFriedRice_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "밥", "name_en": "cooked rice", "quantity": "1공기", "is_optional": false},
+        {"name_ko": "애호박", "name_en": "zucchini", "quantity": "1/4개", "is_optional": false},
+        {"name_ko": "명란젓", "name_en": "pollock roe", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "참기름", "name_en": "sesame oil", "quantity": "1스푼", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_056",
+        "source": "HARDCODED",
+        "title_ko": "고추장 멸치 주먹밥",
+        "title": "Spicy Anchovy Rice Balls",
+        "difficulty": "EASY",
+        "ready_minutes": 5,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/SpicyAnchovyRiceBalls/SpicyAnchovyRiceBalls_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "남은 멸치볶음에 고추장 0.5스푼과 올리고당 0.5스푼을 넣고 가볍게 볶는다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/kw/SpicyAnchovyRiceBalls/SpicyAnchovyRiceBalls_1.png"
+        },
+        {
+            "step": 2,
+            "description": "밥에 참기름을 넣고 섞은 뒤 볶아낸 멸치를 넣어 골고루 섞는다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/SpicyAnchovyRiceBalls/SpicyAnchovyRiceBalls_2.png"
+        },
+        {
+            "step": 3,
+            "description": "한입 크기로 동그랗게 뭉쳐 완성한다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/SpicyAnchovyRiceBalls/SpicyAnchovyRiceBalls_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "밥", "name_en": "cooked rice", "quantity": "1공기", "is_optional": false},
+        {"name_ko": "멸치볶음", "name_en": "stir-fried anchovies", "quantity": "3스푼", "is_optional": false},
+        {"name_ko": "고추장", "name_en": "gochujang", "quantity": "0.5스푼", "is_optional": false},
+        {"name_ko": "참기름", "name_en": "sesame oil", "quantity": "1스푼", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_057",
+        "source": "HARDCODED",
+        "title_ko": "전자레인지 계란빵",
+        "title": "Microwave Egg Bread",
+        "difficulty": "EASY",
+        "ready_minutes": 5,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/MicrowaveEggBread/MicrowaveEggBread_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "종이컵 안쪽에 식용유를 살짝 바르고 핫케이크 반죽을 1/3 채운다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/MicrowaveEggBread/MicrowaveEggBread_1.png"
+        },
+        {
+            "step": 2,
+            "description": "그 위에 계란 1개를 올리고 노른자를 젓가락으로 콕 찌른다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/MicrowaveEggBread/MicrowaveEggBread_2.png"
+        },
+        {
+            "step": 3,
+            "description": "전자레인지에서 2분간 조리하여 익힌다.",
+            "timer_minutes": 2,
+            "image": "/static/images/recipes/kw/MicrowaveEggBread/MicrowaveEggBread_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "핫케이크 가루 반죽", "name_en": "pancake mix batter", "quantity": "0.5컵", "is_optional": false},
+        {"name_ko": "계란", "name_en": "egg", "quantity": "1개", "is_optional": false},
+        {"name_ko": "소금", "name_en": "salt", "quantity": "한 꼬집", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_058",
+        "source": "HARDCODED",
+        "title_ko": "봄동 비빔밥",
+        "title": "Bomdong(Spring Cabbage) Bibimbap",
+        "difficulty": "EASY",
+        "ready_minutes": 10,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/BomdongBibimbap/BomdongBibimbap_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "봄동을 깨끗이 씻어 물기를 제거하고 한입 크기로 썬다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/BomdongBibimbap/BomdongBibimbap_1.png"
+        },
+        {
+            "step": 2,
+            "description": "고추장 1, 고춧가루 0.5, 간장 0.5, 설탕 0.5, 참기름 1스푼을 섞어 양념장을 만든다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/BomdongBibimbap/BomdongBibimbap_2.png"
+        },
+        {
+            "step": 3,
+            "description": "볼에 밥과 봄동, 양념장을 넣고 겉절이 느낌으로 가볍게 버무려 완성한다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/BomdongBibimbap/BomdongBibimbap_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "봄동", "name_en": "bomdong", "quantity": "5-6잎", "is_optional": false},
+        {"name_ko": "밥", "name_en": "cooked rice", "quantity": "1공기", "is_optional": false},
+        {"name_ko": "고추장", "name_en": "gochujang", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "참기름", "name_en": "sesame oil", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "계란", "name_en": "egg", "quantity": "1개", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_059",
+        "source": "HARDCODED",
+        "title_ko": "마파두부 덮밥",
+        "title": "Mapo Tofu Rice Bowl",
+        "difficulty": "EASY",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/MapoTofuRiceBowl/MapoTofuRiceBowl_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "두부는 작은 큐브 모양으로 썰고 양파는 잘게 다진다.",
+            "timer_minutes": 0,
+            "image": "/static/images/recipes/kw/MapoTofuRiceBowl/MapoTofuRiceBowl_1.png"
+        },
+        {
+            "step": 2,
+            "description": "팬에 기름을 두르고 다진 고기와 양파를 볶다가 고추장 1, 된장 0.5, 설탕 0.5, 물 150ml를 넣고 끓인다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/kw/MapoTofuRiceBowl/MapoTofuRiceBowl_2.png"
+        },
+        {
+            "step": 3,
+            "description": "국물이 끓으면 두부를 넣고, 전분물(전분 1:물 2)을 조금씩 부어 농도를 조절한 뒤 밥 위에 얹는다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/kw/MapoTofuRiceBowl/MapoTofuRiceBowl_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "두부", "name_en": "tofu", "quantity": "0.5모", "is_optional": false},
+        {"name_ko": "다진 돼지고기", "name_en": "minced pork", "quantity": "50g", "is_optional": false},
+        {"name_ko": "된장", "name_en": "doenjang", "quantity": "0.5스푼", "is_optional": false},
+        {"name_ko": "고추장", "name_en": "gochujang", "quantity": "1스푼", "is_optional": false},
+        {"name_ko": "감자전분", "name_en": "potato starch", "quantity": "1스푼", "is_optional": true}
+        ]
+    },
+    {
+        "external_id": "hardcoded_060",
+        "source": "HARDCODED",
+        "title_ko": "돼지고기 두루치기",
+        "title": "Spicy Stir-fried Pork",
+        "difficulty": "MEDIUM",
+        "ready_minutes": 15,
+        "servings": 1,
+        "image_url": "/static/images/recipes/kw/SpicyStir-friedPork/SpicyStir-friedPork_main.png",
+        "instructions": [
+        {
+            "step": 1,
+            "description": "삼겹살이나 앞다리살을 먹기 좋게 썰어 설탕 1스푼을 뿌려 먼저 볶는다.",
+            "timer_minutes": 5,
+            "image": "/static/images/recipes/kw/SpicyStir-friedPork/SpicyStir-friedPork_1.png"
+        },
+        {
+            "step": 2,
+            "description": "고기 기름이 나오면 고춧가루 2, 간장 2, 다진 마늘 1스푼을 넣고 타지 않게 볶는다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/kw/SpicyStir-friedPork/SpicyStir-friedPork_2.png"
+        },
+        {
+            "step": 3,
+            "description": "대파와 양파를 넣고 강불에서 빠르게 볶아낸 뒤 통깨를 뿌려 마무리한다.",
+            "timer_minutes": 3,
+            "image": "/static/images/recipes/kw/SpicyStir-friedPork/SpicyStir-friedPork_3.png"
+        }
+        ],
+        "ingredients": [
+        {"name_ko": "돼지고기(앞다리살)", "name_en": "pork shoulder", "quantity": "200g", "is_optional": false},
+        {"name_ko": "고춧가루", "name_en": "chili powder", "quantity": "2스푼", "is_optional": false},
+        {"name_ko": "진간장", "name_en": "soy sauce", "quantity": "2스푼", "is_optional": false},
+        {"name_ko": "대파", "name_en": "green onion", "quantity": "0.5대", "is_optional": false},
+        {"name_ko": "설탕", "name_en": "sugar", "quantity": "1스푼", "is_optional": false}
+        ]
+    },
+    {
     "external_id": "hardcoded_401",
     "source": "HARDCODED",
     "title_ko": "간장계란밥",
