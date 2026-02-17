@@ -1467,6 +1467,8 @@
     function bindCompleteButtonEvents() {
         const btnNo = document.getElementById('btnNo');
         const btnYes = document.getElementById('btnYes');
+        const btnClose = document.getElementById('btnClose'); // 추가
+        const btnLogin = document.getElementById('btnLogin'); // 추가
         const dataElement = document.getElementById('cooking-complete-data');
         
         if (!dataElement) {
@@ -1509,6 +1511,19 @@
                 } else {
                     window.location.href = '/logs/create/';
                 }
+            });
+        }
+        // [추가] "닫기" 버튼 - 메인 페이지로 이동
+        if (btnClose) {
+            btnClose.addEventListener('click', function() {
+                window.location.href = '/'; 
+            });
+        }
+
+        // [추가] "로그인" 버튼 - 로그인 페이지로 이동
+        if (btnLogin) {
+            btnLogin.addEventListener('click', function() {
+                window.location.href = '/users/login/'; 
             });
         }
     }
