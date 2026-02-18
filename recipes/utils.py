@@ -173,7 +173,7 @@ def search_recipes_from_spoonacular(user_ingredients, max_results=10):
 # =========================================================
 # 3. 점수 계산 (원래 로직 유지)
 # =========================================================
-def calculate_final_recommendations(recipes, user, user_ingredients_dict, user_skill_level):
+def calculate_final_recommendations(recipes, user, user_ingredients_dict, user_skill_level, min_score=55):
     """
     레시피 추천 점수 계산 및 정렬
     """
@@ -196,9 +196,8 @@ def calculate_final_recommendations(recipes, user, user_ingredients_dict, user_s
                 'ingredient_score': 0, 'missing_ingredients_count': 0
             }
 
-        # ============ 개선: 점수 필터 완화 (55점 이상) ============
-        # 기존: >= 60 → 새로: >= 55
-        if score_data['total_score'] >= 55:
+        # ============ 개선: min_score 파라미터 사용 (기본값 55) ============
+        if score_data['total_score'] >= min_score:
             scored_recipes.append({
                 'recipe': recipe,
                 'score_data': score_data
