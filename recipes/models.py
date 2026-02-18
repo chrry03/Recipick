@@ -268,7 +268,7 @@ class Recipe(models.Model):
         """
         레시피 추천 점수 계산 (자취생 친화적 개선 버전)
         
-        총점 = 베이스라인(20) + 재료매칭(35%) + 유통기한(35%) + 난이도(15%) + 개인화(15%)
+        총점 = 베이스라인(20) + 재료매칭(35%) + 소비기한(35%) + 난이도(15%) + 개인화(15%)
         
         개선사항:
         1. 베이스라인 20점 추가 (기본 점수 보장)
@@ -334,7 +334,7 @@ class Recipe(models.Model):
         # 기존: 0.7/0.3 → 0.6/0.4로 변경 (패널티 영향 증가)
         ingredient_score = (base_score * 0.6) + (missing_penalty * 0.4)
         
-        # 2. 유통기한 점수 (35% - 기존 40%에서 소폭 하향)
+        # 2. 소비기한 점수 (35% - 기존 40%에서 소폭 하향)
         expiry_score = 0
         urgent_count = 0
         very_urgent_count = 0
@@ -361,7 +361,7 @@ class Recipe(models.Model):
                         # 여유 (D-11 이상)
                         expiry_score += 30  # 20→30
                 else:
-                    # 유통기한 미입력 (더 관대하게)
+                    # 소비기한 미입력 (더 관대하게)
                     expiry_score += 30  # 20→30
         
         if matched > 0:
@@ -683,7 +683,7 @@ class Recipe(models.Model):
                     'ingredients_status': ingredients_status
                 })
         
-        # 정렬: 총점 → 유통기한 → 난이도 쉬운 순
+        # 정렬: 총점 → 소비기한 → 난이도 쉬운 순
         def get_difficulty_value(rec):
             difficulty_map = {
                 'EASY': 1,
