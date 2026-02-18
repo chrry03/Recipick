@@ -294,9 +294,9 @@ def get_recipe_recommendations(request):
     logger.info(f"📋 식재료 ID 목록: {selected_ingredient_ids[:5]}...")  # 처음 5개만
 
     # ==========================================
-    # [검색 모드] 키워드가 있을 때는 추천 로직을 완전히 우회하고 별도 처리
-    # - 비로그인: 키워드 매칭 레시피를 점수 필터 없이 전부 반환
-    # - 로그인:   키워드 매칭 레시피만 대상으로 재료 점수 계산 후 정렬 (55점 필터 없음)
+    # [검색 모드] 키워드 기반 단순 검색 (추천/스코어 로직 없음)
+    # - 제목(한글/영문)에 키워드 포함된 레시피만 반환
+    # - 로그인/비로그인 동일: 찜 상태만 주입
     # ==========================================
     if keyword:
         logger.info(f"🔍 [검색 모드] 키워드='{keyword}'")
@@ -318,62 +318,9 @@ def get_recipe_recommendations(request):
                 'message': f"'{keyword}'에 해당하는 레시피가 없습니다."
             })
 
-        # ── 비로그인: 점수 계산 없이 전체 반환 ──
-        if not user:
-            recipes_data = []
-            for recipe in keyword_recipes:
-                recipes_data.append({
-                    'recipe_id': recipe.recipe_id,
-                    'title': recipe.get_display_title(),
-                    'title_ko': recipe.title_ko,
-                    'title_en': recipe.title,
-                    'image_url': recipe.image_url,
-                    'ready_minutes': recipe.ready_minutes,
-                    'difficulty': recipe.difficulty,
-                    'difficulty_display': recipe.get_difficulty_display() if hasattr(recipe, 'get_difficulty_display') else recipe.difficulty,
-                    'total_score': None,
-                    'score_breakdown': {},
-                    'missing_ingredients_count': 0,
-                    'ingredients_status': {'ingredients_status': {}},
-                    'expired_ingredients': [],
-                    'urgent_ingredients': [],
-                    'is_favorited': False,
-                })
-            logger.info(f"✅ [검색 모드 / 비로그인] {len(recipes_data)}개 반환")
-            return Response({
-                'recipes': recipes_data,
-                'total_count': len(recipes_data),
-                'search_mode': True
-            })
-
-        # ── 로그인: 재료 점수 계산 후 정렬 (55점 필터 없음) ──
-        # 사용자 스킬 레벨
-        _skill_level = 'INTERMEDIATE'
-        try:
-            if hasattr(user, 'profile'):
-                _skill_level = user.profile.cooking_level
-        except Exception:
-            pass
-
-        scored_search = []
+        # 키워드 기반 단순 검색: 스코어/정렬 없이 결과만 반환 (재료 상태는 표시)
+        recipes_data = []
         for recipe in keyword_recipes:
-            try:
-                score_data = recipe.calculate_recommendation_score(
-                    user=user,
-                    user_ingredient_ids=selected_ingredient_ids,
-                    user_ingredients_dict=user_ingredients_dict,
-                    user_skill_level=_skill_level,
-                )
-            except Exception:
-                score_data = {
-                    'total_score': 0,
-                    'ingredient_score': 0,
-                    'expiry_score': 0,
-                    'difficulty_score': 0,
-                    'personalization_score': 0,
-                    'missing_ingredients_count': 0,
-                }
-
             try:
                 status_info = recipe.get_ingredients_status_for_user(user_ingredients_dict)
             except Exception:
@@ -385,7 +332,12 @@ def get_recipe_recommendations(request):
                     'urgent_ingredients': [],
                 }
 
-            scored_search.append({
+            missing_count = sum(
+                1 for s in status_info.get('ingredients_status', {}).values()
+                if isinstance(s, dict) and not s.get('is_owned', False)
+            )
+
+            recipes_data.append({
                 'recipe_id': recipe.recipe_id,
                 'title': recipe.get_display_title(),
                 'title_ko': recipe.title_ko,
@@ -394,9 +346,9 @@ def get_recipe_recommendations(request):
                 'ready_minutes': recipe.ready_minutes,
                 'difficulty': recipe.difficulty,
                 'difficulty_display': recipe.get_difficulty_display() if hasattr(recipe, 'get_difficulty_display') else recipe.difficulty,
-                'total_score': score_data['total_score'],
-                'score_breakdown': score_data,
-                'missing_ingredients_count': score_data.get('missing_ingredients_count', 0),
+                'total_score': None,
+                'score_breakdown': {},
+                'missing_ingredients_count': missing_count,
                 'ingredients_status': {
                     'ingredients_status': status_info.get('ingredients_status', {}),
                     'has_expired': status_info.get('has_expired', False),
@@ -407,27 +359,20 @@ def get_recipe_recommendations(request):
                 'is_favorited': False,
             })
 
-        # 정렬: 재료 매칭 점수 높은 순 → 유통기한 점수 → 난이도
-        # (55점 필터 없음 - 검색 결과는 모두 노출)
-        scored_search.sort(key=lambda x: (
-            -x['score_breakdown'].get('ingredient_score', 0),
-            -x['score_breakdown'].get('expiry_score', 0),
-            x['score_breakdown'].get('difficulty_score', 0),
-        ))
+        # 로그인 시 찜 상태만 주입
+        if user:
+            all_ids = [r['recipe_id'] for r in recipes_data]
+            favorited_set = set(FavoriteRecipe.objects.filter(
+                user=user,
+                recipe_id__in=all_ids
+            ).values_list('recipe_id', flat=True))
+            for r in recipes_data:
+                r['is_favorited'] = r['recipe_id'] in favorited_set
 
-        # 찜 상태 주입
-        all_search_ids = [r['recipe_id'] for r in scored_search]
-        favorited_set = set(FavoriteRecipe.objects.filter(
-            user=user,
-            recipe_id__in=all_search_ids
-        ).values_list('recipe_id', flat=True))
-        for r in scored_search:
-            r['is_favorited'] = r['recipe_id'] in favorited_set
-
-        logger.info(f"✅ [검색 모드 / 로그인] {len(scored_search)}개 반환")
+        logger.info(f"✅ [검색 모드] 키워드 기반 {len(recipes_data)}개 반환")
         return Response({
-            'recipes': scored_search,
-            'total_count': len(scored_search),
+            'recipes': recipes_data,
+            'total_count': len(recipes_data),
             'search_mode': True
         })
 
