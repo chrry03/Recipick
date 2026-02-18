@@ -292,9 +292,147 @@ def get_recipe_recommendations(request):
     }
     
     logger.info(f"📋 식재료 ID 목록: {selected_ingredient_ids[:5]}...")  # 처음 5개만
-    
+
     # ==========================================
-    # 4. DB 검색 (utils.py 함수 사용)
+    # [검색 모드] 키워드가 있을 때는 추천 로직을 완전히 우회하고 별도 처리
+    # - 비로그인: 키워드 매칭 레시피를 점수 필터 없이 전부 반환
+    # - 로그인:   키워드 매칭 레시피만 대상으로 재료 점수 계산 후 정렬 (55점 필터 없음)
+    # ==========================================
+    if keyword:
+        logger.info(f"🔍 [검색 모드] 키워드='{keyword}'")
+
+        # 키워드 매칭 레시피 DB 조회 (제목 한글/영문 모두 검색)
+        keyword_qs = Recipe.objects.filter(
+            Q(title__icontains=keyword) | Q(title_ko__icontains=keyword),
+            is_active=True
+        ).prefetch_related('recipe_ingredients__ingredient').order_by('-is_translated', '-created_at')
+
+        keyword_recipes = list(keyword_qs)
+        logger.info(f"🔍 [검색 모드] 키워드 매칭 레시피: {len(keyword_recipes)}개")
+
+        if not keyword_recipes:
+            return Response({
+                'recipes': [],
+                'total_count': 0,
+                'search_mode': True,
+                'message': f"'{keyword}'에 해당하는 레시피가 없습니다."
+            })
+
+        # ── 비로그인: 점수 계산 없이 전체 반환 ──
+        if not user:
+            recipes_data = []
+            for recipe in keyword_recipes:
+                recipes_data.append({
+                    'recipe_id': recipe.recipe_id,
+                    'title': recipe.get_display_title(),
+                    'title_ko': recipe.title_ko,
+                    'title_en': recipe.title,
+                    'image_url': recipe.image_url,
+                    'ready_minutes': recipe.ready_minutes,
+                    'difficulty': recipe.difficulty,
+                    'difficulty_display': recipe.get_difficulty_display() if hasattr(recipe, 'get_difficulty_display') else recipe.difficulty,
+                    'total_score': None,
+                    'score_breakdown': {},
+                    'missing_ingredients_count': 0,
+                    'ingredients_status': {'ingredients_status': {}},
+                    'expired_ingredients': [],
+                    'urgent_ingredients': [],
+                    'is_favorited': False,
+                })
+            logger.info(f"✅ [검색 모드 / 비로그인] {len(recipes_data)}개 반환")
+            return Response({
+                'recipes': recipes_data,
+                'total_count': len(recipes_data),
+                'search_mode': True
+            })
+
+        # ── 로그인: 재료 점수 계산 후 정렬 (55점 필터 없음) ──
+        # 사용자 스킬 레벨
+        _skill_level = 'INTERMEDIATE'
+        try:
+            if hasattr(user, 'profile'):
+                _skill_level = user.profile.cooking_level
+        except Exception:
+            pass
+
+        scored_search = []
+        for recipe in keyword_recipes:
+            try:
+                score_data = recipe.calculate_recommendation_score(
+                    user=user,
+                    user_ingredient_ids=selected_ingredient_ids,
+                    user_ingredients_dict=user_ingredients_dict,
+                    user_skill_level=_skill_level,
+                )
+            except Exception:
+                score_data = {
+                    'total_score': 0,
+                    'ingredient_score': 0,
+                    'expiry_score': 0,
+                    'difficulty_score': 0,
+                    'personalization_score': 0,
+                    'missing_ingredients_count': 0,
+                }
+
+            try:
+                status_info = recipe.get_ingredients_status_for_user(user_ingredients_dict)
+            except Exception:
+                status_info = {
+                    'ingredients_status': {},
+                    'has_expired': False,
+                    'has_urgent': False,
+                    'expired_ingredients': [],
+                    'urgent_ingredients': [],
+                }
+
+            scored_search.append({
+                'recipe_id': recipe.recipe_id,
+                'title': recipe.get_display_title(),
+                'title_ko': recipe.title_ko,
+                'title_en': recipe.title,
+                'image_url': recipe.image_url,
+                'ready_minutes': recipe.ready_minutes,
+                'difficulty': recipe.difficulty,
+                'difficulty_display': recipe.get_difficulty_display() if hasattr(recipe, 'get_difficulty_display') else recipe.difficulty,
+                'total_score': score_data['total_score'],
+                'score_breakdown': score_data,
+                'missing_ingredients_count': score_data.get('missing_ingredients_count', 0),
+                'ingredients_status': {
+                    'ingredients_status': status_info.get('ingredients_status', {}),
+                    'has_expired': status_info.get('has_expired', False),
+                    'has_urgent': status_info.get('has_urgent', False),
+                },
+                'expired_ingredients': status_info.get('expired_ingredients', []),
+                'urgent_ingredients': status_info.get('urgent_ingredients', []),
+                'is_favorited': False,
+            })
+
+        # 정렬: 재료 매칭 점수 높은 순 → 유통기한 점수 → 난이도
+        # (55점 필터 없음 - 검색 결과는 모두 노출)
+        scored_search.sort(key=lambda x: (
+            -x['score_breakdown'].get('ingredient_score', 0),
+            -x['score_breakdown'].get('expiry_score', 0),
+            x['score_breakdown'].get('difficulty_score', 0),
+        ))
+
+        # 찜 상태 주입
+        all_search_ids = [r['recipe_id'] for r in scored_search]
+        favorited_set = set(FavoriteRecipe.objects.filter(
+            user=user,
+            recipe_id__in=all_search_ids
+        ).values_list('recipe_id', flat=True))
+        for r in scored_search:
+            r['is_favorited'] = r['recipe_id'] in favorited_set
+
+        logger.info(f"✅ [검색 모드 / 로그인] {len(scored_search)}개 반환")
+        return Response({
+            'recipes': scored_search,
+            'total_count': len(scored_search),
+            'search_mode': True
+        })
+
+    # ==========================================
+    # 4. DB 검색 (utils.py 함수 사용) - 추천 모드 (검색어 없음)
     # ==========================================
     db_recipes_by_ing = []
     if selected_ingredient_ids:
@@ -304,19 +442,11 @@ def get_recipe_recommendations(request):
         )
         logger.info(f"🗄️ DB 레시피 (식재료 기반): {len(db_recipes_by_ing)}개")
 
-    # ============ 한글/영문 키워드 검색 (수정!) ============
-    db_recipes_by_keyword = []
-    if keyword:
-        db_recipes_by_keyword = list(
-            Recipe.objects.filter(
-                Q(title__icontains=keyword) | 
-                Q(title_ko__icontains=keyword)
-            )
-        )
-        logger.info(f"🔍 DB 레시피 (키워드 '{keyword}'): {len(db_recipes_by_keyword)}개")
+    # ※ 키워드가 있는 경우는 위의 [검색 모드] 블록에서 이미 return 처리됨.
+    #   여기(추천 모드)에서는 keyword가 항상 빈 문자열이므로 별도 키워드 검색 불필요.
 
     # 결과 합치기
-    combined_db = db_recipes_by_keyword + db_recipes_by_ing
+    combined_db = db_recipes_by_ing
     logger.info(f"📦 DB 레시피 합계: {len(combined_db)}개")
 
     # ==========================================
