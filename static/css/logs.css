@@ -45,7 +45,7 @@
 }
 
 
-.image-upload-wrapper { /* 이미지 추가 영역 */
+.image-upload-wrapper { /* 이미지 추가 영역. */
     display: flex;
     flex-direction: column;
     justify-content: center;
