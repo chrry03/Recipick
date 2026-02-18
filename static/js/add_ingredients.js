@@ -107,6 +107,7 @@ class IngredientAdder {
         } catch (err) { console.error(err); }
     }
 
+    // 수정 - "직접 추가"를 제외한 첫 번째 카테고리를 선택
     async fetchCategories() {
         try {
             const res = await fetch('/ingredients/api/categories/'); 
@@ -114,9 +115,12 @@ class IngredientAdder {
             const categories = Array.isArray(data) ? data : (data.results || []);
             this.renderCategories(categories);
             
-            // 첫 번째 카테고리 자동 선택
-            if (categories.length > 0) {
-                const firstCat = categories[0];
+            // [핵심 수정] "직접 추가" 제외한 첫 번째 카테고리 자동 선택
+            const displayCategories = categories.filter(
+                c => c.name !== '직접추가' && c.name !== '직접 추가'
+            );
+            if (displayCategories.length > 0) {
+                const firstCat = displayCategories[0];   // ← 직접 추가 제외 후 첫 번째
                 const firstId = firstCat.id || firstCat.category_id;
                 this.currentCategory = firstId;
                 this.fetchIngredients(firstId);
