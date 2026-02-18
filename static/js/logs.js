@@ -141,13 +141,17 @@
         setupStarRating('difficultyStars', 'difficultyRating');
         setupStarRating('satisfactionStars', 'satisfactionRating');
 
-        // 난이도
+        // 난이도 (숫자 선택 시 EASY/NORMAL/DIFFICULT로 변환, 미선택 시 기본값 유지)
         if (form) {
             form.addEventListener('submit', function() {
                 const diffInput = document.getElementById('difficultyRating');
-                if (!diffInput || !diffInput.value) return;
-                const val = diffInput.value.trim();
+                if (!diffInput) return;
+                const val = (diffInput.value || '').trim();
                 if (val === 'EASY' || val === 'NORMAL' || val === 'DIFFICULT') return;
+                if (!val) {
+                    diffInput.value = 'NORMAL';
+                    return;
+                }
                 const n = parseInt(val, 10);
                 if (n <= 2) diffInput.value = 'EASY';
                 else if (n === 3) diffInput.value = 'NORMAL';

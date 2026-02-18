@@ -63,7 +63,7 @@
                     <button type="button" class="star-btn {% if log.perceived_difficulty == 'DIFFICULT' %}active{% endif %}" data-value="DIFFICULT">★</button>
                 </div>
             </div>
-            <input type="hidden" id="difficultyRating" name="difficulty" value="{{ log.perceived_difficulty|default:'' }}" required>
+            <input type="hidden" id="difficultyRating" name="difficulty" value="{{ log.perceived_difficulty|default:'NORMAL' }}">
             
             <div class="rating-row">
                 <span class="rating-label">만족도:</span>
@@ -73,7 +73,7 @@
                     {% endfor %}
                 </div>
             </div>
-            <input type="hidden" id="satisfactionRating" name="rating" value="{{ log.rating|default:'' }}" required>
+            <input type="hidden" id="satisfactionRating" name="rating" value="{{ log.rating|default:'3' }}">
         </div>
 
         <div class="memo-header">&lt;메모&gt;</div>
