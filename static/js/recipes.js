@@ -1495,21 +1495,22 @@
 
         // "예" 버튼 - 일지 작성 페이지로 이동
         if (btnYes) {
-            btnYes.addEventListener('click', function() {
-                // 체크된 재료를 소비 처리 (선택사항)
+            btnYes.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // 일지 작성 페이지로 먼저 이동 (recipe_id, title 전달)
+                const baseUrl = logCreateUrl || '/logs/create/';
+                const params = new URLSearchParams();
+                if (recipeId) params.set('recipe_id', recipeId);
+                if (recipeTitle) params.set('title', recipeTitle);
+                const targetUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+                window.location.href = targetUrl;
+
+                // 체크된 재료 소비는 백그라운드에서 처리 (페이지 이동에 영향 없음)
                 const checkedIngredients = getCheckedIngredientIds();
                 if (checkedIngredients.length > 0) {
                     consumeIngredients(checkedIngredients);
-                }
-                
-                // 일지 작성 페이지로 이동 (recipe_id, title 전달)
-                if (logCreateUrl) {
-                    const params = new URLSearchParams();
-                    if (recipeId) params.set('recipe_id', recipeId);
-                    if (recipeTitle) params.set('title', recipeTitle);
-                    window.location.href = params.toString() ? `${logCreateUrl}?${params.toString()}` : logCreateUrl;
-                } else {
-                    window.location.href = '/logs/create/';
                 }
             });
         }

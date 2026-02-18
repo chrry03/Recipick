@@ -81,12 +81,12 @@
                     aria-label="일지 작성하지 않고 레시피 목록으로 이동">
                 아니오
             </button>
-            <button type="button" 
-                    class="btn btn-yes" 
-                    id="btnYes"
-                    aria-label="일지 작성 페이지로 이동">
+            <a href="{% url 'logs:create' %}?recipe_id={{ recipe.recipe_id }}&amp;title={{ recipe.get_display_title|default:recipe.title|default:''|urlencode }}"
+               class="btn btn-yes"
+               id="btnYes"
+               aria-label="일지 작성 페이지로 이동">
                 예
-            </button>
+            </a>
         </div>
 
     {% else %}

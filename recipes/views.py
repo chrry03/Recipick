@@ -35,6 +35,28 @@ from .utils import (
     search_recipes_from_spoonacular, 
     calculate_final_recommendations
 )
+from django.conf import settings
+
+
+def _resolve_recipe(recipe_id):
+    """
+    recipe_id로 Recipe 조회. Spoonacular 레시피(음수 ID)는 external_id로 조회하거나 API에서 가져옴.
+    """
+    if recipe_id < 0:
+        external_id = str(-recipe_id)
+        recipe = Recipe.objects.filter(
+            external_id=external_id,
+            source='spoonacular'
+        ).prefetch_related('recipe_ingredients__ingredient').first()
+        if not recipe:
+            api_key = getattr(settings, 'SPOONACULAR_API_KEY', '')
+            if api_key:
+                recipe = Recipe.fetch_from_spoonacular_by_id(external_id, api_key, None)
+        return recipe
+    try:
+        return Recipe.objects.prefetch_related('recipe_ingredients__ingredient').get(recipe_id=recipe_id)
+    except Recipe.DoesNotExist:
+        return None
 
 
 # ==================== ViewSets ==================== #
@@ -672,12 +694,11 @@ def cooking_mode_view(request, recipe_id, step=None):
     
     Args:
         request: HTTP request
-        recipe_id: 레시피 ID
+        recipe_id: 레시피 ID (음수면 Spoonacular external_id)
         step: 현재 단계 번호 (URL parameter, optional)
     """
-    try:
-        recipe = Recipe.objects.get(recipe_id=recipe_id)
-    except Recipe.DoesNotExist:
+    recipe = _resolve_recipe(recipe_id)
+    if not recipe:
         return render(request, 'recipes/recipe_not_found.html', status=404)
 
     # ============ 한글 단계 우선 (수정!) ============
@@ -744,11 +765,8 @@ def cooking_mode_view(request, recipe_id, step=None):
 
 def cooking_complete_view(request, recipe_id):
     """조리 완료 페이지"""
-    try:
-        recipe = Recipe.objects.prefetch_related(
-            'recipe_ingredients__ingredient'
-        ).get(recipe_id=recipe_id)
-    except Recipe.DoesNotExist:
+    recipe = _resolve_recipe(recipe_id)
+    if not recipe:
         return render(request, 'recipes/recipe_not_found.html', status=404)
 
     # 다 쓴 재료 체크하기: 레시피에 적힌 재료 목록 (모든 재료 포함)

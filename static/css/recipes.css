@@ -384,8 +384,8 @@
 .button-group { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 33px; }
 .btn-no { background-color: #d9d9d9; color: #000; }
 .btn-no:hover { background-color: #c9c9c9; }
-.btn-yes { background-color: #ff7043; color: #f2f2f2; }
-.btn-yes:hover { background-color: #ff5722; }
+.btn-yes { background-color: #ff7043; color: #f2f2f2; text-decoration: none; }
+.btn-yes:hover { background-color: #ff5722; color: #f2f2f2; }
 
 @media (max-width: 400px) {
     .container { width: 100%; height: 100vh; border-radius: 0; }

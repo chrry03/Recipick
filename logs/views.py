@@ -160,12 +160,16 @@ def log_update_view(request, pk):
 
     if request.method == 'POST':
         data = request.POST.copy()
-        # 새 이미지를 선택했을 때만 반영 (없으면 data에 image 넣지 않아 기존 이미지 유지)
-        new_image = request.FILES.get('image')
-        if new_image and new_image.size > 0:
-            data['image'] = new_image
+        # 사진 삭제 요청
+        if request.POST.get('remove_image') in ('1', 'true', 'yes'):
+            data['image'] = None
         else:
-            data.pop('image', None)  # POST에 빈 값으로 올 수 있으므로 제거
+            # 새 이미지를 선택했을 때만 반영 (없으면 기존 이미지 유지)
+            new_image = request.FILES.get('image')
+            if new_image and new_image.size > 0:
+                data['image'] = new_image
+            else:
+                data.pop('image', None)  # POST에 빈 값으로 올 수 있으므로 제거
         # 난이도가 폼에서 오는 그대로 반영되도록 data에 확실히 넣음
         difficulty_raw = request.POST.get('difficulty', '').strip()
         if difficulty_raw in dict(RecipeLog.PerceivedDifficulty.choices):
