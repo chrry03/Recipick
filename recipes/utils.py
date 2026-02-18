@@ -203,7 +203,7 @@ def calculate_final_recommendations(recipes, user, user_ingredients_dict, user_s
                 'score_data': score_data
             })
     
-    # 정렬: 총점 → 유통기한 점수 → 난이도
+    # 정렬: 총점 → 소비기한 점수 → 난이도
     scored_recipes.sort(
         key=lambda x: (
             -x['score_data']['total_score'],
@@ -214,7 +214,7 @@ def calculate_final_recommendations(recipes, user, user_ingredients_dict, user_s
     )
     
     categories = {
-        'urgent_ready': {'label': '유통기한 임박 레시피', 'recipes': [], 'count': 0},
+        'urgent_ready': {'label': '소비기한 임박 레시피', 'recipes': [], 'count': 0},
         'ready': {'label': '지금 바로 만들 수 있어요', 'recipes': [], 'count': 0},
         'almost_ready': {'label': '재료 1-2개만 있으면 가능해요', 'recipes': [], 'count': 0}
     }
