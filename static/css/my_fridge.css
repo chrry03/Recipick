@@ -242,6 +242,9 @@
     position: relative;
     cursor: pointer;
     transition: transform 0.1s;
+    /* [핵심 추가] 글자가 길어도 그리드 칸이 억지로 늘어나지 않게 고정합니다 */
+    width: 100%;
+    min-width: 0;
 }
 .shelf-item:active { transform: scale(0.95); }
 
@@ -273,6 +276,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
+    /* [핵심 추가] 이름이 양옆으로 너무 꽉 차지 않게 숨통(여백)을 트여줍니다 */
+    padding: 0 5px;
+    box-sizing: border-box;
 }
 
 .d-day-tag {

@@ -633,9 +633,11 @@
             return;
         }
 
+        // [수정 1] 정렬 로직 개선 ("만료"된 식재료를 제일 앞(0순위)으로 가져오기)
         ingredients.sort((a, b) => {
             const getDaysValue = (daysLeft) => {
                 if (!daysLeft || daysLeft === '-' || daysLeft === null || daysLeft === undefined) return null;
+                if (daysLeft === '만료') return -1; // 만료된 것은 -1 처리해서 최우선 정렬!
                 if (daysLeft === 'D-Day') return 0;
                 if (typeof daysLeft === 'string' && daysLeft.startsWith('D+')) {
                     return -parseInt(daysLeft.substring(2)) || null;
@@ -667,15 +669,33 @@
         ingredients.forEach(ingredient => {
             const btn = document.createElement('button');
             const daysLeftDisplay = ingredient.daysLeft || '-';
+            
+            // ==========================================
+            // [수정 2] D-3 이하이거나 만료인 경우 빨간색 처리
+            // ==========================================
+            let isUrgent = false;
+            if (daysLeftDisplay === '만료' || daysLeftDisplay === 'D-Day') {
+                isUrgent = true;
+            } else if (typeof daysLeftDisplay === 'string' && daysLeftDisplay.startsWith('D-')) {
+                const days = parseInt(daysLeftDisplay.replace('D-', ''), 10);
+                if (days <= 3) { // 3일 이하면 긴급!
+                    isUrgent = true;
+                }
+            }
+
+            // 긴급 상태면 빨간색, 아니면 원래 색상(회색계열) 지정
+            const urgentStyle = isUrgent ? 'color: #FF3B30; font-weight: bold;' : 'color: #999;';
+            // ==========================================
+
             btn.className = 'ingredient-btn';
             btn.setAttribute('aria-label', `${ingredient.name} (${daysLeftDisplay})`);
             btn.innerHTML = `
                 <div class="ingredient-icon">
-                    <img src="${escapeHtml(ingredient.image)}" alt="${escapeHtml(ingredient.name)}" loading="lazy">
+                    <img src="${escapeHtml(ingredient.image)}" alt="${escapeHtml(ingredient.name)}" loading="lazy" onerror="this.onerror=null; this.src='/static/images/categories/etc.png';">
                 </div>
                 <div class="ingredient-info">
                     <span class="ingredient-name">${escapeHtml(ingredient.name)}</span>
-                    <span class="ingredient-days">${escapeHtml(daysLeftDisplay)}</span>
+                    <span class="ingredient-days" style="${urgentStyle}">${escapeHtml(daysLeftDisplay)}</span>
                 </div>
             `;
             container.appendChild(btn);

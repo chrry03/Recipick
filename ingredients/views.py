@@ -337,7 +337,7 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def expiring_soon(self, request):
         """유통기한 임박 식재료 조회 (D-3 이내)"""
-        from datetime import timedelta
+        from datetime import timedelta, date
         
         threshold_date = date.today() + timedelta(days=3)
         
@@ -345,7 +345,7 @@ class UserIngredientViewSet(viewsets.ModelViewSet):
             user=request.user,
             is_consumed=False,
             expire_at__lte=threshold_date,
-            expire_at__gte=date.today()
+            expire_at__isnull=False # None 값인 것은 제외
         ).select_related('ingredient', 'ingredient__category').order_by('expire_at')
         
         serializer = self.get_serializer(expiring, many=True)
