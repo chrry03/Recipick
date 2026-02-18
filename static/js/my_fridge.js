@@ -297,6 +297,9 @@ class MyFridgeManager {
             if (res.ok) {
                 this.closeModal();
                 await this.fetchMyIngredients(); // 목록 새로고침
+                // [여기 추가!!] 식재료 정보가 수정되었으니 알림 배지도 즉시 재계산
+                if (typeof checkUnreadNotifications === 'function') checkUnreadNotifications();
+                
             } else {
                 alert('수정 실패');
             }
@@ -325,6 +328,8 @@ class MyFridgeManager {
             if (res.ok) {
                 // 성공 시 목록 갱신 (편집 모드는 자동으로 유지됨)
                 await this.fetchMyIngredients(); 
+                // [여기 추가!!] 삭제 후에도 알림 배지 즉시 재계산
+                if (typeof checkUnreadNotifications === 'function') checkUnreadNotifications();
             } else {
                 alert('삭제에 실패했습니다.');
             }

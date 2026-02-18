@@ -631,6 +631,9 @@
   border: none;
   cursor: pointer;
   transition: transform 0.2s;
+  /* [핵심 추가] 글자가 길어도 Grid 칸이 억지로 늘어나지 않게 고정! */
+  width: 100%;
+  min-width: 0;
 }
 
 .ingredient-btn:hover {
@@ -662,6 +665,10 @@
   text-align: center;
   min-width: 0;
   max-width: 100%;
+  /* [핵심 추가] 버튼 넓이에 꽉 차게 만들고, 글자가 아이콘 밖으로 튀어나가지 않게 여백 주기 */
+  width: 100%;
+  padding: 0 4px;
+  box-sizing: border-box;
 }
 
 .ingredient-name {

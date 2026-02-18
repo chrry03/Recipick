@@ -118,15 +118,20 @@ def log_create_view(request):
     POST: 작성된 데이터를 저장합니다.
     """
     if request.method == 'POST':
-        # 1. Serializer를 이용해 데이터 검증 (팀장님이 짠 코드 활용!)
-        # request.data 대신 request.POST, request.FILES를 넘겨줍니다.
-        serializer = RecipeLogCreateSerializer(data=request.POST)
-        
+        data = request.POST.copy()
+        # 난이도·만족도 미선택 시 기본값 적용
+        if not data.get('difficulty') or data.get('difficulty') not in dict(RecipeLog.PerceivedDifficulty.choices):
+            data['difficulty'] = 'NORMAL'
+        try:
+            r = int(data.get('rating', 3))
+            if not (1 <= r <= 5):
+                data['rating'] = 3
+        except (TypeError, ValueError):
+            data['rating'] = 3
         # 이미지 파일은 별도로 넣어줘야 함 (form-data 특성상). 빈 파일은 제외
         if request.FILES.get('image') and request.FILES['image'].size > 0:
-            data = request.POST.copy()
             data['image'] = request.FILES['image']
-            serializer = RecipeLogCreateSerializer(data=data)
+        serializer = RecipeLogCreateSerializer(data=data)
 
         if serializer.is_valid():
             # 2. 저장 (user는 현재 로그인한 사람)
@@ -144,9 +149,17 @@ def log_create_view(request):
     recipe_id = request.GET.get('recipe_id')
     recipe_name = request.GET.get('title', '요리 이름 없음')
     
+    # 작성 시 기본값 (난이도·만족도 미선택 시 사용)
     context = {
         'recipe_id': recipe_id,
-        'recipe_name': recipe_name
+        'recipe_name': recipe_name,
+        'log': type('Log', (), {
+            'perceived_difficulty': 'NORMAL',
+            'rating': 3,
+            'memo': '',
+            'cooked_at': timezone.now().date(),
+            'image': None
+        })()
     }
     return render(request, 'logs/log_create.html', context)
 
@@ -160,12 +173,16 @@ def log_update_view(request, pk):
 
     if request.method == 'POST':
         data = request.POST.copy()
-        # 새 이미지를 선택했을 때만 반영 (없으면 data에 image 넣지 않아 기존 이미지 유지)
-        new_image = request.FILES.get('image')
-        if new_image and new_image.size > 0:
-            data['image'] = new_image
+        # 사진 삭제 요청
+        if request.POST.get('remove_image') in ('1', 'true', 'yes'):
+            data['image'] = None
         else:
-            data.pop('image', None)  # POST에 빈 값으로 올 수 있으므로 제거
+            # 새 이미지를 선택했을 때만 반영 (없으면 기존 이미지 유지)
+            new_image = request.FILES.get('image')
+            if new_image and new_image.size > 0:
+                data['image'] = new_image
+            else:
+                data.pop('image', None)  # POST에 빈 값으로 올 수 있으므로 제거
         # 난이도가 폼에서 오는 그대로 반영되도록 data에 확실히 넣음
         difficulty_raw = request.POST.get('difficulty', '').strip()
         if difficulty_raw in dict(RecipeLog.PerceivedDifficulty.choices):

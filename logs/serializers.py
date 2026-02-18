@@ -41,8 +41,11 @@ class RecipeLogCreateSerializer(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
-        # 수정 시 image가 넘어오지 않았거나 비어 있으면 기존 이미지 유지
+        # image가 명시적으로 None이면 기존 이미지 삭제 (remove_image 요청)
         if 'image' in validated_data and validated_data['image'] is None:
+            if instance.image:
+                instance.image.delete(save=False)
+            instance.image = None
             validated_data.pop('image')
         return super().update(instance, validated_data)
 

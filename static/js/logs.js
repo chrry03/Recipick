@@ -51,7 +51,9 @@
                 const memoChanged = memoInput && memoInput.value !== (memoInput.getAttribute('data-initial') || '');
                 const dateChanged = cookedAt && cookedAt.value !== (cookedAt.getAttribute('data-initial') || '');
                 const imageChanged = imageInput && imageInput.files && imageInput.files.length > 0;
-                formDirty = !!(diffChanged || ratingChanged || memoChanged || dateChanged || imageChanged);
+                const removeImageInput = document.getElementById('removeImageInput');
+                const imageRemoved = removeImageInput && removeImageInput.value === '1';
+                formDirty = !!(diffChanged || ratingChanged || memoChanged || dateChanged || imageChanged || imageRemoved);
             }
 
             if (diffInput) diffInput.setAttribute('data-initial', diffInput.value || '');
@@ -80,13 +82,37 @@
 
         // 이미지 미리보기 및 수정하기 (클릭 시 파일 선택)
         const imagePreviewWrap = document.getElementById('imagePreviewWrap');
+        const imageDeleteBtn = document.getElementById('imageDeleteBtn');
+        const removeImageInput = document.getElementById('removeImageInput');
         if (imageUpload && imageInput) {
             imageUpload.addEventListener('click', () => imageInput.click());
             if (imagePreviewWrap) {
-                imagePreviewWrap.addEventListener('click', () => imageInput.click());
+                imagePreviewWrap.addEventListener('click', (e) => {
+                    if (e.target.closest('#imageDeleteBtn')) return;
+                    imageInput.click();
+                });
             }
             if (imagePreview) {
                 imagePreview.addEventListener('click', (e) => { e.preventDefault(); imageInput.click(); });
+            }
+            // 사진 삭제 버튼 (수정 페이지)
+            if (imageDeleteBtn && removeImageInput && isEdit) {
+                imageDeleteBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (this.dataset.hasImage !== 'true') {
+                        alert('삭제할 사진이 없습니다.');
+                        return;
+                    }
+                    removeImageInput.value = '1';
+                    if (imagePreviewWrap) imagePreviewWrap.style.display = 'none';
+                    if (imageUpload) imageUpload.style.display = 'flex';
+                    imageInput.value = '';
+                    if (imagePreview) imagePreview.src = '';
+                    this.dataset.hasImage = 'false';
+                    this.style.opacity = '0.5';
+                    formDirty = true;
+                });
             }
             imageInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
@@ -99,6 +125,7 @@
                     return;
                 }
 
+                if (removeImageInput) removeImageInput.value = '0';
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                     imagePreview.src = ev.target.result;
@@ -114,13 +141,17 @@
         setupStarRating('difficultyStars', 'difficultyRating');
         setupStarRating('satisfactionStars', 'satisfactionRating');
 
-        // 난이도
+        // 난이도 (숫자 선택 시 EASY/NORMAL/DIFFICULT로 변환, 미선택 시 기본값 유지)
         if (form) {
             form.addEventListener('submit', function() {
                 const diffInput = document.getElementById('difficultyRating');
-                if (!diffInput || !diffInput.value) return;
-                const val = diffInput.value.trim();
+                if (!diffInput) return;
+                const val = (diffInput.value || '').trim();
                 if (val === 'EASY' || val === 'NORMAL' || val === 'DIFFICULT') return;
+                if (!val) {
+                    diffInput.value = 'NORMAL';
+                    return;
+                }
                 const n = parseInt(val, 10);
                 if (n <= 2) diffInput.value = 'EASY';
                 else if (n === 3) diffInput.value = 'NORMAL';
@@ -211,17 +242,13 @@
 
 })();
 
-// ★ [추가] 삭제 버튼 클릭 시 실행되는 함수 (전역)
+// 일지 상세 페이지 - 삭제 버튼
 window.deleteLog = function() {
     if (confirm('정말 이 일지를 삭제하시겠습니까?')) {
         const form = document.getElementById('deleteForm');
-        if (form) {
-            form.submit(); // 숨겨진 폼 제출 (POST 요청)
-        } else {
-            alert("삭제 처리 중 오류가 발생했습니다.");
-        }
+        if (form) form.submit();
+        else alert('삭제 처리 중 오류가 발생했습니다.');
     }
-    // 메뉴 닫기
     const menu = document.getElementById('optionsMenu');
-    if(menu) menu.style.display = 'none';
+    if (menu) menu.style.display = 'none';
 };

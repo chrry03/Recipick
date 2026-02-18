@@ -491,7 +491,7 @@ def main_view(request):
                 'isFavorite': True
             })
 
-    # 3. 내 식재료 (유통기한 임박한 순서 8개)
+    # 3. 내 식재료 (소비기한 임박한 순서 8개)
     ingredients = []
     if user.is_authenticated:
         # [Logic] is_consumed=False인 것만, expire_at 오름차순(급한거 먼저), NULL은 마지막에 배치
@@ -621,7 +621,7 @@ def notification_view(request):
         upcoming_qs = UserIngredient.get_expiring_soon_ingredients(user, days_threshold=3)
         
         # 2. [Model 활용] 이미 상한 재료 가져오기 (ingredients/views.py 코드)
-        # (유통기한 지난 것도 보여주려면 이것도 필요. ingredients/views.py에는 지난거는 없기 때문.)
+        # (소비기한 지난 것도 보여주려면 이것도 필요. ingredients/views.py에는 지난거는 없기 때문.)
         expired_qs = UserIngredient.get_expired_ingredients(user)
         
         # 3. 두 리스트 합치기 (상한 거 + 곧 상할 거)

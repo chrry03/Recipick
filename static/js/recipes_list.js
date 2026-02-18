@@ -449,8 +449,17 @@
             });
         }
 
-        // 초기 로딩 (전체 보기)
-        loadRecipes('recommend');
+        // 초기 로딩: URL에 ?q=검색어 가 있으면 검색 모드, 없으면 추천 모드
+        const queryFromUrl = urlParams.get('q');
+        if (queryFromUrl && queryFromUrl.trim()) {
+            // 검색창에 검색어 채우기
+            if (DOM.searchInput) {
+                DOM.searchInput.value = queryFromUrl.trim();
+            }
+            loadRecipes('search', queryFromUrl.trim());
+        } else {
+            loadRecipes('recommend');
+        }
     });
 
 })();

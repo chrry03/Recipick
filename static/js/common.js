@@ -69,3 +69,59 @@ function forceLogout() {
     localStorage.removeItem('user_nickname');
     window.location.href = '/users/login/';
 }
+// ==========================================
+// [스마트 알림 배지] 아까보다 위험 식재료가 늘어났을 때만 다시 알림!
+// ==========================================
+async function checkUnreadNotifications() {
+    try {
+        const response = await authFetch('/ingredients/api/user-ingredients/expiring_soon/');
+        if (!response.ok) return;
+        
+        const data = await response.json();
+        const badges = document.querySelectorAll('.noti-badge');
+        
+        if (badges.length > 0) {
+            const lastSeenDate = localStorage.getItem('last_seen_noti_date');
+            // [추가] 이전에 확인했던 알림 개수 불러오기 (없으면 0)
+            const lastSeenCount = parseInt(localStorage.getItem('last_seen_noti_count') || '0', 10);
+            const today = new Date().toISOString().split('T')[0];
+
+            badges.forEach(badge => {
+                // 조건: 임박 식재료가 1개 이상 있고,
+                // (오늘 처음 보거나 OR 내가 마지막으로 봤을 때보다 위험 식재료가 '늘어났을 때'만!)
+                if (data && data.length > 0 && (lastSeenDate !== today || data.length > lastSeenCount)) {
+                    badge.textContent = data.length;
+                    badge.style.display = 'flex'; 
+                    badge.dataset.count = data.length; // 클릭 시 저장하기 위해 임시 보관
+                } else {
+                    badge.style.display = 'none'; 
+                }
+            });
+        }
+    } catch (error) {
+        console.error('알림 뱃지 갱신 실패:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+        checkUnreadNotifications();
+    }
+
+    const notiBtns = document.querySelectorAll('.notification-btn');
+    notiBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const today = new Date().toISOString().split('T')[0];
+            localStorage.setItem('last_seen_noti_date', today);
+            
+            // [추가] 알림을 끄는 순간의 '알림 개수'를 브라우저에 저장
+            const badge = btn.querySelector('.noti-badge') || document.querySelectorAll('.noti-badge')[0];
+            if (badge && badge.dataset.count) {
+                localStorage.setItem('last_seen_noti_count', badge.dataset.count);
+            }
+            
+            document.querySelectorAll('.noti-badge').forEach(b => b.style.display = 'none');
+        });
+    });
+});

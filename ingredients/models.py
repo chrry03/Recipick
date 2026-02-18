@@ -287,13 +287,13 @@ class UserIngredient(models.Model):
     사용자 보유 식재료
     
     사용자 냉장고에 있는 식재료 관리
-    유통기한, 소비 여부 등을 추적
+    소비기한, 소비 여부 등을 추적
     
     Fields:
         user_ingredient_id: 사용자 식재료 고유 ID (PK)
         user: 소유자
         ingredient: 어떤 식재료인지 (IngredientMaster 참조)
-        expire_at: 유통기한 (선택, 입력 시 추천 가중치에 반영)
+        expire_at: 소비기한 (선택, 입력 시 추천 가중치에 반영)
         is_consumed: 사용 완료 여부
     """
     # Primary Key
@@ -320,11 +320,11 @@ class UserIngredient(models.Model):
         verbose_name='식재료'
     )
     
-    # 유통기한 (선택 사항)
+    # 소비기한 (선택 사항)
     expire_at = models.DateField(
         null=True,
         blank=True,
-        verbose_name='유통기한',
+        verbose_name='소비기한',
         help_text='입력 안하면 가중치 제외'
     )
     
@@ -365,7 +365,7 @@ class UserIngredient(models.Model):
 
     @property
     def is_expiring_soon(self):
-        """유통기한 임박 여부 (3일 이내)"""
+        """소비기한 임박 여부 (3일 이내)"""
         if not self.expire_at:
             return False
         from datetime import date, timedelta
@@ -373,7 +373,7 @@ class UserIngredient(models.Model):
 
     @property
     def is_expired(self):
-        """유통기한 만료 여부"""
+        """소비기한 만료 여부"""
         if not self.expire_at:
             return False
         from datetime import date
@@ -381,7 +381,7 @@ class UserIngredient(models.Model):
 
     @property
     def days_until_expiry(self):
-        """유통기한까지 남은 일수"""
+        """소비기한까지 남은 일수"""
         if not self.expire_at:
             return None
         from datetime import date
@@ -389,7 +389,7 @@ class UserIngredient(models.Model):
         return delta.days
 
     def get_urgency_score(self):
-        """유통기한 긴급도 점수 계산"""
+        """소비기한 긴급도 점수 계산"""
         days = self.days_until_expiry
         
         if days is None or days < 0:
@@ -405,7 +405,7 @@ class UserIngredient(models.Model):
             return 20
 
     def get_expiry_status(self):
-        """유통기한 상태 반환 (UI 표시용)"""
+        """소비기한 상태 반환 (UI 표시용)"""
         days = self.days_until_expiry
         
         if days is None:
@@ -422,7 +422,7 @@ class UserIngredient(models.Model):
 
     @classmethod
     def get_expiring_soon_ingredients(cls, user, days_threshold=3):
-        """유통기한 임박 식재료 조회 (알림용)"""
+        """소비기한 임박 식재료 조회 (알림용)"""
         from datetime import date, timedelta
         
         threshold_date = date.today() + timedelta(days=days_threshold)
@@ -437,7 +437,7 @@ class UserIngredient(models.Model):
 
     @classmethod
     def get_expired_ingredients(cls, user):
-        """유통기한 지난 식재료 조회"""
+        """소비기한 지난 식재료 조회"""
         from datetime import date
         
         return cls.objects.filter(
@@ -456,15 +456,15 @@ class UserIngredient(models.Model):
             return ""
         
         if days < 0:
-            return f"⚠️ {ingredient_name}의 유통기한이 지났습니다!"
+            return f"⚠️ {ingredient_name}의 소비기한이 지났습니다!"
         elif days == 0:
-            return f"🔥 {ingredient_name}의 유통기한이 오늘까지입니다!"
+            return f"🔥 {ingredient_name}의 소비기한이 오늘까지입니다!"
         elif days <= 2:
-            return f"🔥 {ingredient_name}의 유통기한이 {days}일 남았습니다!"
+            return f"🔥 {ingredient_name}의 소비기한이 {days}일 남았습니다!"
         elif days <= 5:
-            return f"⚡ {ingredient_name}의 유통기한이 {days}일 남았습니다!"
+            return f"⚡ {ingredient_name}의 소비기한이 {days}일 남았습니다!"
         else:
-            return f"ℹ️ {ingredient_name}의 유통기한이 {days}일 남았습니다!"
+            return f"ℹ️ {ingredient_name}의 소비기한이 {days}일 남았습니다!"
 
     def mark_as_consumed(self):
         """식재료 사용 처리"""
