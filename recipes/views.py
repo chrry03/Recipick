@@ -369,6 +369,23 @@ def get_recipe_recommendations(request):
             for r in recipes_data:
                 r['is_favorited'] = r['recipe_id'] in favorited_set
 
+        # ========== [핵심 수정] 키워드 검색 모드에서도 "내 재료만" 필터 적용 ==========
+        if only_owned_ingredients and user and selected_ingredient_ids:
+            owned_set = set(selected_ingredient_ids)
+            filtered_data = []
+            for r in recipes_data:
+                # ingredients_status에서 missing 재료가 있는지 확인
+                status_map = r.get('ingredients_status', {}).get('ingredients_status', {})
+                has_missing = any(
+                    isinstance(s, dict) and not s.get('is_owned', False)
+                    for k, s in status_map.items()
+                    if k not in ('has_expired', 'has_urgent')
+                )
+                if not has_missing:
+                    filtered_data.append(r)
+            recipes_data = filtered_data
+            logger.info(f"🔒 [검색 모드] '내 재료만' 적용 후: {len(recipes_data)}개")
+
         logger.info(f"✅ [검색 모드] 키워드 기반 {len(recipes_data)}개 반환")
         return Response({
             'recipes': recipes_data,
@@ -377,126 +394,131 @@ def get_recipe_recommendations(request):
         })
 
     # ==========================================
-    # 4. DB 검색 (utils.py 함수 사용) - 추천 모드 (검색어 없음)
+    # [핵심 수정] "내 재료만" 모드: DB 전체 레시피에서 모든 재료를 보유한 레시피 탐색
     # ==========================================
-    db_recipes_by_ing = []
-    if selected_ingredient_ids:
-        # utils.py 함수가 '우유' 같은 문자열 에러를 방지합니다.
-        db_recipes_by_ing = list(
-            search_recipes_from_db(selected_ingredient_ids, user)
-        )
-        logger.info(f"🗄️ DB 레시피 (식재료 기반): {len(db_recipes_by_ing)}개")
-
-    # ※ 키워드가 있는 경우는 위의 [검색 모드] 블록에서 이미 return 처리됨.
-    #   여기(추천 모드)에서는 keyword가 항상 빈 문자열이므로 별도 키워드 검색 불필요.
-
-    # 결과 합치기
-    combined_db = db_recipes_by_ing
-    logger.info(f"📦 DB 레시피 합계: {len(combined_db)}개")
-
-    # ==========================================
-    # 5. Spoonacular 검색 (utils.py 함수 사용)
-    # ==========================================
-    spoon_recipes = []
-    if include_spoonacular and selected_ingredients.exists():
-        logger.info("🌐 Spoonacular 검색 시작...")
-        # utils.py 함수가 402 에러를 방지하고 빈 리스트를 반환합니다.
-        spoon_recipes = search_recipes_from_spoonacular(
-            selected_ingredients,
-            max_results=10
-        )
-        logger.info(f"🌐 Spoonacular 레시피: {len(spoon_recipes)}개")
-    
-    # 6. 통합 및 중복 제거
-    all_recipes = list(combined_db) + spoon_recipes
-    unique_recipes = {}
-    
-    for recipe in all_recipes:
-        if recipe.external_id not in unique_recipes:
-            unique_recipes[recipe.external_id] = recipe
-    
-    logger.info(f"🎯 중복 제거 후: {len(unique_recipes)}개")
-    
-    # 7. 사용자 스킬 레벨
-    user_skill_level = 'INTERMEDIATE'
-    if user:
-        try:
-            if hasattr(user, 'profile'):
-                user_skill_level = user.profile.cooking_level
-        except:
-            pass
-    
-    # 8. 최종 결과 계산 (utils.py 함수 사용)
-    final_list = list(unique_recipes.values())
-    
-    logger.info(f"🧮 점수 계산 시작: {len(final_list)}개")
-    
-    # ========== [수정] "내 재료만" 필터링 - calculate_final_recommendations 전에 적용 ==========
     if only_owned_ingredients and user and selected_ingredient_ids:
         logger.info("=" * 50)
-        logger.info("🔒 '내 재료만' 필터 적용 시작")
+        logger.info("🔒 '내 재료만' 모드: DB 전체 레시피 탐색 시작")
         logger.info(f"🔒 보유 식재료 개수: {len(selected_ingredient_ids)}개")
-        logger.info(f"🔒 보유 식재료 ID: {selected_ingredient_ids[:10]}..." if len(selected_ingredient_ids) > 10 else f"🔒 보유 식재료 ID: {selected_ingredient_ids}")
-        
-        owned_ingredient_ids = set(selected_ingredient_ids)
-        filtered_recipes = []
-        
-        # Recipe 객체에서 필터링
-        for idx, recipe in enumerate(final_list):
+
+        owned_set = set(selected_ingredient_ids)
+
+        # DB의 모든 활성 레시피를 대상으로 검색 (상위 N개 제한 없음)
+        all_db_recipes = Recipe.objects.filter(
+            is_active=True
+        ).prefetch_related('recipe_ingredients__ingredient')
+
+        fully_owned_recipes = []
+        for recipe in all_db_recipes:
             try:
-                # 필수 재료만 확인 (is_optional=False)
                 required_ingredients = recipe.recipe_ingredients.filter(is_optional=False)
-                required_ingredient_ids = set(
-                    required_ingredients.values_list('ingredient_id', flat=True)
+                req_ids = set(
+                    ri.ingredient_id for ri in required_ingredients
+                    if ri.ingredient_id is not None
                 )
-                
-                # None 제거
-                required_ingredient_ids = {id for id in required_ingredient_ids if id is not None}
-                
-                if not required_ingredient_ids:
-                    # 필수 재료가 없으면 모든 재료 확인
-                    all_ingredients = recipe.recipe_ingredients.all()
-                    required_ingredient_ids = set(
-                        all_ingredients.values_list('ingredient_id', flat=True)
+
+                # 필수 재료가 없으면 전체 재료를 대상으로 확인
+                if not req_ids:
+                    req_ids = set(
+                        ri.ingredient_id for ri in recipe.recipe_ingredients.all()
+                        if ri.ingredient_id is not None
                     )
-                    required_ingredient_ids = {id for id in required_ingredient_ids if id is not None}
-                
-                # 디버깅: 첫 5개만 상세 로그
-                if idx < 5:
-                    logger.info(f"  [{idx}] {recipe.get_display_title()[:30]}")
-                    logger.info(f"       필수 재료: {required_ingredient_ids}")
-                    logger.info(f"       보유 여부: {required_ingredient_ids.issubset(owned_ingredient_ids)}")
-                
+
+                # 레시피에 식재료 정보가 전혀 없으면 제외
+                if not req_ids:
+                    continue
+
                 # 모든 필수 재료를 보유하고 있는지 확인
-                if required_ingredient_ids.issubset(owned_ingredient_ids):
-                    filtered_recipes.append(recipe)
-                    if idx < 5:
-                        logger.info(f"       ✅ 포함")
-                else:
-                    missing = required_ingredient_ids - owned_ingredient_ids
-                    if idx < 5:
-                        logger.info(f"       ❌ 제외 (부족: {missing})")
-            
+                if req_ids.issubset(owned_set):
+                    fully_owned_recipes.append(recipe)
+
             except Exception as e:
-                logger.error(f"  ❌ [{idx}] 필터링 에러: {e}")
-                import traceback
-                logger.error(traceback.format_exc())
+                logger.error(f"  ❌ 필터링 에러 ({recipe.recipe_id}): {e}")
                 continue
-        
-        logger.info(f"🔒 필터링 전: {len(final_list)}개")
-        logger.info(f"🔒 필터링 후: {len(filtered_recipes)}개")
+
+        logger.info(f"🔒 '내 재료만' 결과: {len(fully_owned_recipes)}개")
         logger.info("=" * 50)
-        
-        # 필터링된 레시피로 교체
-        final_list = filtered_recipes
-    
-    # 이제 calculate_final_recommendations 호출
-    result = calculate_final_recommendations(
-        recipes=final_list[:max_results],
-        user=user,
-        user_ingredients_dict=user_ingredients_dict,
-        user_skill_level=user_skill_level
-    )
+
+        # 7. 사용자 스킬 레벨
+        user_skill_level = 'INTERMEDIATE'
+        if user:
+            try:
+                if hasattr(user, 'profile'):
+                    user_skill_level = user.profile.cooking_level
+            except:
+                pass
+
+        # 점수 임계값을 0으로 설정 → 모든 재료를 보유하면 무조건 표시
+        result = calculate_final_recommendations(
+            recipes=fully_owned_recipes[:max_results],
+            user=user,
+            user_ingredients_dict=user_ingredients_dict,
+            user_skill_level=user_skill_level,
+            min_score=0
+        )
+
+    else:
+        # ==========================================
+        # 4. DB 검색 (utils.py 함수 사용) - 일반 추천 모드 (검색어 없음)
+        # ==========================================
+        db_recipes_by_ing = []
+        if selected_ingredient_ids:
+            # utils.py 함수가 '우유' 같은 문자열 에러를 방지합니다.
+            db_recipes_by_ing = list(
+                search_recipes_from_db(selected_ingredient_ids, user)
+            )
+            logger.info(f"🗄️ DB 레시피 (식재료 기반): {len(db_recipes_by_ing)}개")
+
+        # ※ 키워드가 있는 경우는 위의 [검색 모드] 블록에서 이미 return 처리됨.
+        #   여기(추천 모드)에서는 keyword가 항상 빈 문자열이므로 별도 키워드 검색 불필요.
+
+        # 결과 합치기
+        combined_db = db_recipes_by_ing
+        logger.info(f"📦 DB 레시피 합계: {len(combined_db)}개")
+
+        # ==========================================
+        # 5. Spoonacular 검색 (utils.py 함수 사용)
+        # ==========================================
+        spoon_recipes = []
+        if include_spoonacular and selected_ingredients.exists():
+            logger.info("🌐 Spoonacular 검색 시작...")
+            # utils.py 함수가 402 에러를 방지하고 빈 리스트를 반환합니다.
+            spoon_recipes = search_recipes_from_spoonacular(
+                selected_ingredients,
+                max_results=10
+            )
+            logger.info(f"🌐 Spoonacular 레시피: {len(spoon_recipes)}개")
+
+        # 6. 통합 및 중복 제거
+        all_recipes = list(combined_db) + spoon_recipes
+        unique_recipes = {}
+
+        for recipe in all_recipes:
+            if recipe.external_id not in unique_recipes:
+                unique_recipes[recipe.external_id] = recipe
+
+        logger.info(f"🎯 중복 제거 후: {len(unique_recipes)}개")
+
+        # 7. 사용자 스킬 레벨
+        user_skill_level = 'INTERMEDIATE'
+        if user:
+            try:
+                if hasattr(user, 'profile'):
+                    user_skill_level = user.profile.cooking_level
+            except:
+                pass
+
+        # 8. 최종 결과 계산 (utils.py 함수 사용)
+        final_list = list(unique_recipes.values())
+
+        logger.info(f"🧮 점수 계산 시작: {len(final_list)}개")
+
+        result = calculate_final_recommendations(
+            recipes=final_list[:max_results],
+            user=user,
+            user_ingredients_dict=user_ingredients_dict,
+            user_skill_level=user_skill_level
+        )
 
     # ==================== [수정됨: 찜 상태 주입 (Dict/Object 호환)] ====================
     if user and user.is_authenticated:
