@@ -22,12 +22,12 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-change-this')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-12345')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -51,10 +51,13 @@ INSTALLED_APPS = [
     'ingredients',
     'recipes',
     'logs',
+
+    'storages',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # <--- ★ 여기 추가!
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -84,17 +87,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
+# 기본값은 SQLite (도커 테스트 & 파일 DB용)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'recipick_db'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# 만약 서버 환경변수에 DB 정보가 있다면? (나중에 AWS RDS 쓸 때 자동 전환)
+if os.getenv('DB_HOST'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -120,12 +132,49 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
+# 정적 파일들을 모을 폴더 위치 (배포 필수 설정)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+# WhiteNoise가 정적 파일을 압축해서 전송하도록 설정 (속도 향상)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files (사용자 업로드)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# ==========================================
+# [Media files] 사용자 업로드 파일 (AWS S3) - 최신 Django 방식
+# ==========================================
+# 기존 로컬 저장 설정은 주석 처리
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = BASE_DIR / 'media'
+
+# AWS S3 접근 정보 (.env에서 가져옴)
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_REGION = 'ap-northeast-2'
+
+# S3 버킷 설정 (아까 확인한 버킷 이름!)
+AWS_STORAGE_BUCKET_NAME = 'recipick-media-2026'
+
+# S3 도메인 주소 자동 생성
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com'
+
+# [핵심] Django 4.2 이상 / 5.0 필수 설정 (STORAGES)
+STORAGES = {
+    # 정적 파일 (CSS, JS) -> 화이트노이즈 사용 (기존 유지)
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+    # 미디어 파일 (이미지 업로드) -> AWS S3 사용
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+}
+
+# 이미지 URL을 S3 주소로 변경
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+
+# (선택) 같은 파일명이 올라와도 덮어쓰지 않도록 설정 (False 추천)
+AWS_S3_FILE_OVERWRITE = False
+
+# ==========================================
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -164,6 +213,13 @@ CORS_ALLOWED_ORIGINS = os.getenv(
     'http://localhost:3000,http://localhost:8000'
 ).split(',')
 CORS_ALLOW_CREDENTIALS = True
+
+# [추가] CSRF 보안 설정 (배포 시 필수)
+# 프론트엔드 주소와 백엔드 주소(AWS 도메인)를 모두 적어줘야 합니다.
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    'CSRF_TRUSTED_ORIGINS', 
+    'http://localhost:3000,http://127.0.0.1:8000'
+).split(',')
 
 # ==================== Spoonacular API 설정 ==================== #
 SPOONACULAR_API_KEY = os.getenv('SPOONACULAR_API_KEY', '')

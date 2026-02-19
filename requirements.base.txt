@@ -1,0 +1,45 @@
+# 1. Web Framework & API
+Django==5.2.10
+djangorestframework==3.15.2
+
+# 2. Database (PostgreSQL) binary version
+psycopg[binary]==3.1.18
+
+# 3. Environment Variables(.env)
+python-dotenv==1.0.1
+
+# 4. External API & Utilities
+requests==2.32.3
+Pillow==10.3.0
+
+# 5. Deployment (Docker/AWS)
+# WSGI server used for real service instead of django embedded server
+gunicorn==21.2.0
+
+# 6. Security & Auth (option)
+# It is recommended to add CORS error prevention when communicating with the front end (JS).
+django-cors-headers==4.3.1
+# Social Login
+django-allauth==0.63.6
+
+# 7. JWT Authentication
+djangorestframework-simplejwt==5.3.1
+
+# 8. API Documentation (Swagger)
+drf-yasg==1.21.7
+
+# 9. Filtering
+django-filter==23.5
+
+# 10. Date Utilities
+python-dateutil==2.8.2
+
+# 11. Caching
+django-redis==5.4.0
+redis==5.0.1
+
+# 12. Translation
+deep-translator==1.11.4
+googletrans==3.1.0a0
+
+whitenoise==6.11.0
