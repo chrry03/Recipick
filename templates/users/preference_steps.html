@@ -1,0 +1,65 @@
+{% extends 'base_with_navbar.html' %}
+{% load static %}
+
+{% block title %}Recipick - preference{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/users.css' %}">
+{% endblock %}
+
+{% block extra_script %}
+    <script src="{% static 'js/users.js' %}"></script>
+{% endblock %}
+
+{% block header %}
+    {% include 'header.html' %}
+{% endblock header %}
+
+{% block main_content %}
+<div class="app-container">
+    <div class="pref-container">
+
+        <div id="step-1" class="step-section active">
+            <h2 class="step-title">알러지 선택</h2>
+            <div class="allergy-grid" id="allergy-list"></div>
+            <div class="fixed-bottom-btn-area">
+                <button class="btn-floating-mw" onclick="goToStep(2)">선택 완료</button>
+            </div>
+        </div>
+
+        <div id="step-2" class="step-section">
+            <h2 class="step-title">제외할 식재료</h2>
+            <div class="search-wrapper-step2">
+                <img src="{% static 'images/search.png' %}" class="search-icon-step2" alt="검색">
+                <input type="text" id="ingredient-search" placeholder="식재료 검색">
+            </div>
+
+            <div class="exclude-layout">
+                <div class="exclude-sidebar" id="category-wrapper"></div>
+                <div class="vertical-dashed-line"></div>
+                <div class="exclude-content-box">
+                    <div class="orange-bookmark"></div>
+                    <div class="box-header">
+                        <button type="button" class="btn-select-all" onclick="toggleSelectAll()">전체 선택</button>
+                    </div>
+                    <div class="ingredient-list" id="ingredient-list"></div>
+                </div>
+            </div>
+
+            <div class="fixed-bottom-btn-area">
+                <button type="button" class="btn-floating-mw" onclick="goToStep(3)">선택 완료</button>
+            </div>
+        </div>
+
+        <div id="step-3" class="step-section">
+            <h2 class="step-title">레시피 난이도 설정</h2>
+            <div class="level-container">
+                <button class="btn-level beginner" onclick="finishPreference('BEGINNER')">무명요리사</button>
+                <button class="btn-level intermediate" onclick="finishPreference('INTERMEDIATE')">흑요리사</button>
+                <button class="btn-level expert" onclick="finishPreference('EXPERT')">백요리사</button>
+            </div>
+        </div>
+
+    </div> 
+</div> 
+{% endblock %}

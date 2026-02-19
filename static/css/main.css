@@ -1,0 +1,924 @@
+/* 메인 화면 */
+.app-container {
+  width: 100%;
+  max-width: min(28rem, 100%); /* 448px */
+  margin: 0 auto;
+  padding-bottom: 6rem;
+  padding-top: clamp(14rem, 45vh, 18rem); /* 헤더 높이 - 반응형 */
+  position: relative;
+}
+
+.app-container > .app-container {
+  min-height: auto;
+}
+
+/* Header */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem 0 0;
+  background: linear-gradient(to bottom, #F5EFE5, rgba(245, 239, 229, 0.95));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  box-sizing: border-box;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0;
+}
+
+.header.main-header {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 스크롤 시 축소된 헤더 스타일 */
+.header.scrolled {
+  padding: 0.75rem 0 !important;
+  border-radius: 0 0 1.25rem 1.25rem !important;
+  margin-left: 1rem !important;
+  margin-right: 1rem !important;
+  width: calc(100% - 2rem) !important;
+  background: rgba(245, 239, 229, 0.95) !important;
+}
+
+.header-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+  max-height: 3.125rem;
+  overflow: hidden;
+  transform: translateY(0);
+}
+
+.header.scrolled .header-top {
+  margin: 0;
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-0.625rem);
+}
+
+.header-top-content {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  max-width: min(28rem, 100%);
+  padding: 0 1.5rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: min(28rem, 100%);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.header-logo-container {
+  display: flex;
+  align-items: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+}
+
+/* 초기 상태: 로고를 중앙에 배치 */
+.header:not(.scrolled) .header-logo-container {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  justify-content: center;
+}
+
+.header.scrolled .header-logo-container {
+  position: relative;
+  left: 0;
+  transform: translateX(0);
+  width: auto;
+  justify-content: flex-start;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 2;
+  margin-left: auto;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: translateX(1.25rem);
+  pointer-events: none;
+}
+
+.header.scrolled .header-icons {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.header-scrolled-notification {
+  display: inline-flex !important;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.header.scrolled .header-scrolled-notification {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  pointer-events: auto !important;
+}
+
+/* 알림 아이콘 호버 효과 */
+.header-scrolled-notification:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+
+.logo {
+  height: 2.3125rem;
+  width: auto;
+  object-fit: contain;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header.scrolled .logo {
+  height: 2.3125rem;
+}
+
+
+.search-icon-btn {
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  color: #666;
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+.header.scrolled .search-icon-btn {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.search-icon-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+
+.search-icon-small {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
+  display: block;
+}
+
+.notification-btn {
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  color: #666;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  z-index: 10;
+}
+
+.notification-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.header-top-notification {
+  display: inline-flex;
+}
+
+.header.scrolled .header-top-notification {
+  display: none !important;
+}
+
+/* Search Bar */
+.search-container {
+  padding: 3.3125rem 0 3rem;
+  margin-top: 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+  max-height: 12.5rem;
+  overflow: hidden;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.header.scrolled .search-container {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(-1.25rem) !important;
+}
+
+.search-bar-wrapper {
+  width: 100%;
+  max-width: min(28rem, 100%);
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.search-bar {
+  position: relative;
+  background: #F5F0E7;
+  border-radius: 0.9375rem;
+  box-shadow: -1px 1px 2px 0 rgba(255, 255, 255, 0.30), 
+              1px -1px 2px 0 rgba(216, 211, 203, 0.50), 
+              1px 1px 2px 0 rgba(216, 211, 203, 0.20) inset, 
+              -1px -1px 2px 0 rgba(216, 211, 203, 0.20) inset, 
+              1px -1px 2px 0 rgba(255, 255, 255, 0.90) inset, 
+              -1px 1px 3px 0 rgba(216, 211, 203, 0.90) inset;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.25rem;
+  height: 1.25rem;
+  min-width: 1.25rem;
+  min-height: 1.25rem;
+  z-index: 2;
+  pointer-events: none;
+  object-fit: contain;
+  object-position: left center;
+  display: block;
+  opacity: 1;
+}
+
+.search-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem 0.5rem 3.5rem;
+  font-size: 0.875rem;
+  color: #555;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Section */
+.section {
+  margin-bottom: 2rem;
+  margin-top: 1.25rem;
+}
+
+.section:first-child {
+  margin-top: 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  margin-bottom: 1rem;
+}
+
+.section-icon {
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+}
+
+.section-title {
+  font-family: 'MemomentKkukkukk', 'Nanum Gothic', 'Gowun Dodum';
+  font-size: 1.5rem;
+  font-weight: normal;
+  color: #555;
+  flex: 1;
+}
+
+.view-all-btn {
+  font-size: 0.75rem;
+  color: #a6a6a2;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  text-decoration: none;
+}
+
+.view-all-btn:hover {
+  color: #666;
+  text-decoration: none;
+}
+
+/* Carousel */
+.carousel-wrapper {
+  padding: 0 2rem;
+}
+
+.carousel {
+  position: relative;
+  width: 100%;
+  max-width: 18rem;
+  height: 18rem;
+  margin: 0 auto;
+  perspective: 500px;
+  transform-style: preserve-3d;
+}
+
+.card-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transition: all 0.3s ease-out;
+}
+
+.carousel-card {
+  width: 100%;
+  height: 100%;
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+  border-radius: 1rem;
+  box-shadow: 1px 1px 2px 0px rgba(255, 255, 255, 0.3),
+              -1px -1px 2px 0px rgba(221, 221, 221, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.carousel-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  pointer-events: none;
+  box-shadow: inset -1px 1px 2px 0px rgba(221, 221, 221, 0.2),
+              inset 1px -1px 2px 0px rgba(221, 221, 221, 0.2),
+              inset -1px -1px 2px 0px rgba(255, 255, 255, 0.9),
+              inset 1px 1px 3px 0px rgba(221, 221, 221, 0.9);
+}
+
+.carousel-card h3 {
+  font-family: 'MemomentKkukkukk', 'Nanum Gothic', 'Gowun Dodum';
+  font-size: 1.5rem;
+  font-weight: normal;
+  color: #555;
+  margin: 0 0 1rem;
+  text-align: center;
+  z-index: 1;
+}
+
+.recipe-image {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  background-color: #e5e5e5;
+  box-shadow: inset 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  z-index: 1;
+}
+
+.recipe-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recipe-info {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #666;
+  line-height: 1.5;
+  z-index: 1;
+}
+
+.recipe-info p {
+  margin: 0.25rem 0;
+}
+
+/* Carousel Navigation */
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.carousel-nav:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-nav.left {
+  left: -1rem;
+}
+
+.carousel-nav.right {
+  right: -1rem;
+}
+
+/* Carousel Dots */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.carousel-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: #d1d5db;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.carousel-dot.active {
+  width: 1.5rem;
+  background-color: #ff7043;
+  border-radius: 0.25rem;
+}
+
+/* Recipe List */
+.recipe-list {
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 3rem;
+}
+
+.recipe-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #f9f9f9;
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s;
+}
+
+.recipe-card:hover {
+  box-shadow: 2px 4px 8px 0px rgba(0, 0, 0, 0.15);
+}
+
+.recipe-image-small {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: #e5e5e5;
+}
+
+.recipe-image-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recipe-name {
+  flex: 1;
+  font-family: 'MemomentKkukkukk', 'Nanum Gothic', 'Gowun Dodum';
+  font-size: 1.125rem;
+  color: #555;
+}
+
+.favorite-btn {
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.1);
+}
+
+.favorite-btn svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.favorite-btn.active svg {
+  fill: #ffd983;
+  stroke: #ffd983;
+}
+
+.favorite-btn:not(.active) svg {
+  fill: none;
+  stroke: #d1d5db;
+}
+
+
+/* Ingredients */
+.ingredients-container {
+  padding: 0 2rem;
+}
+
+.ingredients-grid {
+  background: #f9f9f9;
+  border-radius: 1.5rem;
+  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.1);
+  padding: 0.6rem;
+  
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  column-gap: 0.625rem;
+  row-gap: 0.625rem;
+  
+  height: 15rem; 
+  overflow-y: auto;
+
+  /* 스크롤바 숨기기 */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* (선택사항) 크롬/사파리 스크롤바 숨기기 */
+.ingredients-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.ingredient-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #999;
+  padding: 2rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ingredient-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+  /* [핵심 추가] 글자가 길어도 Grid 칸이 억지로 늘어나지 않게 고정! */
+  width: 100%;
+  min-width: 0;
+}
+
+.ingredient-btn:hover {
+  transform: scale(1.05);
+}
+
+.ingredient-icon {
+  width: clamp(2.5rem, 8vw, 4rem);
+  height: clamp(2.5rem, 8vw, 4rem);
+  border-radius: 50%;
+  background: linear-gradient(to bottom right, white, #f2f2f2);
+  box-shadow: 1px 1px 2px 0px rgba(211, 211, 211, 0.9),
+              -1px -1px 2px 0px rgba(255, 255, 255, 0.9),
+              inset -1px -1px 2px 0px rgba(211, 211, 211, 0.5),
+              inset 1px 1px 2px 0px rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ingredient-icon img {
+  width: clamp(1.5rem, 5vw, 2.5rem);
+  height: clamp(1.5rem, 5vw, 2.5rem);
+  object-fit: contain;
+}
+
+.ingredient-info {
+  text-align: center;
+  min-width: 0;
+  max-width: 100%;
+  /* [핵심 추가] 버튼 넓이에 꽉 차게 만들고, 글자가 아이콘 밖으로 튀어나가지 않게 여백 주기 */
+  width: 100%;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.ingredient-name {
+  font-family: 'MemomentKkukkukk', 'Nanum Gothic', 'Gowun Dodum';
+  font-size: 0.875rem;
+  color: #555;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.ingredient-days {
+  font-size: 0.75rem;
+  color: #999;
+  display: block;
+}
+
+/* Diary Slider */
+.diary-slider-wrapper {
+  position: relative;
+  padding: 0 2rem;
+}
+
+.diary-slider {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 0.5rem;
+  align-items: center;
+  min-height: 8rem;
+}
+
+.diary-slider.empty {
+  justify-content: center;
+}
+
+.diary-empty-state {
+  width: 100%;
+  text-align: center;
+  color: #999;
+  padding: 2rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.diary-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.diary-card {
+  flex-shrink: 0;
+  width: auto;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.diary-card:hover {
+  transform: scale(1.05);
+}
+
+.diary-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  width: 126px;
+  min-width: 126px;
+  height: 201px;
+  min-height: 201px;
+  background: #F9F9F9;
+  border-radius: 8px;
+  box-shadow: -1px 1px 2px 0 rgba(207, 207, 207, 0.20), 1px -1px 2px 0 rgba(207, 207, 207, 0.20), -1px -1px 2px 0 rgba(255, 255, 255, 0.90), 1px 1px 3px 0 rgba(207, 207, 207, 0.90);
+  padding: 8px 12px 12px 12px;
+  box-sizing: border-box;
+}
+
+.diary-image {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  width: 102px;
+  min-width: 102px;
+  height: 136px;
+  min-height: 136px;
+  margin: 0 0 8px 0;
+  padding: 8px;
+  background: #E6E6E6;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+}
+
+.diary-image img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 일지 이미지 없을 때 나오는 로고 */
+.diary-image img[src*="Recipick_logo"] {
+  position: static;
+  width: 52px;
+  height: 52px;
+  max-width: 52px;
+  max-height: 52px;
+  min-width: auto;
+  min-height: auto;
+  object-fit: contain;
+}
+
+.diary-title {
+  font-family: 'MemomentKkukkukk', 'Nanum Gothic', 'Gowun Dodum';
+  font-size: 0.8rem;
+  color: #333;
+  text-align: left;
+  align-self: flex-start;
+  width: 100%;
+  max-width: 102px;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-right: 0;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diary-date {
+  font-family: 'MemomentKkukkukk', 'Nanum Gothic', 'Gowun Dodum';
+  font-size: 6px;
+  color: #999;
+  text-align: left;
+  align-self: flex-start;
+  margin-top: 0;
+  margin-right: 47px;
+}
+
+/* Diary Navigation */
+.diary-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.diary-nav:hover {
+  background: white;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.diary-nav.left {
+  left: 2rem;
+}
+
+.diary-nav.right {
+  right: 2rem;
+}
+
+/* Floating Add Button */
+.floating-add-btn {
+  position: fixed;
+  right: 1.5rem;
+  bottom: clamp(5rem, 12vh, 7.5rem);
+  width: 76px;
+  height: 76px;
+  min-width: 76px;
+  min-height: 76px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 100;
+  padding: 0;
+}
+
+.floating-add-btn img,
+.floating-add-btn .floating-add-btn-icon {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+}
+
+@media (min-width: 28rem) {
+  .floating-add-btn {
+    right: calc(50% - 14rem + 1.5rem);
+  }
+}
+
+/* Bottom Navigation */
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  color: #999;
+  padding: 2rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 28rem) {
+  .app-container {
+    max-width: 100%;
+  }
+  
+  .search-container,
+  .carousel-wrapper,
+  .recipe-list,
+  .ingredients-container,
+  .diary-slider-wrapper {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .section-header {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .floating-add-btn {
+    right: 1rem;
+    bottom: clamp(4.5rem, 10vh, 6.5rem);
+  }
+}

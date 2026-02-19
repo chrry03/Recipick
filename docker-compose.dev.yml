@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  web:
+    # 1. 현재 폴더(.)에 있는 Dockerfile로 이미지를 만듭니다.
+    build: .
+    
+    # 2. 컨테이너 이름 (알아보기 쉽게 설정)
+    container_name: recipick-server
+    
+    # 3. 실행 명령어 (Dockerfile에 있는 CMD를 덮어쓸 수도 있지만, 명시적으로 적어둡니다)
+    # gunicorn으로 배포 환경과 똑같이 실행합니다.
+    command: gunicorn --bind 0.0.0.0:8000 config.wsgi:application
+    
+    # 4. 내 컴퓨터의 8000번 포트와 컨테이너의 8000번 포트를 연결합니다.
+    # (주소창에 localhost:8000 치면 들어갈 수 있게 해줌)
+    ports:
+      - "8000:8000"
+    
+    # 5. 로컬 폴더를 컨테이너 내부와 연결합니다.
+    # (코드를 고치면 재빌드 없이 바로 반영되고, SQLite 파일도 공유됩니다)
+    volumes:
+      - .:/app
+      
+    # 6. 아까 만든 비밀창고(.env)를 컨테이너에게 전달합니다.
+    env_file:
+      - .env

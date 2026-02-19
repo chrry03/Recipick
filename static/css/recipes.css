@@ -1,0 +1,474 @@
+@charset "UTF-8";
+
+:root {
+    --primary-color: #FF7043;
+    --text-color: #555555;
+}
+
+/* ==========================================================================
+    1. 요리 모드 & 완성 화면 (기존 독립 레이아웃 유지)
+   ========================================================================== */
+.recipe-container,
+.cooking-complete-container {
+    position: relative;
+    width: 100%;
+    max-width: 385px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding-bottom: 70px; /* 네비 버튼 공간 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
+    border-radius: 20px;
+    overflow-x: hidden;
+}
+
+/* 요리 완료: 스크롤 여유 확보(버튼 고정 시 하단 여백 + 최소 높이) */
+.cooking-complete-container {
+    padding-bottom: 90px;
+    min-height: max(100vh, 820px);
+}
+
+.recipe-container .app-header {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 10;
+}
+
+.recipe-container .app-header .header-logo { width: 175px; height: 37px; }
+.recipe-container .app-header .logo-img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 헤더 아래에 오도록 상단 여백 (헤더 높이 ~60px + 여유) */
+.step-number {
+    flex-shrink: 0;
+    text-align: center;
+    margin-top: 72px;
+}
+
+.step-number p {
+    font-family: 'MemomentKkukkukk', sans-serif;
+    font-size: 60px; /* [수정] 100px -> 60px로 축소 */
+    line-height: 1;
+    color: rgba(0, 0, 0, 1);
+    font-weight: normal;
+    margin: 0;
+}
+
+/* 설명: 단계 번호 아래 (순서: 단계 → 설명 → 사진 → 타이머) */
+.description {
+    flex-shrink: 0;
+    width: 312px;
+    max-width: calc(100% - 40px);
+    margin-top: 12px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+/* 사진 + 타이머: 설명 아래 */
+.mask-group {
+    flex-shrink: 0;
+    width: 353px;
+    max-width: calc(100% - 32px);
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
+.description p {
+    font-family: 'MemomentKkukkukk', sans-serif;
+    font-size: 20px;
+    line-height: 1.4;
+    color: rgba(85, 85, 85, 1);
+    white-space: pre-wrap;
+    margin: 0;
+    word-break: keep-all;
+}
+
+.image-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 17px;
+    background-color: #e5e5e5;
+}
+
+.image-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.image-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #e5e5e5; }
+.image-placeholder svg { opacity: 0.5; }
+
+#timer-app { display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 20px; }
+
+/* 타이머 시간 추가 버튼 그룹 */
+.timer-add-buttons { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 20px; width: 100%; }
+.timer-add-btn {
+    width: 89px; height: 33px; border-radius: 30px;
+    background: linear-gradient(135deg, #FFF 100%, #F2F2F2 0%);
+    box-shadow: 1px 1px 2px 0 rgba(255, 255, 255, 0.30) inset, -1px -1px 2px 0 rgba(229, 229, 229, 0.50) inset, -1px 1px 2px 0 rgba(229, 229, 229, 0.20), 1px -1px 2px 0 rgba(229, 229, 229, 0.20), -1px -1px 2px 0 rgba(255, 255, 255, 0.90), 1px 1px 3px 0 rgba(229, 229, 229, 0.90);
+    border: none; padding: 0; font-family: 'Gowun Dodum', sans-serif; font-size: 16px; color: #555;
+    cursor: pointer; transition: all 0.2s ease; text-align: center; display: flex; align-items: center; justify-content: center;
+}
+
+.nav-buttons {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 385px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 33px;
+    box-sizing: border-box;
+    z-index: 10;
+}
+
+.btn {
+    width: 89px; height: 33px; border-radius: 30px; border: none;
+    font-family: 'Gowun Dodum', sans-serif; font-size: 20px; line-height: 1;
+    cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-prev { background-color: #d9d9d9; color: #000; }
+.btn-prev:hover { background-color: #c9c9c9; }
+.btn-exit { background-color: #d9d9d9; color: #000; }
+.btn-exit:hover { background-color: #c9c9c9; }
+.btn-next { background-color: #ff7043; color: #f2f2f2; }
+.btn-next:hover { background-color: #ff5722; }
+.btn:active { transform: scale(0.95); }
+
+@media (max-width: 385px) {
+    .recipe-container { border-radius: 0; }
+}
+
+
+/* ==========================================================================
+    2. 레시피 리스트 스타일 (.app-container 내부)
+   ========================================================================== */
+.recipe-list-wrapper {
+    /* [수정] .app-container가 상단 여백을 주므로 내부 패딩 제거 */
+    width: 100%;
+    max-width: 377px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+#recipe-recommendations { display: flex; flex-direction: column; gap: 20px; }
+
+.recipe-card {
+    background: #FFFFFF;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+    border-radius: 18px;
+    padding: 20px 15px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.recipe-card:hover { transform: translateY(-2px); }
+
+.favorite-btn {
+    position: absolute; top: 15px; right: 15px;
+    background: none; border: none;
+    font-family: 'MemomentKkukkukk', sans-serif;
+    font-size: 25px; color: #FFD983; cursor: pointer; padding: 0; line-height: 1; z-index: 2;
+}
+.favorite-btn.inactive { color: #fff; -webkit-text-stroke: 1px rgba(85, 85, 85, 0.5); }
+
+.recipe-title {
+    font-family: 'MemomentKkukkukk', sans-serif;
+    font-weight: 400; font-size: 24px; line-height: 28px;
+    color: #555555; text-align: center; margin: 5px 0 15px 0;
+}
+
+.recipe-image-wrapper {
+    width: 100%; height: 150px; border-radius: 10px; overflow: hidden; margin-bottom: 15px; background: #D9D9D9; box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.25);
+}
+.recipe-image { width: 100%; height: 100%; object-fit: cover; }
+
+.info-rows { display: flex; flex-direction: column; gap: 8px; }
+.info-row {
+    background: #EFEFEF; border-radius: 7px; height: 30px; padding: 0 12px; display: flex; align-items: center;
+    box-shadow: inset 1px -1px 2px rgba(233, 233, 233, 0.2), inset -1px 1px 2px rgba(233, 233, 233, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.9), inset -1px -1px 3px rgba(233, 233, 233, 0.9);
+}
+.info-label { font-family: 'Gowun Dodum', sans-serif; font-size: 12px; color: #555555; width: 80px; flex-shrink: 0; font-weight: bold; letter-spacing: -0.5px; }
+.info-value { font-family: 'Gowun Dodum', sans-serif; font-size: 13px; color: #555555; flex-grow: 1; padding-left: 5px; min-width: 0; }
+.text-ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+
+/* ==========================================================================
+   3. 타이머 스타일 (크기 축소 수정 버전)
+   ========================================================================== */
+/* [수정] 주황색 원형 타이머 크기 (220px) */
+.base-timer { 
+    position: relative; 
+    width: 220px; 
+    height: 220px; 
+    margin: 0 auto; 
+    display: block; 
+    visibility: visible; 
+}
+
+.base-timer__svg { transform: scaleX(-1); width: 100%; height: 100%; }
+.base-timer__circle { fill: none; stroke: none; }
+.base-timer__path-elapsed { stroke-width: 4px; stroke: #d9d9d9; }
+.base-timer__path-remaining { stroke-width: 4px; stroke-linecap: round; transform: rotate(90deg); transform-origin: center; transition: 1s linear all; fill-rule: nonzero; stroke: currentColor; }
+.base-timer__path-remaining.green { color: rgb(65, 184, 131); }
+.base-timer__path-remaining.orange { color: #ff7043; }
+.base-timer__path-remaining.red { color: #f44336; }
+
+.base-timer__content { position: absolute; width: 100%; height: 100%; top: 0; left: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.base-timer__reset-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: -65px;
+    z-index: 1;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #555555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.base-timer__reset-button:hover {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.08);
+}
+.base-timer__reset-button:active {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+.base-timer__reset-button svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+.base-timer__left-label { font-size: 18px; font-weight: 500; color: rgba(85, 85, 85, 1); text-transform: uppercase; margin-bottom: 0; letter-spacing: 0.5px; font-family: 'MemomentKkukkukk', sans-serif; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: -35px; z-index: 1; }
+.base-timer__time { font-size: 65px; font-weight: normal; color: #000000; line-height: 1; margin: 0; font-family: 'MemomentKkukkukk', sans-serif; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); user-select: none; display: flex; align-items: center; justify-content: center; gap: 4px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: 10px; z-index: 1; }
+.timer-time-part { display: inline-block; min-width: 50px; text-align: center; transition: background-color 0.2s ease; border-radius: 4px; padding: 0 4px; }
+.timer-time-part:hover { background-color: rgba(255, 110, 64, 0.1); }
+.timer-time-separator { display: inline-block; user-select: none; font-family: 'MemomentKkukkukk', sans-serif; }
+
+/* [수정] 입력창 크기 축소 */
+.timer-time-input { 
+    width: 70px; /* 100px -> 70px */
+    font-size: 48px; /* 65px -> 48px */
+    font-weight: normal; 
+    color: #000000; 
+    background-color: transparent; 
+    border: 2px solid #ff6e40; 
+    border-radius: 4px; 
+    text-align: center; 
+    font-family: 'MemomentKkukkukk', sans-serif; 
+    outline: none; 
+    padding: 0; 
+}
+.timer-time-input--small { width: 40px; font-size: 48px; } /* 50px -> 40px */
+.timer-time-input::-webkit-inner-spin-button, .timer-time-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.timer-time-input[type="number"] { 
+    -moz-appearance: textfield; 
+    appearance: textfield;
+}
+.timer-time-input::placeholder { color: #999; }
+
+/* [수정] 재생 버튼 크기 및 위치 조정 */
+.base-timer__play-button { 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    margin-top: 42px;
+    width: 0; 
+    height: 0; 
+    border-left: 18px solid #ff6e40; /* 24px -> 18px */
+    border-top: 12px solid transparent; /* 16px -> 12px */
+    border-bottom: 12px solid transparent; /* 16px -> 12px */
+    cursor: pointer; 
+    transition: transform 0.2s ease; 
+    z-index: 1; 
+}
+
+.base-timer__play-button:hover { transform: translate(-50%, -50%) scale(1.1); }
+.base-timer__play-button.paused:hover { transform: translate(-50%, -50%) scale(1.1); }
+
+/* [수정] 일시정지 버튼(|| 모양) 크기 조정 */
+.base-timer__play-button.paused { 
+    border-left: 0; 
+    border-top: 0; 
+    border-bottom: 0; 
+    width: 18px; /* 24px -> 18px */
+    height: 18px; /* 24px -> 18px */
+    background-color: transparent; 
+    position: absolute; 
+    transform: translate(-50%, -50%); 
+    margin-top: 42px; 
+}
+.base-timer__play-button.paused::before, .base-timer__play-button.paused::after { 
+    content: ''; 
+    position: absolute; 
+    top: 0; 
+    width: 5px; /* 6px -> 5px */
+    height: 18px; /* 24px -> 18px */
+    background-color: #ff6e40; 
+    border-radius: 2px; 
+}
+.base-timer__play-button.paused::before { left: 0; }
+.base-timer__play-button.paused::after { right: 0; }
+
+
+/* ==========================================================================
+    4. 요리 완료 화면 (기존 유지)
+   ========================================================================== */
+.complete-logo { position: absolute; top: 12px; left: 12px; width: 175px; height: 37px; }
+.complete-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+.complete-title { position: absolute; top: 171px; left: 50%; transform: translateX(-50%); font-size: 48px; font-weight: normal; color: #000; text-align: center; line-height: 28px; font-family: 'MemomentKkukkukk', sans-serif; }
+
+.dish-image { position: absolute; top: 217px; left: 50%; transform: translateX(-50%); width: 306px; height: 168px; border-radius: 17px; overflow: hidden; background-color: #d9d9d9; }
+.dish-image img { width: 100%; height: 100%; object-fit: cover; }
+
+.checklist-section { position: absolute; top: 403px; left: 50%; transform: translateX(-50%); width: 90%; max-width: calc(100% - 40px); max-height: 300px; box-sizing: border-box; overflow: visible; display: flex; flex-direction: column; }
+.checklist-title { font-size: 30px; font-weight: normal; color: #555; text-align: center; margin-bottom: 20px; line-height: 28px; font-family: 'MemomentKkukkukk', sans-serif; flex-shrink: 0; position: relative; z-index: 1; }
+.checklist-columns { display: flex; justify-content: center; align-items: flex-start; gap: 20px; width: 100%; max-width: 100%; height: 264px; max-height: 250px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden; flex: 1; padding-left: 24px; padding-right: 24px; }
+
+/* ========== [핵심 수정] 재료 8개 제한 해제 ========== */
+.checklist-column { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 0px; 
+    flex: 1; 
+    min-width: 0; 
+    max-width: 50%; 
+    /* height: 264px; (제거 - 모든 재료 표시) */
+    /* overflow: hidden; (제거 - 모든 재료 표시) */
+}
+
+.checklist-column:empty { display: none; }
+.checklist-item { display: flex; align-items: center; gap: 10px; min-width: 0; width: 100%; max-width: 100%; margin-bottom: 16px; }
+.checklist-item:last-child { margin-bottom: 0; }
+
+.checkbox { width: 20px; height: 19px; border: 2px solid #ff7043; border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s; flex-shrink: 0; }
+.checkbox:hover { background-color: #fff5f2; }
+.checklist-item.checked .checkbox { background-color: transparent; }
+.checkmark { width: 20px; height: 20px; display: none; }
+.checklist-item.checked .checkmark { display: block; }
+.item-text { font-size: 18px; color: #555; line-height: 52.571px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-family: 'Gowun Dodum', sans-serif; }
+.item-text.highlight { color: #ff7043; }
+.no-ingredients { text-align: center; color: #999; font-size: 16px; padding: 20px; }
+
+.divider { position: absolute; top: 720px; left: 50%; transform: translateX(-50%); width: 324px; height: 1px; background-image: repeating-linear-gradient(to right, #555 0px, #555 5px, transparent 5px, transparent 10px); }
+
+.question { position: absolute; top: 740px; left: 50%; transform: translateX(-50%); font-size: 30px; font-weight: normal; color: #555; text-align: center; line-height: 28px; font-family: 'MemomentKkukkukk', sans-serif; white-space: nowrap; width: auto; max-width: calc(100% - 40px); }
+
+/* 요리 완료: 예/아니오 버튼 화면 하단 고정 */
+.cooking-complete-container .button-group {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 385px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 33px;
+    box-sizing: border-box;
+    z-index: 10;
+}
+.button-group { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 33px; }
+.btn-no { background-color: #d9d9d9; color: #000; }
+.btn-no:hover { background-color: #c9c9c9; }
+.btn-yes { background-color: #ff7043; color: #f2f2f2; text-decoration: none; }
+.btn-yes:hover { background-color: #ff5722; color: #f2f2f2; }
+
+@media (max-width: 400px) {
+    .container { width: 100%; height: 100vh; border-radius: 0; }
+}
+
+/* ==========================================================================
+    찜 기능 스타일
+   ========================================================================== */
+.recipe-image-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.favorite-star {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #ccc;
+    transition: all 0.2s ease;
+    z-index: 10;
+    user-select: none;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.favorite-star:hover {
+    transform: scale(1.2);
+}
+
+.favorite-star.favorited {
+    color: #FFD700;
+}
+
+.favorite-star:active {
+    transform: scale(0.9);
+}
+
+/* ==========================================================================
+    5. 비로그인 유저 (Guest) 완료 화면 전용 스타일
+   ========================================================================== */
+.guest-banner-section {
+    position: absolute;
+    top: 403px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 320px;
+}
+
+.guest-banner {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 20px; /* 기존 30px에서 20px로 다이어트하여 내부 공간 확보 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 240px; /* 기존 260px에서 살짝 줄여 버튼과의 간격 확보 */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05); 
+}
+
+.guest-banner-img {
+    width: 300px; /* 원하시는 시원한 가로 사이즈 유지! */
+    height: 170px; /* 💡 핵심 1: 세로 높이를 강제로 제한해서 텍스트를 밀어내지 못하게 방어합니다. */
+    object-fit: cover; /* 💡 핵심 2: 지정된 120px 높이를 넘치는 위아래 빈 여백을 CSS가 알아서 잘라줍니다. */
+    object-position: center; /* 이미지가 잘릴 때 중앙(주방 도구들)이 온전히 보이도록 중심을 잡아줍니다. */
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.guest-banner-text {
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #000;
+    text-align: center;
+    margin: 0;
+    word-break: keep-all;
+}
+
+/* 닫기 및 로그인 버튼 색상 */
+.btn-close { background-color: #d9d9d9; color: #000; }
+.btn-close:hover { background-color: #c9c9c9; }
+.btn-login { background-color: #ff7043; color: #f2f2f2; }
+.btn-login:hover { background-color: #ff5722; }

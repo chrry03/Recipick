@@ -1,0 +1,138 @@
+{% extends 'base_with_navbar.html' %}
+{% load static %}
+
+{% block title %}Recipick - add_ingredients{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/add_ingredients.css' %}">
+<style>
+    /* 모달 스타일 */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); display: none;
+        align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-overlay.open { display: flex; }
+    
+    .custom-modal {
+        background: white; padding: 25px 20px; border-radius: 20px;
+        width: 300px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .modal-title { margin: 0 0 20px 0; font-size: 18px; color: #333; }
+    .highlight-text { color: #FF7043; font-weight: bold; }
+    
+    .date-input-wrapper { margin-bottom: 15px; }
+    .date-picker {
+        width: 100%; padding: 10px; border: 1px solid #ddd;
+        border-radius: 10px; font-size: 16px; text-align: center; outline: none;
+        box-sizing: border-box;
+    }
+    
+    .checkbox-wrapper {
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 25px; cursor: pointer; color: #666; font-size: 14px;
+    }
+    
+    .modal-actions { display: flex; justify-content: space-between; gap: 10px; }
+    .modal-actions button {
+        flex: 1; padding: 12px; border: none; border-radius: 12px;
+        font-size: 14px; font-weight: bold; cursor: pointer;
+    }
+    .btn-cancel { background: #f0f0f0; color: #666; }
+    .btn-confirm { background: #FF7043; color: white; }
+</style>
+{% endblock %}
+
+{% block header %}
+{% include 'header.html' %}
+{% endblock header %}
+
+{% block main_content %}
+
+    <div class="add-container">
+        
+        <div class="grid-search-bar">
+            <img src="{% static 'images/search.png' %}" alt="검색" 
+                 onerror="this.style.display='none'"
+                 style="width: 14px; opacity: 0.5; margin-right: 5px;">
+            <input type="text" placeholder="식재료 검색" class="grid-search-input" id="searchInput">
+        </div>
+
+        <div class="content-layout-wrapper">
+            
+            <div class="category-sidebar" id="categoryListContainer">
+                </div>
+
+            <div class="vertical-dashed-line"></div>
+
+            <div class="ingredient-list-box">
+                <div class="orange-bookmark"></div>
+
+                <div class="ingredient-grid" id="ingredientGrid">
+                    <div class="loading-msg" style="padding: 40px 0; text-align: center; color: #999; font-size: 13px;">
+                        식재료 목록을 불러오는 중...
+                    </div>
+                </div>
+
+                <button type="button" class="btn-submit-all" id="submitBtn">
+                    등록 완료 <span id="countBadge"></span>
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" id="dateModal">
+        <div class="custom-modal date-modal">
+            <h3 class="modal-title">
+                <span id="modalIngredientName" class="highlight-text"></span>의<br>소비기한을 알려주세요!
+            </h3>
+            <div class="date-input-wrapper">
+                <input type="date" id="expiryInput" class="date-picker">
+            </div>
+            <label class="checkbox-wrapper">
+                <input type="checkbox" id="noExpiryCheck">
+                <span style="margin-left: 8px;" class="checkbox-text">소비기한 미입력</span>
+            </label>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" id="cancelBtn">취소</button>
+                <button type="button" class="btn-confirm" id="confirmBtn">완료</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="directAddModal">
+        <div class="custom-modal input-modal">
+            <h3 class="modal-title">추가할 재료의 이름을 정해주세요!</h3>
+            <div class="date-input-wrapper" style="margin-top: 10px;">
+                <input type="text" id="customIngredientInput" class="date-picker" placeholder="예: 홍합" style="text-align: left; padding-left: 10px;">
+            </div>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button type="button" class="btn-cancel" id="directAddCancelBtn">취소</button>
+                <button type="button" class="btn-confirm" id="directAddConfirmBtn">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="successModal">
+        <div class="custom-modal success-modal" style="height: auto; padding-bottom: 30px;">
+            <h3 class="modal-title" style="margin-bottom: 30px; margin-top: 10px;">등록이 완료되었습니다!</h3>
+            <div class="modal-actions center" style="width: 100%; justify-content: center;">
+                <button type="button" class="btn-confirm" id="successConfirmBtn" style="width: 100px;">확인</button>
+            </div>
+        </div>
+    </div>
+
+{% endblock main_content %}
+
+{% block extra_script %}
+<div id="csrf-token" 
+     data-token="{{ csrf_token }}" 
+     data-add-ingredient-url="{% url 'ingredients:add_ingredient' %}" 
+     data-my-fridge-url="{% url 'ingredients:my_fridge' %}" 
+     style="display: none;"></div>
+
+<script src="{% static 'js/add_ingredients.js' %}"></script>
+{% endblock %}

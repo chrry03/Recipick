@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recipick - signup{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/users.css' %}">
+{% endblock %}
+
+{% block extra_script %}
+    <script src="{% static 'js/users.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    
+    <a href="{% url 'users:login' %}" class="logo-area">
+        <img src="{% static 'images/Recipick_logo.png' %}" class="logo-img-top" alt="Recipick Top">
+        <img src="{% static 'images/Recipick_logo_text.png' %}" class="logo-img-bottom" alt="Recipick Bottom">
+    </a>
+
+    <form id="signup-step1-form" class="form-group-mw">
+        <input type="email" id="email" placeholder="이메일" class="input-mw" required>
+        <input type="password" id="password" placeholder="비밀번호" class="input-mw" required>
+        <input type="password" id="password_confirm" placeholder="비밀번호 확인" class="input-mw" required>
+        
+        <button type="submit" class="btn-mw btn-primary-mw">회원가입</button>
+    </form>
+
+</div>
+{% endblock %}

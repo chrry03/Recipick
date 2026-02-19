@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{# ============ 한글 제목 우선 표시 (수정!) ============ #}
+{% block title %}{{ recipe.get_display_title }} - 단계 {{ current_step }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recipes.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+{% include 'header.html' %}
+<div class="recipe-container" 
+     data-recipe-id="{{ recipe.recipe_id }}" 
+     data-total-steps="{{ total_steps }}"
+     data-current-step="{{ current_step }}"
+     data-initial-timer-seconds="{{ step_data.timer_seconds|default:0 }}">
+    
+    {# 1. 단계 번호 #}
+    <div class="step-number" aria-label="현재 단계">
+        <p>{{ current_step }}</p>
+    </div>
+
+    {# 2. 설명 #}
+    <div class="description" role="article">
+        {% if step_data %}
+            <p>{{ step_data.description|linebreaksbr }}</p>
+            {% if step_data.timer_seconds %}
+            <div class="timer-info">
+                ⏱️ 타이머: {{ step_data.timer_seconds|floatformat:0 }}초
+                ({{ step_data.timer_seconds|floatformat:0|divisibleby:60|yesno:"약,약" }} 
+                {% widthratio step_data.timer_seconds 60 1 %}분)
+            </div>
+            {% endif %}
+        {% else %}
+            <p class="no-step-data">단계 정보가 없습니다.</p>
+        {% endif %}
+    </div>
+
+    {# 3. 사진 + 4. 타이머 #}
+    <div class="mask-group">
+        {% if step_data.image %}
+            <div class="image-container">
+                <img src="{{ step_data.image }}" 
+                     alt="{{ recipe.get_display_title }} - 단계 {{ current_step }}" 
+                     loading="lazy"
+                     class="step-image"
+                     data-fallback-display="none">
+            </div>
+        {% elif recipe.image_url %}
+            <div class="image-container">
+                <img src="{{ recipe.image_url }}" 
+                     alt="{{ recipe.get_display_title }} - 단계 {{ current_step }}" 
+                     loading="lazy"
+                     class="step-image"
+                     data-fallback-display="none">
+            </div>
+        {% else %}
+            <div class="image-container">
+                <div class="image-placeholder" aria-hidden="true">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+        {% endif %}
+        {# 타이머 앱 #}
+        <div id="timer-app"></div>
+        {# 타이머 추가 버튼 #}
+        <div class="timer-add-buttons">
+            <button type="button" class="timer-add-btn" data-seconds="30" aria-label="30초 추가">+30초</button>
+            <button type="button" class="timer-add-btn" data-seconds="60" aria-label="1분 추가">+1분</button>
+            <button type="button" class="timer-add-btn" data-seconds="300" aria-label="5분 추가">+5분</button>
+        </div>
+    </div>
+
+    {# 네비게이션 버튼 #}
+    <nav class="nav-buttons" aria-label="단계 네비게이션">
+        {% if current_step == 1 %}
+        <button type="button" 
+                class="btn btn-exit" 
+                id="exitBtn"
+                aria-label="요리 종료하고 홈으로 이동">
+            종료
+        </button>
+        {% else %}
+        <button type="button" 
+                class="btn btn-prev" 
+                id="prevStepBtn"
+                aria-label="이전 단계로 이동">
+            이전
+        </button>
+        {% endif %}
+        
+        <button type="button" 
+                class="btn btn-next" 
+                id="nextStepBtn"
+                aria-label="{% if current_step >= total_steps %}완료 페이지로 이동{% else %}다음 단계로 이동{% endif %}">
+            {% if current_step >= total_steps %}완료{% else %}다음{% endif %}
+        </button>
+    </nav>
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+<script src="{% static 'js/recipes.js' %}"></script>
+{% endblock extra_script %}

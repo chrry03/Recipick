@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}일지 수정{% else %}일지 작성{% endif %} - Recipick{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/logs.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    {% include 'header.html' %}
+
+    <div class="title-section">
+        <button type="button" class="back-btn" id="logBackBtn" aria-label="뒤로가기">
+            <svg width="23" height="21" viewBox="0 0 23 21" fill="none">
+                <path d="M22 10.5H1M1 10.5L11 1M1 10.5L11 20" stroke="#555555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <h1 class="page-title">{% if is_edit %}일지 수정하기{% else %}오늘 요리는 어떠셨나요?{% endif %}</h1>
+    </div>
+
+    <form id="log-create-form" method="POST" enctype="multipart/form-data" {% if is_edit %}action="{% url 'logs:update' log.recipe_log_id %}" data-is-edit="true"{% endif %}>
+        {% csrf_token %}
+        <input type="hidden" name="recipe" value="{{ recipe_id }}">
+
+        <div class="image-upload-wrapper">
+            <input type="hidden" name="remove_image" id="removeImageInput" value="0">
+            <div class="image-upload" id="imageUpload" {% if log.image %}style="display:none;"{% endif %}>
+                <img src="{% static 'images/image_upload.svg' %}" alt="이미지 업로드" class="camera-icon">
+            </div>
+            <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
+            <div class="image-preview-wrap" id="imagePreviewWrap" style="{% if log.image %}display: flex;{% else %}display: none;{% endif %}">
+                <div class="image-preview-inner">
+                    <img class="image-preview" id="imagePreview" alt="업로드된 사진" 
+                         src="{% if log.image %}{{ log.image.url }}{% endif %}">
+                    {% if is_edit %}
+                    <span class="image-edit-icon" aria-hidden="true"></span>
+                    {% endif %}
+                </div>
+            </div>
+            {% if is_edit %}
+            <button type="button" class="image-delete-btn-below {% if not log.image %}image-delete-btn-disabled{% endif %}" id="imageDeleteBtn" aria-label="사진 삭제" data-has-image="{% if log.image %}true{% else %}false{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+                사진 삭제
+            </button>
+            {% endif %}
+        </div>
+
+        <div class="cooking-info">
+            <h2 class="cooking-name">{{ recipe_name|default:"요리 이름 없음" }}</h2>
+            
+            <div class="rating-row">
+                <span class="rating-label">난이도:</span>
+                <div class="stars difficulty-stars" id="difficultyStars">
+                    <button type="button" class="star-btn {% if log.perceived_difficulty %}active{% endif %}" data-value="EASY">★</button>   
+                    <button type="button" class="star-btn {% if log.perceived_difficulty == 'NORMAL' or log.perceived_difficulty == 'DIFFICULT' %}active{% endif %}" data-value="NORMAL">★</button>    
+                    <button type="button" class="star-btn {% if log.perceived_difficulty == 'DIFFICULT' %}active{% endif %}" data-value="DIFFICULT">★</button>
+                </div>
+            </div>
+            <input type="hidden" id="difficultyRating" name="difficulty" value="{{ log.perceived_difficulty|default:'NORMAL' }}">
+            
+            <div class="rating-row">
+                <span class="rating-label">만족도:</span>
+                <div class="stars satisfaction-stars" id="satisfactionStars">
+                    {% for i in "12345" %}
+                        <button type="button" class="star-btn {% if log.rating >= forloop.counter %}active{% endif %}" data-value="{{ forloop.counter }}">★</button>
+                    {% endfor %}
+                </div>
+            </div>
+            <input type="hidden" id="satisfactionRating" name="rating" value="{{ log.rating|default:'3' }}">
+        </div>
+
+        <div class="memo-header">&lt;메모&gt;</div>
+        <div class="memo-container">
+            <textarea class="memo-input" name="memo" placeholder="후기를 남겨주세요.">{{ log.memo|default:'' }}</textarea>
+        </div>
+
+        <input type="date" id="cookedAt" name="cooked_at" class="date-input-hidden" value="{{ log.cooked_at|date:'Y-m-d' }}">
+
+        <button type="submit" class="submit-btn" id="submitBtn">{% if is_edit %}수정 완료{% else %}작성하기{% endif %}</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="{% static 'js/logs.js' %}"></script>
+{% endblock %}

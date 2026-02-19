@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recipick - Home{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    <!-- Main Header (스크롤 시 축소됨) -->
+    <header class="header main-header" id="mainHeader">
+        <!-- 상단 알림 아이콘 (초기 상태만 표시) -->
+        <div class="header-top">
+            <div class="header-top-content">
+                <a href="{% url 'users:notification' %}" class="notification-btn header-top-notification" aria-label="알림" style="position: relative;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                    </svg>
+                    <span class="noti-badge" style="display: none;">0</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="header-wrapper">
+            <!-- 로고 -->
+            <div class="header-logo-container">
+                <img src="{% static 'images/logo.png' %}" alt="Recipick" class="logo" onerror="this.src='https://via.placeholder.com/175x37'">
+            </div>
+            
+            <!-- 오른쪽 아이콘들 (스크롤 시 표시) -->
+            <div class="header-icons">
+                <!-- 검색 아이콘 (스크롤 시 표시) -->
+                <button class="search-icon-btn" id="searchIconBtn" aria-label="검색">
+                    <img src="{% static 'images/search.png' %}" class="search-icon-small" alt="검색" onerror="console.error('검색 아이콘 로드 실패:', this.src)">
+                </button>
+                
+                <!-- 알림 아이콘 (스크롤 시 표시) -->
+                <a href="{% url 'users:notification' %}" class="notification-btn header-scrolled-notification" aria-label="알림">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                    </svg>
+                    <span class="noti-badge" style="display: none;">0</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- 검색창 (스크롤 시 숨김) -->
+        <div class="search-container">
+            <div class="search-bar-wrapper">
+                <div class="search-bar">
+                    <img src="{% static 'images/search.png' %}" class="search-icon" alt="검색" onerror="console.error('검색 아이콘 로드 실패:', this.src)">
+                    <input type="text" placeholder="레시피 검색" class="search-input" id="searchInput" data-recipe-list-url="{% url 'recipes:list' %}">
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+
+
+    <!-- Recommended Recipe Section -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">오늘의 추천 메뉴</h2>
+            <a class="view-all-btn" href="{% url 'recipes:list' %}">전체보기</a>
+        </div>
+        
+        <div class="carousel-wrapper">
+            <div class="carousel" id="recipeCarousel">
+                <!-- Carousel items will be inserted by JavaScript -->
+            </div>
+            <div class="carousel-dots" id="carouselDots"></div>
+        </div>
+        
+        <!-- 레시피 데이터 (서버에서 전달) -->
+        <script type="application/json" id="recipeData">{{ recommended_recipes|safe }}</script>
+    </section>
+
+    <!-- Favorite Recipes Section -->
+    <section class="section">
+        <div class="section-header">
+            <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#ff7043" stroke="#ff7043" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+            </svg>
+            <h2 class="section-title">찜한 레시피</h2>
+            <a class="view-all-btn" href="{% url 'recipes:list' %}?filter=favorites">전체보기</a>
+        </div>
+        
+        <div class="recipe-list" id="favoriteRecipes" data-recipes='{{ favorite_recipes|safe }}'>
+            <!-- Recipe cards will be inserted by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Ingredients Section -->
+    <section class="section">
+        <div class="section-header">
+            <img src="{% static 'images/main_ingredient.svg' %}" class="section-icon" alt="내 식재료">
+            <h2 class="section-title">내 식재료</h2>
+            <a class="view-all-btn" href="{% url 'ingredients:my_fridge' %}">전체보기</a>
+        </div>
+        
+        <div class="ingredients-container">
+            {{ ingredients|json_script:"ingredients-data" }}
+            <div class="ingredients-grid" id="ingredientsGrid">
+                <!-- Ingredient buttons will be inserted by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Diary Section -->
+    <section class="section">
+        <div class="section-header">
+            <img src="{% static 'images/main_log.svg' %}" class="section-icon" alt="내 일지">
+            <h2 class="section-title">내 일지</h2>
+            <a class="view-all-btn" href="{% url 'logs:list' %}">전체보기</a>
+        </div>
+        
+        <div class="diary-slider-wrapper">
+            <button type="button" class="diary-nav left" id="diaryPrev" style="display: none;" aria-label="이전 일지">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m15 18-6-6 6-6"></path>
+                </svg>
+            </button>
+            <button type="button" class="diary-nav right" id="diaryNext" aria-label="다음 일지">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9 18 6-6-6-6"></path>
+                </svg>
+            </button>
+            <script id="diaryEntriesData" type="application/json">{{ diary_entries|safe }}</script>
+            <div class="diary-slider" id="diarySlider">
+                <!-- Diary cards will be inserted by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Add Button -->
+    <button class="floating-add-btn" id="addRecipeBtn" aria-label="식재료 추가" data-add-url="{% url 'ingredients:add_ingredient' %}">
+        <svg class="floating-add-btn-icon" xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72" fill="none">
+            <g filter="url(#filter0_d_141_107)">
+                <rect width="68" height="68" rx="24.5" fill="#FF7043"/>
+            </g>
+            <path d="M21 34.914C27.599 34.03 33.505 34.862 46.91 34.543" stroke="#FFEEDB" stroke-width="4" stroke-linecap="round"/>
+            <path d="M32.9871 22C33.6771 29.777 33.0001 37.516 34.2391 47.443" stroke="#FFEEDB" stroke-width="4" stroke-linecap="round"/>
+            <defs>
+                <filter id="filter0_d_141_107" x="-4" y="-4" width="80" height="80" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                    <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                    <feOffset dx="0" dy="0"/>
+                    <feGaussianBlur stdDeviation="1.5"/>
+                    <feComposite in2="hardAlpha" operator="out"/>
+                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_141_107"/>
+                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_141_107" result="shape"/>
+                </filter>
+            </defs>
+        </svg>
+    </button>
+
+    <!-- Bottom Navigation -->
+    {% include 'base_with_navbar.html' %}
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="{% static 'js/common.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,19 @@
+<!-- 상단 헤더 (여러 곳에서 include 해서 쓰기 위함) -->
+{% load static %}
+
+<header class="app-header">
+    <div class="header-content">
+        <div class="header-logo">
+            <a href="{% url 'root' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Recipick" class="logo-img" onerror="this.src='https://via.placeholder.com/175x37'">
+            </a>
+        </div>
+        <a href="{% url 'users:notification' %}" class="notification-btn" aria-label="알림">
+            <svg width="21" height="23" viewBox="0 0 23 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.645 23.334C9.850 23.688 10.145 23.983 10.500 24.188C10.854 24.393 11.256 24.500 11.666 24.500C12.076 24.500 12.478 24.393 12.833 24.188C13.187 23.983 13.482 23.688 13.687 23.334" stroke="#555555" stroke-width="2.333" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M1.472 16.714C1.319 16.881 1.219 17.089 1.182 17.312C1.145 17.535 1.175 17.764 1.266 17.971C1.357 18.178 1.506 18.354 1.696 18.477C1.885 18.601 2.106 18.667 2.333 18.667H21C21.226 18.667 21.447 18.602 21.636 18.478C21.826 18.355 21.976 18.179 22.067 17.972C22.158 17.766 22.188 17.537 22.152 17.313C22.115 17.090 22.015 16.882 21.863 16.715C20.311 15.116 18.666 13.416 18.666 8.167C18.666 6.310 17.929 4.530 16.616 3.217C15.303 1.904 13.523 1.167 11.666 1.167C9.810 1.167 8.029 1.904 6.716 3.217C5.403 4.530 4.666 6.310 4.666 8.167C4.666 13.416 3.020 15.116 1.472 16.714Z" stroke="#555555" stroke-width="2.333" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="notiBadge" class="noti-badge" style="display: none;">0</span>
+        </a>
+    </div>
+</header>

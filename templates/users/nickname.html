@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recipick - nickname{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/users.css' %}">
+{% endblock %}
+
+{% block extra_script %}
+    <script src="{% static 'js/users.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    
+    <div class="logo-area">
+        <img src="{% static 'images/Recipick_logo.png' %}" class="logo-img-top" alt="Recipick Top">
+        <img src="{% static 'images/Recipick_logo_text.png' %}" class="logo-img-bottom" alt="Recipick Bottom">
+    </div>
+
+    <form id="nickname-form" class="form-group-mw">
+        <input type="text" id="nickname" placeholder="닉네임 입력" class="input-mw" required>
+        <button type="submit" class="btn-mw btn-primary-mw">설정 완료</button>
+    </form>
+
+</div>
+{% endblock %}

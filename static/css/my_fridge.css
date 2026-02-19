@@ -1,0 +1,427 @@
+/* ==========================================================================
+   내 냉장고 페이지 (my_fridge.css) - 최종 고정 버전
+   ========================================================================== */
+
+/* 1. 메인 컨테이너 */
+.fridge-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /* 전체 화면 높이에서 헤더(60px)와 하단탭(80px)을 뺀 만큼만 사용 */
+    height: calc(100vh - 140px); 
+    margin: 0 auto;
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* 2. 상단 고정 영역 (검색창 + 필터) */
+.fridge-fixed-top {
+    flex-shrink: 0;
+    /* 위쪽 여백을 줄여서 검색창을 위로 올림 */
+    padding-top: 10px; 
+    padding-bottom: 5px;
+    z-index: 10;
+}
+
+.fridge-search-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 380px;
+    height: 40px;
+    margin: 0 auto 15px;
+    padding: 0 24px;
+    box-sizing: border-box;
+}
+
+.search-input-container {
+    position: relative;
+    flex-grow: 1;
+    height: 100%;
+    background: #F5F0E7;
+    border-radius: 20px;
+    box-shadow: inset 1px 1px 2px rgba(216, 211, 203, 0.2), 
+                inset -1px -1px 2px rgba(255, 255, 255, 0.9), 
+                inset -1px 1px 3px rgba(216, 211, 203, 0.9);
+}
+
+.fridge-search-input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    padding: 0 15px 0 40px; /* 돋보기 공간 확보 */
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 13px;
+    color: #555;
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px; 
+    top: 50%;
+    transform: translateY(-50%); /* 돋보기 수직 중앙 정렬 완벽 해결! */
+    width: 16px;
+    opacity: 0.5;
+}
+
+/* 편집 버튼 스타일 (그림자 추가) */
+.edit-mode-btn {
+    min-width: 55px; 
+    height: 36px; 
+    border-radius: 18px; 
+    border: 1px solid #FF7043;
+    background-color: #ffffff; 
+    color: #FF7043; 
+    font-family: 'Gowun Dodum', sans-serif;
+    font-weight: bold; 
+    cursor: pointer; 
+    transition: all 0.2s ease; 
+    margin-left: 10px;
+    /* [핵심] 검색창과 일관성 있는 입체적인 외부 그림자 추가 */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.08), -1px -1px 3px rgba(255, 255, 255, 0.8);
+}
+.edit-mode-btn.active { 
+    background-color: #FF7043; 
+    color: #ffffff; 
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.15); /* 눌린 느낌 */
+}
+
+/* ==========================================================================
+   편집 모드 애니메이션 (X 뱃지 및 흔들림 효과)
+   ========================================================================== */
+.delete-badge {
+    display: none; position: absolute; top: -5px; right: -5px;
+    width: 24px; height: 24px; background-color: #FF3B30; color: white;
+    border-radius: 50%; text-align: center; line-height: 22px;
+    font-weight: bold; font-size: 14px; cursor: pointer; z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.fridge-container.edit-mode .delete-badge { display: block; }
+.fridge-container.edit-mode .shelf-item {
+    animation: wiggle 0.3s infinite; position: relative;
+}
+
+@keyframes wiggle {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-2deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(2deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.category-filter-bar {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    padding: 0 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    box-sizing: border-box;
+    padding-bottom: 5px;
+}
+.category-filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+    flex: 0 0 auto;
+    height: 28px;
+    padding: 0 14px;
+    background: #EAEAEA;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 12px;
+    color: #777;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.filter-chip.active {
+    background: #FF7043;
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(255, 112, 67, 0.3);
+}
+
+/* 3. 카테고리 필터 (가로 스크롤 & 디자인 적용) */
+.category-filter-bar {
+    width: 100%;
+    display: flex;
+    gap: 8px; /* 버튼 사이 간격 */
+    padding: 0 24px 10px 24px; /* 좌우 여백 및 하단 여백 */
+    overflow-x: auto; /* 가로 스크롤 허용 */
+    white-space: nowrap; /* 줄바꿈 방지 */
+    
+    /* 스크롤바 숨김 (크롬, 사파리, 오페라) */
+    scrollbar-width: none; /* 파이어폭스 */
+    -ms-overflow-style: none; /* IE, 엣지 */
+}
+.category-filter-bar::-webkit-scrollbar { display: none; }
+
+/* 필터 칩 버튼 스타일 */
+.filter-chip {
+    flex: 0 0 auto; /* 크기 고정 (찌그러짐 방지) */
+    height: 32px;
+    padding: 0 16px;
+    
+    /* 기본 상태 (회색) */
+    background: #E0E0E0; 
+    border-radius: 20px; /* 둥근 알약 모양 */
+    border: none;
+    
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 13px;
+    color: #555555;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* 활성화 상태 (주황색) */
+.filter-chip.active {
+    background: #FF7043;
+    color: #FFFFFF;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(255, 112, 67, 0.3); /* 그림자 효과 */
+}
+
+/* 호버 효과 */
+.filter-chip:hover {
+    filter: brightness(0.95);
+}
+
+/* 3. 스크롤 영역 (냉장고 박스 위치 잡기) */
+.fridge-scroll-area {
+    flex: 1; /* 남은 공간 채움 */
+    overflow: hidden; 
+    padding: 10px 0 20px 0; /* 위아래 여백을 줘서 공중에 뜬 느낌 */
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.fridge-inner-box {
+    width: 90%;
+    max-width: 400px;
+    height: 100%; /* 부모(scroll-area) 높이만큼만 */
+    background: #F9F9F9;
+    border-radius: 24px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* 그림자 살짝 진하게 */
+    padding: 20px 15px;
+    
+    /* 박스 내부에서만 스크롤 */
+    overflow-y: auto;
+    scrollbar-width: none; 
+    box-sizing: border-box;
+}
+.fridge-inner-box::-webkit-scrollbar { display: none; }
+
+/* 4. 재료 리스트 (Grid) */
+.ingredient-shelf-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px 10px;
+    width: 100%;
+    padding-bottom: 40px; 
+}
+
+/* 개별 아이템 스타일 */
+.shelf-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s;
+    /* [핵심 추가] 글자가 길어도 그리드 칸이 억지로 늘어나지 않게 고정합니다 */
+    width: 100%;
+    min-width: 0;
+}
+.shelf-item:active { transform: scale(0.95); }
+
+.ingredient-icon {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+    z-index: 2;
+    filter: drop-shadow(0 3px 3px rgba(0,0,0,0.1));
+    margin-bottom: -5px;
+}
+
+.shelf-base {
+    width: 70px;
+    height: 6px;
+    background: #E0D4C3;
+    border-radius: 3px;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+    z-index: 1;
+    margin-bottom: 6px;
+}
+
+.ingredient-name {
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 12px;
+    color: #555;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    /* [핵심 추가] 이름이 양옆으로 너무 꽉 차지 않게 숨통(여백)을 트여줍니다 */
+    padding: 0 5px;
+    box-sizing: border-box;
+}
+
+.d-day-tag {
+    position: absolute;
+    top: -5px;
+    right: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #888;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    z-index: 3;
+}
+.d-day-tag.urgent {
+    color: #FF7043;
+    border: 1px solid #FF7043;
+}
+
+/* 5. Floating Add Button (사용자 디자인 유지 + 인터랙션 추가) */
+.floating-add-btn {
+    position: absolute; /* fixed가 아니라 absolute로 변경하여 컨테이너 기준 배치 */
+    right: 20px;
+    bottom: 30px; /* 흰 박스 오른쪽 아래에 걸치게 */
+    width: 3.5rem; /* 크기 약간 조정 */
+    height: 3.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 0;
+    
+    /* 부드러운 효과 */
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.floating-add-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* 그림자 추가로 입체감 */
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); 
+}
+
+/* 눌렀을 때 효과 */
+.floating-add-btn:active {
+    transform: scale(0.9);
+}
+
+/* 마우스 올렸을 때 효과 */
+.floating-add-btn:hover {
+    transform: scale(1.1);
+}
+
+/* ==========================================================================
+   모달 스타일 (CSS 누락 해결)
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none; /* JS로 flex로 변경됨 */
+    align-items: center; /* 수직 중앙 정렬 */
+    justify-content: center; /* 수평 중앙 정렬 */
+    z-index: 1000;
+}
+
+/* 모달이 열렸을 때 (JS에서 클래스 추가 시) */
+.modal-overlay.open {
+    display: flex !important;
+}
+
+.custom-modal {
+    background: white;
+    padding: 25px 20px;
+    border-radius: 20px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: relative;
+    /* 모달이 항상 화면 중앙에 오도록 보장 */
+    margin: auto; 
+}
+
+.modal-title {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    color: #333;
+    font-family: 'Gowun Dodum', sans-serif;
+}
+
+.highlight-text {
+    color: #FF7043;
+    font-weight: bold;
+}
+
+.date-input-wrapper {
+    margin-bottom: 20px;
+}
+
+.date-picker {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+    box-sizing: border-box;
+    font-family: 'Gowun Dodum', sans-serif;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: 'Gowun Dodum', sans-serif;
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.btn-confirm {
+    background: #FF7043;
+    color: white;
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 중...</title>
+</head>
+<body>
+    <p>로그인 처리 중입니다. 잠시만 기다려주세요...</p>
+    <script>
+        // views.py에서 넘겨준 데이터 받기
+        const accessToken = "{{ access_token }}";
+        const refreshToken = "{{ refresh_token }}";
+        const nickname = "{{ user_nickname }}";
+
+        if (accessToken && refreshToken) {
+            // 1. 로컬 스토리지에 토큰 저장 (기존 users.js 로직과 호환)
+            localStorage.setItem('access_token', accessToken);
+            localStorage.setItem('refresh_token', refreshToken);
+            localStorage.setItem('user_nickname', nickname);
+
+            // 2. 메인 페이지로 이동
+            window.location.href = "/";
+        } else {
+            alert("로그인 처리 중 오류가 발생했습니다.");
+            window.location.href = "/users/login/";
+        }
+    </script>
+</body>
+</html>
