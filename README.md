@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🥕 레시픽 (Recipick)
+# 🧑🏻‍🍳 레시픽 (Recipick)
 
 ### *"집에 있는 식재료로, 지금 나에게 딱 맞는 레시피"*
 
