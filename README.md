@@ -411,7 +411,14 @@ python manage.py setup_recipick --create-test-user
 
 ## 👥 팀원
 
-이 프로젝트는 **5명의 팀원이 협업**하여 개발했습니다.
+<div align="center">
+
+| **김경원** | **오채령** | **김서윤** | **박민욱** | **최명규** |
+| :------: |  :------: | :------: | :------: | :------: |
+| [<img src="https://github.com/user-attachments/assets/6d96b729-c53f-4bc2-917b-4e0a6c23e742" height=200 width=150> <br/> @kkw610](https://github.com/kkw610) | [<img src="https://github.com/user-attachments/assets/8cae1ad0-ba11-492f-8f85-53d036c2dfab" height=200 width=150> <br/> @chrry03](https://github.com/chrry03) | [<img src="https://github.com/user-attachments/assets/95c241d6-3a08-49a0-a695-4ebe4af29768" height=200 width=150> <br/> @kdhye1119](https://github.com/kdhye1119) | [<img src="https://github.com/user-attachments/assets/2e7f7b14-1db9-4a1d-8608-4d5f646939be" height=200 width=150> <br/> @minuk1749](https://github.com/minuk1749) | [<img src="https://github.com/user-attachments/assets/f95ca81a-25a0-4a9d-bbc1-24f5801f5961" height=200 width=150> <br/> @YanggalleDolmery](https://github.com/YanggalleDolmery) |
+| PM / BE | BE | FE | FE | FE |
+
+</div>
 
 <br>
 
